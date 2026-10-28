@@ -24,3 +24,11 @@ jobs:
 
       - name: Format Check
         run: npx prettier --check "**/*.{js,html,css,yaml,yml,toml}" --ignore-unknown
+
+  deploy:
+    needs: prettier-check
+    if: github.ref == 'refs/heads/staging'
+    runs-on:
+      self-hosted
+
+      #TODO: Will do in the future docker command
