@@ -1,0 +1,26 @@
+name: Prettier Format Check
+
+on:
+  push:
+    branches: ["main", "staging", "dev"]
+  pull_request:
+    branches: ["main", "staging", "dev"]
+
+jobs:
+  prettier-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Format Check
+        run: npx prettier --check "**/*.{js,html,css,yaml,yml,toml}" --ignore-unknown
