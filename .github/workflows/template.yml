@@ -1,0 +1,7 @@
+name: testing
+
+on:
+    push:
+        branches: [ server ]
+    pull_request: 
+        branches: [ server ]
