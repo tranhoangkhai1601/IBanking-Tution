@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Login</title>
+
+        <link rel="stylesheet" href="./css/style.css">
+        <link rel="stylesheet" href="./css/login.css">
+
+        <script type="module" src="./js/login.js"></script>
+    </head>
+
+    <body class="login-page">
+        <main class="login-layout">
+
+            <section class="login-form-panel" aria-labelledby="login-title">
+                <div class="login-card">
+                    <p class="login-brand" id="app-name"></p>
+
+                    <h1 id="login-title">Login</h1>
+                    <p class="login-intro">Welcome back <br> Please enter your
+                        details</p>
+
+                    <form id="login-form" method="post" novalidate>
+                        <div class="login-field">
+                            <label for="identifier">Email or phone
+                                number</label>
+
+                            <input
+                                class="login-input"
+                                id="identifier"
+                                name="identifier"
+                                type="text"
+                                placeholder="Enter your email or phone number"
+                                autocomplete="username"
+                                autocapitalize="none"
+                                spellcheck="false"
+                                required
+                                aria-invalid="false"
+                                aria-describedby="identifier-error">
+
+                            <p
+                                class="login-error"
+                                id="identifier-error"
+                                hidden></p>
+                        </div>
+
+                        <div class="login-field">
+                            <label for="password">Password</label>
+
+                            <div class="password-wrapper">
+                                <input
+                                    class="login-input"
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    placeholder="Enter your password"
+                                    autocomplete="current-password"
+                                    required
+                                    aria-invalid="false"
+                                    aria-describedby="password-error">
+
+                                <button
+                                    class="password-toggle"
+                                    id="password-toggle"
+                                    type="button"
+                                    aria-label="Show password"
+                                    aria-controls="password">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        width="24"
+                                        height="24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        aria-hidden="true"
+                                        focusable="false">
+                                        <path
+                                            d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                                        <circle cx="12" cy="12" r="3" />
+
+                                        <path
+                                            id="password-slash"
+                                            d="M3 3 21 21"
+                                            hidden />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <p
+                                class="login-error"
+                                id="password-error"
+                                hidden></p>
+                        </div>
+
+                        <div class="login-forgot">
+                            <button
+                                class="login-forgot-button"
+                                id="forgot-password"
+                                type="button">
+                                Forgot Password
+                            </button>
+                        </div>
+
+                        <button
+                            class="login-submit"
+                            id="login-submit"
+                            type="submit"
+                            disabled>
+                            Login
+                        </button>
+
+                        <p
+                            class="login-status"
+                            id="login-status"
+                            role="status"
+                            aria-live="polite"
+                            aria-atomic="true"></p>
+
+                        <noscript>
+                            <p>Please enable JavaScript to use this form.</p>
+                        </noscript>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </body>
+</html>
