@@ -1,15 +1,15 @@
 import { APP_CONFIG } from "../config/config.js";
 
-export const AUTH_RULES = Object.freeze({
-  minPasswordLength: APP_CONFIG.minPasswordLength
-});
 
 export const AUTH_MESSAGES = Object.freeze({
   identifierRequired: "Please enter your email or phone number.",
   identifierInvalid: "Please enter a valid email or phone number.",
   passwordRequired: "Please enter your password.",
   passwordTooShort:
-    `Password must contain at least ${AUTH_RULES.minPasswordLength} characters.`
+    `Password must contain at least ${APP_CONFIG.minPasswordLength} characters.`,
+  otpRequired: "Please enter the verification code.",
+  otpInvalid:
+    `Please enter a ${APP_CONFIG.otpLength}-digit verification code.`
 });
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
@@ -37,7 +37,7 @@ export function validatePassword(password) {
     return AUTH_MESSAGES.passwordRequired;
   }
 
-  if (password.length < AUTH_RULES.minPasswordLength) {
+  if (password.length < APP_CONFIG.minPasswordLength) {
     return AUTH_MESSAGES.passwordTooShort;
   }
 
@@ -65,4 +65,18 @@ export function validateLogin({ identifier, password }) {
       password
     }
   };
+}
+
+export function validateOtp(code) {
+  if (!code) {
+    return AUTH_MESSAGES.otpRequired;
+  }
+
+  const pattern = new RegExp(
+    `^[0-9]{${APP_CONFIG.otpLength}}$`
+  );
+
+  return pattern.test(code)
+    ? ""
+    : AUTH_MESSAGES.otpInvalid;
 }

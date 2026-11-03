@@ -591,3 +591,128 @@
     transition: none !important;
   }
 }
+
+.screen-icon--code span {
+  padding-bottom: 6px;
+  font-family: var(--font-family-heading);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 3px;
+}
+
+.otp-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.otp-label {
+  padding: 0;
+  color: #283f55;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.otp-hint {
+  margin: 6px 0 14px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.otp-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--otp-length), minmax(0, 1fr));
+  gap: 9px;
+}
+
+.otp-grid input {
+  width: 100%;
+  min-width: 0;
+  height: 58px;
+  padding: 0;
+
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  outline: none;
+
+  background: var(--color-surface-muted);
+  color: var(--navy-900);
+
+  font-family: var(--font-family-heading);
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.otp-grid input:focus {
+  border-color: var(--blue-500);
+  background: var(--surface);
+  box-shadow: 0 0 0 4px rgba(25, 118, 201, 0.11);
+}
+
+.otp-grid input[aria-invalid="true"] {
+  border-color: var(--danger);
+  background: #fffafb;
+}
+
+.otp-grid input[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 4px rgba(198, 59, 74, 0.12);
+}
+
+.resend-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 16px 0 20px;
+
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.resend-row button {
+  min-height: 44px;
+  padding: 8px 0;
+  cursor: pointer;
+}
+
+.resend-row button:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 3px;
+}
+
+@media (max-width: 400px) {
+  .otp-grid {
+    gap: 6px;
+  }
+
+  .otp-grid input {
+    height: 52px;
+    font-size: 19px;
+  }
+}
+
+.subtitle strong {
+  color: var(--ink);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.resend-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#otp-expiry {
+  color: var(--navy-900);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}

@@ -1,8 +1,5 @@
 import { APP_CONFIG } from "../config/config.js";
-import {
-    AUTH_RULES,
-    validateLogin
-} from "./auth-validation.js";
+import { validateLogin } from "./auth-validation.js";
 
 const form = document.getElementById("login-form");
 const loginButton = document.getElementById("login-submit");
@@ -23,7 +20,7 @@ document.querySelectorAll("[data-app-name]").forEach((element) => {
 });
 document.title = `Login | ${APP_CONFIG.appName}`;
 
-inputs.password.minLength = AUTH_RULES.minPasswordLength;
+inputs.password.minLength = APP_CONFIG.minPasswordLength;
 
 let hasSubmitted = false;
 

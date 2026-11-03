@@ -1,4 +1,4 @@
-import { APP_CONFIG } from "../config/config.js";
+import { APP_CONFIG, STORAGE_KEYS } from "../config/config.js";
 import { validateIdentifier } from "./auth-validation.js";
 
 const form = document.getElementById("forgot-password-form");
@@ -27,6 +27,8 @@ function displayError(message) {
 identifierInput.addEventListener("input", () => {
   statusMessage.textContent = "";
 
+  sessionStorage.removeItem(STORAGE_KEYS.recoveryRecipient);
+
   if (!hasSubmitted) {
     return;
   }
@@ -34,6 +36,27 @@ identifierInput.addEventListener("input", () => {
   const error = validateIdentifier(identifierInput.value);
   displayError(error);
 });
+
+// Lưu giá trị của email hoặc phone number đã nhập vào sessionStorage để hiển thị lại trên trang OTP.
+function maskIdentifier(value) {
+  const identifier = value.trim();
+
+  if (identifier.includes("@")) {
+    const [name, domain] = identifier.split("@");
+
+    const visiblePart = name.slice(0, 2);
+    const hiddenLength = Math.max(
+      3,
+      name.length - visiblePart.length
+    );
+
+    return `${visiblePart}${"•".repeat(hiddenLength)}@${domain}`;
+  }
+
+  const digits = identifier.replace(/[^0-9]/g, "");
+
+  return `••• ••• ••${digits.slice(-3)}`;
+}
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -51,10 +74,17 @@ form.addEventListener("submit", (event) => {
     return;
   }
 
-  // TODO: Integrate the real password reset flow in a future task.
+  // Chuyển trang để xem giao diện OTP.
+  // TODO: Khi có backend, chỉ chuyển sau khi yêu cầu gửi mã được xử lý.
 
-  statusMessage.textContent =
-    "Input is valid. Password reset is not connected yet.";
+  const maskedRecipient = maskIdentifier(identifierInput.value);
+
+  sessionStorage.setItem(
+    STORAGE_KEYS.recoveryRecipient,
+    maskedRecipient
+  );
+
+  window.location.assign("./otp.html");
 });
 
 submitButton.disabled = false;
