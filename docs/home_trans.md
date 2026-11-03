@@ -30,9 +30,13 @@
 - Mới xài mock data thoi do chưa có API
 - Thiếu button confirm + OTP
 
-## 5.Pics
-![Login Homepage](./Home_trans%20pics/Login_Hpage.png)
-![Logout Homepage](./Home_trans%20pics/Logout_Hpage.png)
+## 5. Pics
+* **Login Homepage:**
+  ![Login Homepage](./Home_trans%20images/Login_Hpage.png)
+* **Logout Homepage:**
+  ![Logout Homepage](./Home_trans%20images/Login_Hpage.png)
 
-![Login_Paytuition](./Home_trans%20pics/Login_Paytuition.png)
-![Logout_Paytuition](./Home_trans%20pics/Logout_Paytuition.png)
+* **Login Paytuition:**
+  ![Login Paytuition](./Home_trans%20images/Login_Paytuition.png)
+* **Logout Paytuition:**
+  ![Logout Paytuition](./Home_trans%20images/Logout_Paytuition.png)
