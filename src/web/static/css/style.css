@@ -1,16 +1,31 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap");
+
 :root {
-  --font-family-base:
-    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --navy-950: #071a2f;
+  --navy-900: #0b2545;
+  --navy-800: #10365e;
+  --blue-600: #1261a9;
+  --blue-500: #1976c9;
+  --cyan-400: #3bd4c5;
+  --surface: #ffffff;
+  --canvas: #f3f7fa;
+  --ink: #12283f;
+  --muted: #65778a;
+  --line: #d9e3eb;
+  --danger: #c63b4a;
 
-  --color-primary: #40388d;
-  --color-primary-hover: #30296f;
-  --color-focus-ring: #d9d4ff;
+  --font-family-base: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-family-heading: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
 
-  --color-surface: #ffffff;
-  --color-text: #29263f;
-  --color-text-muted: #686479;
-  --color-border: #c8c5d5;
-  --color-error: #b42318;
+  --color-primary: var(--blue-600);
+  --color-primary-hover: var(--navy-900);
+  --color-focus-ring: rgba(25, 118, 201, 0.2);
+  --color-surface: var(--surface);
+  --color-surface-muted: #fbfdfe;
+  --color-text: var(--ink);
+  --color-text-muted: var(--muted);
+  --color-border: var(--line);
+  --color-error: var(--danger);
 
   --space-1: 4px;
   --space-2: 8px;
@@ -19,7 +34,9 @@
   --space-5: 24px;
   --space-6: 32px;
 
-  --radius-control: 12px;
-  --radius-pill: 999px;
+  --radius-lg: 24px;
+  --radius-md: 12px;
+  --radius-control: var(--radius-md);
   --control-min-height: 52px;
+  --shadow: 0 28px 70px rgba(18, 40, 63, 0.12);
 }

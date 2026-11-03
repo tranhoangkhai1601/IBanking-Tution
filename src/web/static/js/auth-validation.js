@@ -1,4 +1,4 @@
-import { APP_CONFIG } from "./config.js";
+import { APP_CONFIG } from "../config/config.js";
 
 export const AUTH_RULES = Object.freeze({
   minPasswordLength: APP_CONFIG.minPasswordLength

@@ -1,4 +1,4 @@
-import { APP_CONFIG } from "./config.js";
+import { APP_CONFIG } from "../config/config.js";
 import {
     AUTH_RULES,
     validateLogin
@@ -6,7 +6,6 @@ import {
 
 const form = document.getElementById("login-form");
 const loginButton = document.getElementById("login-submit");
-const forgotButton = document.getElementById("forgot-password");
 const statusMessage = document.getElementById("login-status");
 
 const inputs = {
@@ -19,7 +18,9 @@ const errorElements = {
     password: document.getElementById("password-error")
 };
 
-document.getElementById("app-name").textContent = APP_CONFIG.appName;
+document.querySelectorAll("[data-app-name]").forEach((element) => {
+    element.textContent = APP_CONFIG.appName;
+});
 document.title = `Login | ${APP_CONFIG.appName}`;
 
 inputs.password.minLength = AUTH_RULES.minPasswordLength;
@@ -82,11 +83,6 @@ form.addEventListener("submit", (event) => {
 
     statusMessage.textContent =
         "Input is valid. Login is not connected yet.";
-});
-
-forgotButton.addEventListener("click", () => {
-    statusMessage.textContent =
-        "Password reset is not available yet.";
 });
 
 loginButton.disabled = false;
