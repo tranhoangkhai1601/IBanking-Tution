@@ -21,6 +21,8 @@
 **/values.dev.yaml
 **/out/
 **/Makefile
+**/__pycache__
+*.pyc
 LICENSE
 README.md
 local/data/
