@@ -306,7 +306,8 @@
     background-color 160ms ease;
 }
 
-.field input[autocomplete="current-password"] {
+.field input[autocomplete="current-password"],
+.field input[autocomplete="new-password"] {
   padding-right: 56px;
 }
 
@@ -762,4 +763,36 @@
     left: 14px;
     max-width: calc(100% - 28px);
   }
+}
+
+.reset-success {
+  text-align: center;
+}
+
+.screen-icon--success {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--space-5);
+  border-radius: 50%;
+}
+
+.screen-icon--success svg {
+  width: 40px;
+  height: 40px;
+}
+
+.reset-success .subtitle {
+  margin-bottom: var(--space-6);
+}
+
+.reset-success .primary-button {
+  text-decoration: none;
+}
+
+.status-message--error {
+  color: var(--danger);
+}
+
+.status-message--error:not(:empty) {
+  border-color: var(--danger);
 }

@@ -1,9 +1,12 @@
 import "./components/auth-brand.js";
 import "./components/language-switch.js";
 
-import { STORAGE_KEYS } from "../config/config.js";
 import { validateIdentifier } from "./auth-validation.js";
 import { initI18n, setMessage } from "./i18n.js";
+import {
+  clearRecoveryRecipient,
+  saveRecoveryRecipient
+} from "./recovery-storage.js";
 
 const form = document.getElementById("forgot-password-form");
 const identifierInput = document.getElementById("identifier");
@@ -30,7 +33,7 @@ identifierInput.addEventListener("input", () => {
 
   setMessage(statusMessage, "");
 
-  sessionStorage.removeItem(STORAGE_KEYS.recoveryRecipient);
+  clearRecoveryRecipient();
 
   if (!hasSubmitted) {
     return;
@@ -86,10 +89,7 @@ form.addEventListener("submit", (event) => {
 
   const maskedRecipient = maskIdentifier(identifierInput.value);
 
-  sessionStorage.setItem(
-    STORAGE_KEYS.recoveryRecipient,
-    maskedRecipient
-  );
+  saveRecoveryRecipient(maskedRecipient);
 
   window.location.assign("./otp.html");
 });

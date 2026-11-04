@@ -1,9 +1,10 @@
 import "./components/auth-brand.js";
 import "./components/language-switch.js";
 
-import { APP_CONFIG, STORAGE_KEYS } from "../config/config.js";
+import { APP_CONFIG } from "../config/config.js";
 import { validateOtp } from "./auth-validation.js";
 import { initI18n, t, setMessage } from "./i18n.js";
+import { readRecoveryRecipient } from "./recovery-storage.js";
 
 const form = document.getElementById("otp-form");
 const inputGroup = document.getElementById("otp-inputs");
@@ -47,9 +48,7 @@ renderOtpTimer();
 const otpLength = APP_CONFIG.otpLength;
 const description = document.getElementById("otp-description");
 
-const maskedRecipient = sessionStorage.getItem(
-    STORAGE_KEYS.recoveryRecipient
-);
+const maskedRecipient = readRecoveryRecipient();
 
 inputGroup.style.setProperty("--otp-length", String(otpLength));
 
@@ -215,6 +214,7 @@ form.addEventListener("submit", (event) => {
     // TODO: Integrate real OTP verification in a future task.
 
     setMessage(statusMessage, "otpPending");
+    window.location.assign("./reset-password.html");
 });
 
 resendButton.addEventListener("click", () => {

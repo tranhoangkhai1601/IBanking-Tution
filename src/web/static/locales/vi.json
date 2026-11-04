@@ -57,5 +57,20 @@
   "otpPending": "Thông tin đúng định dạng. Chức năng xác minh OTP chưa được kết nối.",
   "resendPending": "Chức năng gửi lại OTP chưa được kết nối.",
 
-  "javascriptRequired": "Vui lòng bật JavaScript để sử dụng biểu mẫu này."
+  "javascriptRequired": "Vui lòng bật JavaScript để sử dụng biểu mẫu này.",
+
+  "resetPageTitle": "Đặt lại mật khẩu",
+  "resetTitle": "Tạo mật khẩu mới",
+  "resetDescription": "Nhập và xác nhận mật khẩu mới của bạn.",
+  "newPasswordLabel": "Mật khẩu mới",
+  "newPasswordPlaceholder": "Nhập mật khẩu mới",
+  "confirmPasswordLabel": "Xác nhận mật khẩu mới",
+  "confirmPasswordPlaceholder": "Nhập lại mật khẩu mới",
+  "resetAction": "Đặt lại mật khẩu",
+  "confirmPasswordRequired": "Vui lòng xác nhận mật khẩu.",
+  "passwordMismatch": "Mật khẩu không khớp.",
+  "resetSuccessTitle": "Đặt lại mật khẩu thành công",
+  "resetSuccessDescription": "Mật khẩu của bạn đã được cập nhật. Bạn có thể đăng nhập bằng mật khẩu mới.",
+  "passwordReused": "Bạn đã sử dụng mật khẩu này trước đây. Vui lòng chọn mật khẩu khác.",
+  "resetServerError": "Không thể đặt lại mật khẩu. Vui lòng thử lại."
 }

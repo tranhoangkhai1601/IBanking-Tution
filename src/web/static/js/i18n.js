@@ -41,7 +41,8 @@ function loadDictionaries() {
     return loadingPromise;
 }
 
-// Ví dụ: t("passwordTooShort", { length: 6 }). Dùng để translate các chuỗi có biến. Nếu không tìm thấy bản dịch, trả về key.
+// Ví dụ: t("passwordTooShort", { length: 6 }). Dùng để translate các chuỗi có biến.
+// Nếu không tìm thấy bản dịch, trả về key.
 export function t(key, values = {}) {
     const template =
         dictionaries[getLanguage()]?.[key] ??

@@ -99,3 +99,24 @@ export function validateOtp(code) {
     ? ""
     : AUTH_MESSAGES.otpInvalid;
 }
+
+export function validateResetPassword({
+  password,
+  confirmPassword
+}) {
+  const errors = {};
+
+  const passwordError = validatePassword(password);
+
+  if (passwordError) {
+    errors.password = passwordError;
+  }
+
+  if (confirmPassword.length === 0) {
+    errors.confirmPassword = t("confirmPasswordRequired");
+  } else if (confirmPassword !== password) {
+    errors.confirmPassword = t("passwordMismatch");
+  }
+
+  return { errors };
+}

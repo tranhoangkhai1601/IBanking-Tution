@@ -6,20 +6,23 @@ import {
 
 export const LANGUAGE_EVENT = "app:languagechange";
 
-let currentLanguage = APP_CONFIG.defaultLanguage;
+function readSavedLanguage(fallback) {
+    try {
+        const savedLanguage = localStorage.getItem(
+            STORAGE_KEYS.language
+        );
 
-// Đọc lựa chọn đã lưu khi mở trang.
-try {
-    const savedLanguage = localStorage.getItem(
-        STORAGE_KEYS.language
-    );
-
-    if (Object.hasOwn(LANGUAGES, savedLanguage)) {
-        currentLanguage = savedLanguage;
+        if (Object.hasOwn(LANGUAGES, savedLanguage)) {
+            return savedLanguage;
+        }
+    } catch {
+        // Giữ lựa chọn hiện tại nếu trình duyệt chặn storage.
     }
-} catch {
-    // Dùng cấu hình mặc định nếu trình duyệt chặn storage.
+
+    return fallback;
 }
+
+let currentLanguage = readSavedLanguage(APP_CONFIG.defaultLanguage);
 
 export function getLanguage() {
     return currentLanguage;
@@ -53,3 +56,10 @@ export function setLanguage(language) {
         })
     );
 }
+
+// Back/Forward Cache khôi phục cả biến JavaScript, không chạy lại module.
+window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+        setLanguage(readSavedLanguage(currentLanguage));
+    }
+});

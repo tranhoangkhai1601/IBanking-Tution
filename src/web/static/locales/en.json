@@ -57,5 +57,20 @@
   "otpPending": "Input is valid. OTP verification is not connected yet.",
   "resendPending": "Resending OTP is not connected yet.",
 
-  "javascriptRequired": "Please enable JavaScript to use this form."
+  "javascriptRequired": "Please enable JavaScript to use this form.",
+
+  "resetPageTitle": "Reset Password",
+  "resetTitle": "Create New Password",
+  "resetDescription": "Enter and confirm your new password.",
+  "newPasswordLabel": "New password",
+  "newPasswordPlaceholder": "Enter your new password",
+  "confirmPasswordLabel": "Confirm new password",
+  "confirmPasswordPlaceholder": "Re-enter your new password",
+  "resetAction": "Reset Password",
+  "confirmPasswordRequired": "Please confirm your password.",
+  "passwordMismatch": "Passwords do not match.",
+  "resetSuccessTitle": "Password Reset Successful",
+  "resetSuccessDescription": "Your password has been updated. You can now log in with your new password.",
+  "passwordReused": "You have used this password before. Please choose a different password.",
+  "resetServerError": "Unable to reset your password. Please try again."
 }
