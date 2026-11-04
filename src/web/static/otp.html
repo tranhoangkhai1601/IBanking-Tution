@@ -3,73 +3,24 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="./js/i18n-boot.js"></script>
         <title>OTP Verification</title>
         <link rel="stylesheet" href="./css/style.css">
-        <link rel="stylesheet" href="./css/login.css">
+        <link rel="stylesheet" href="./css/auth.css">
         <script type="module" src="./js/otp.js"></script>
     </head>
     <body class="auth-page">
         <main class="app-shell">
-            <aside class="brand-panel" aria-label="About the application">
-                <div class="brand-panel__glow" aria-hidden="true"></div>
-                <div class="brand">
-                    <span class="brand__mark" aria-hidden="true">
-                        <svg viewBox="0 0 32 32" fill="none" focusable="false">
-                            <path
-                                d="M16 3.5 26 7.3v7.9c0 6.2-4.1 11.3-10 13.3-5.9-2-10-7.1-10-13.3V7.3L16 3.5Z"
-                                fill="currentColor" />
-                            <path d="m11.7 16.1 2.8 2.9 6.2-6.5" stroke="white"
-                                stroke-width="2.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                    </span>
-                    <span class="brand__name" id="app-name"
-                        data-app-name></span>
-                </div>
-
-                <div class="brand-panel__content">
-                    <p class="trust-pill"><span
-                            aria-hidden="true"></span>Digital tuition
-                        services</p>
-                    <h2>Bank with clarity.<br>Move with confidence.</h2>
-                    <p>A clearer way to access your tuition services, designed
-                        around you.</p>
-                </div>
-
-                <div class="security-card">
-                    <span class="security-card__icon" aria-hidden="true"><svg
-                            width="20" height="20" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="1.8"
-                            stroke-linecap="round" stroke-linejoin="round"
-                            aria-hidden="true" focusable="false"><path
-                                d="M12 22s8-3.6 8-10V5l-8-3-8 3v7c0 6.4 8 10 8 10Z" /></svg></span>
-                    <div>
-                        <strong>Protect your account details</strong>
-                        <p>Keep your password and personal information
-                            private.</p>
-                    </div>
-                </div>
-            </aside>
+            <auth-brand
+                class="brand-panel"
+                variant="panel">
+            </auth-brand>
 
             <section class="auth-panel" aria-labelledby="otp-title">
-                <header class="mobile-header">
-                    <div class="brand brand--compact">
-                        <span class="brand__mark" aria-hidden="true">
-                            <svg viewBox="0 0 32 32" fill="none"
-                                focusable="false">
-                                <path
-                                    d="M16 3.5 26 7.3v7.9c0 6.2-4.1 11.3-10 13.3-5.9-2-10-7.1-10-13.3V7.3L16 3.5Z"
-                                    fill="currentColor" />
-                                <path d="m11.7 16.1 2.8 2.9 6.2-6.5"
-                                    stroke="white" stroke-width="2.5"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                            </svg>
-                        </span>
-                        <span class="brand__name" data-app-name></span>
-                    </div>
-                    <span class="mobile-header__label">Account access</span>
-                </header>
+                <auth-brand
+                    class="mobile-header"
+                    variant="compact">
+                </auth-brand>
 
                 <div class="auth-card">
                     <a class="back-link" href="./forgot-password.html">
@@ -86,7 +37,7 @@
                             focusable="false">
                             <path d="m15 18-6-6 6-6M9 12h10" />
                         </svg>
-                        <span>Edit email or phone</span>
+                        <span data-i18n="editRecipient">Edit email or phone</span>
                     </a>
 
                     <div class="screen-icon screen-icon--code"
@@ -94,7 +45,7 @@
                         <span>•••</span>
                     </div>
 
-                    <h1 id="otp-title">Verify Your Account</h1>
+                    <h1 id="otp-title" data-i18n="otpTitle">Verify Your Account</h1>
 
                     <p class="subtitle" id="otp-description">
                         Enter your verification code to continue.
@@ -102,7 +53,7 @@
 
                     <form id="otp-form" method="post" novalidate>
                         <fieldset class="otp-fieldset">
-                            <legend class="otp-label">Verification code</legend>
+                            <legend class="otp-label" data-i18n="verificationCode">Verification code</legend>
 
                             <p class="otp-hint" id="otp-help"></p>
 
@@ -113,20 +64,20 @@
 
                         <div class="resend-row">
                             <div class="resend-info">
-                                <span>Need another code?</span>
+                                <span data-i18n="needCode">Need another code?</span>
 
                                 <span
                                     id="otp-expiry"
                                     role="timer"
                                     aria-live="off"
-                                    hidden
-                                    >
-                                    Code expires in <strong id="otp-time"></strong>
+                                    hidden>
+                                    <span data-i18n="expiresIn">Code expires in</span>
+                                    <strong id="otp-time"></strong>
                                 </span> <!-- Sau này có thể hiển thị thời gian hết hạn OTP-->
                             </div>
 
                             <button class="text-link" id="resend-otp"
-                                type="button">
+                                type="button" data-i18n="resendAction" disabled>
                                 Resend OTP
                             </button>
                         </div>
@@ -143,7 +94,7 @@
                             id="otp-submit"
                             type="submit"
                             disabled>
-                            <span>Verify OTP</span>
+                            <span data-i18n="verifyAction">Verify OTP</span>
 
                             <svg
                                 width="18"
@@ -167,10 +118,11 @@
                         </noscript>
                     </form>
 
-                    <p class="security-note">
+                    <p class="security-note" data-i18n="otpSecurity">
                         Never share your verification code.
                     </p>
                 </div>
+                <language-switch></language-switch>
             </section>
         </main>
     </body>

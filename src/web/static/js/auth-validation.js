@@ -1,15 +1,34 @@
 import { APP_CONFIG } from "../config/config.js";
-
+import { t } from "./i18n.js";
 
 export const AUTH_MESSAGES = Object.freeze({
-  identifierRequired: "Please enter your email or phone number.",
-  identifierInvalid: "Please enter a valid email or phone number.",
-  passwordRequired: "Please enter your password.",
-  passwordTooShort:
-    `Password must contain at least ${APP_CONFIG.minPasswordLength} characters.`,
-  otpRequired: "Please enter the verification code.",
-  otpInvalid:
-    `Please enter a ${APP_CONFIG.otpLength}-digit verification code.`
+  get identifierRequired() {
+    return t("identifierRequired");
+  },
+
+  get identifierInvalid() {
+    return t("identifierInvalid");
+  },
+
+  get passwordRequired() {
+    return t("passwordRequired");
+  },
+
+  get passwordTooShort() {
+    return t("passwordTooShort", {
+      length: APP_CONFIG.minPasswordLength
+    });
+  },
+
+  get otpRequired() {
+    return t("otpRequired");
+  },
+
+  get otpInvalid() {
+    return t("otpInvalid", {
+      length: APP_CONFIG.otpLength
+    });
+  }
 });
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;

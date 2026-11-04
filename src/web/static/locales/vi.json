@@ -1,0 +1,61 @@
+{
+  "aboutApp": "Giới thiệu ứng dụng",
+  "services": "Dịch vụ học phí trực tuyến",
+  "brandLineOne": "Giao dịch rõ ràng.",
+  "brandLineTwo": "An tâm mỗi bước.",
+  "brandDescription": "Truy cập dịch vụ học phí dễ dàng hơn, phù hợp với nhu cầu của bạn.",
+  "protectTitle": "Bảo vệ thông tin tài khoản",
+  "protectDescription": "Giữ bí mật mật khẩu và thông tin cá nhân của bạn.",
+  "accountAccess": "Truy cập tài khoản",
+
+  "languageGroupLabel": "Chọn ngôn ngữ",
+
+  "loginPageTitle": "Đăng nhập",
+  "welcomeBack": "Chào mừng trở lại",
+  "loginTitle": "Đăng nhập tài khoản",
+  "loginDescription": "Nhập thông tin để truy cập dịch vụ học phí của bạn.",
+  "loginAction": "Đăng nhập",
+  "loginSecurity": "Giữ bí mật mật khẩu của bạn.",
+
+  "identifierLabel": "Email hoặc số điện thoại",
+  "identifierPlaceholder": "Nhập email hoặc số điện thoại",
+  "passwordLabel": "Mật khẩu",
+  "passwordPlaceholder": "Nhập mật khẩu",
+  "showPassword": "Hiện mật khẩu",
+  "hidePassword": "Ẩn mật khẩu",
+
+  "forgotPageTitle": "Quên mật khẩu",
+  "forgotLink": "Quên mật khẩu",
+  "forgotTitle": "Quên mật khẩu?",
+  "forgotDescription": "Nhập email hoặc số điện thoại liên kết với tài khoản để tiếp tục.",
+  "backToLogin": "Quay lại đăng nhập",
+  "continueAction": "Tiếp tục",
+  "forgotSecurity": "Giữ bí mật thông tin tài khoản của bạn.",
+
+  "otpPageTitle": "Xác minh OTP",
+  "otpTitle": "Xác minh tài khoản",
+  "editRecipient": "Sửa email hoặc số điện thoại",
+  "otpDescription": "Nhập mã xác minh để tiếp tục.",
+  "otpPrefix": "Nhập mã gồm {length} chữ số cho ",
+  "otpHelp": "Nhập mã gồm {length} chữ số.",
+  "verificationCode": "Mã xác minh",
+  "otpDigit": "Chữ số thứ {index} trên {length}",
+  "needCode": "Bạn cần mã khác?",
+  "expiresIn": "Mã hết hạn sau",
+  "resendAction": "Gửi lại OTP",
+  "verifyAction": "Xác minh OTP",
+  "otpSecurity": "Không chia sẻ mã xác minh với bất kỳ ai.",
+
+  "identifierRequired": "Vui lòng nhập email hoặc số điện thoại.",
+  "identifierInvalid": "Vui lòng nhập email hoặc số điện thoại hợp lệ.",
+  "passwordRequired": "Vui lòng nhập mật khẩu.",
+  "passwordTooShort": "Mật khẩu phải có ít nhất {length} ký tự.",
+  "otpRequired": "Vui lòng nhập mã xác minh.",
+  "otpInvalid": "Vui lòng nhập mã xác minh gồm {length} chữ số.",
+
+  "loginPending": "Thông tin đúng định dạng. Chức năng đăng nhập chưa được kết nối.",
+  "otpPending": "Thông tin đúng định dạng. Chức năng xác minh OTP chưa được kết nối.",
+  "resendPending": "Chức năng gửi lại OTP chưa được kết nối.",
+
+  "javascriptRequired": "Vui lòng bật JavaScript để sử dụng biểu mẫu này."
+}

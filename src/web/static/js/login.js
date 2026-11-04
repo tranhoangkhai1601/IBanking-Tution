@@ -1,5 +1,9 @@
+import "./components/auth-brand.js";
+import "./components/language-switch.js";
+
 import { APP_CONFIG } from "../config/config.js";
 import { validateLogin } from "./auth-validation.js";
+import { initI18n, t, setMessage } from "./i18n.js";
 
 const form = document.getElementById("login-form");
 const loginButton = document.getElementById("login-submit");
@@ -14,11 +18,6 @@ const errorElements = {
     identifier: document.getElementById("identifier-error"),
     password: document.getElementById("password-error")
 };
-
-document.querySelectorAll("[data-app-name]").forEach((element) => {
-    element.textContent = APP_CONFIG.appName;
-});
-document.title = `Login | ${APP_CONFIG.appName}`;
 
 inputs.password.minLength = APP_CONFIG.minPasswordLength;
 
@@ -46,7 +45,11 @@ function displayErrors(errors) {
 }
 
 form.addEventListener("input", () => {
-    statusMessage.textContent = "";
+    if (loginButton.disabled) {
+        return;
+    }
+
+    setMessage(statusMessage, "");
 
     if (!hasSubmitted) {
         return;
@@ -59,8 +62,12 @@ form.addEventListener("input", () => {
 form.addEventListener("submit", (event) => {
     event.preventDefault();
 
+    if (loginButton.disabled) {
+        return;
+    }
+
     hasSubmitted = true;
-    statusMessage.textContent = "";
+    setMessage(statusMessage, "");
 
     const result = readForm();
 
@@ -78,14 +85,13 @@ form.addEventListener("submit", (event) => {
 
     // TODO: Integrate the real login flow here in a future task.
 
-    statusMessage.textContent =
-        "Input is valid. Login is not connected yet.";
+    setMessage(statusMessage, "loginPending");
 });
-
-loginButton.disabled = false;
 
 const passwordToggle = document.getElementById("password-toggle");
 const passwordSlash = document.getElementById("password-slash");
+
+passwordToggle.disabled = true;
 
 passwordToggle.addEventListener("click", () => {
   const shouldShow = inputs.password.type === "password";
@@ -96,6 +102,29 @@ passwordToggle.addEventListener("click", () => {
 
   passwordToggle.setAttribute(
     "aria-label",
-    shouldShow ? "Hide password" : "Show password"
+    t(shouldShow ? "hidePassword" : "showPassword")
   );
 });
+
+const languageReady = await initI18n({
+    titleKey: "loginPageTitle",
+    statusElement: statusMessage,
+
+    onChange() {
+        passwordToggle.setAttribute(
+            "aria-label",
+            t(inputs.password.type === "password"
+                ? "showPassword"
+                : "hidePassword")
+        );
+
+        if (hasSubmitted) {
+            displayErrors(readForm().errors);
+        }
+    }
+});
+
+if (languageReady) {
+    loginButton.disabled = false;
+    passwordToggle.disabled = false;
+}

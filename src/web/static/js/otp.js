@@ -1,5 +1,9 @@
+import "./components/auth-brand.js";
+import "./components/language-switch.js";
+
 import { APP_CONFIG, STORAGE_KEYS } from "../config/config.js";
 import { validateOtp } from "./auth-validation.js";
+import { initI18n, t, setMessage } from "./i18n.js";
 
 const form = document.getElementById("otp-form");
 const inputGroup = document.getElementById("otp-inputs");
@@ -10,6 +14,8 @@ const submitButton = document.getElementById("otp-submit");
 const resendButton = document.getElementById("resend-otp");
 const otpExpiryElement = document.getElementById("otp-expiry");
 const otpTimeElement = document.getElementById("otp-time");
+
+resendButton.disabled = true;
 
 // Giá trị mẫu để xem giao diện, đơn vị giây.
 let otpRemainingSeconds = 90;
@@ -45,27 +51,6 @@ const maskedRecipient = sessionStorage.getItem(
     STORAGE_KEYS.recoveryRecipient
 );
 
-// Hiển thị thông tin người nhận đã được ẩn một phần nếu có.
-if (maskedRecipient) {
-    const recipientElement = document.createElement("strong");
-    recipientElement.textContent = maskedRecipient;
-
-    description.replaceChildren(
-        document.createTextNode(
-            `Enter the ${otpLength}-digit code for `
-        ),
-        recipientElement,
-        document.createTextNode(".")
-    );
-}
-
-document.querySelectorAll("[data-app-name]").forEach((element) => {
-    element.textContent = APP_CONFIG.appName;
-});
-
-document.title = `OTP Verification | ${APP_CONFIG.appName}`;
-
-helpElement.textContent = `Enter the ${otpLength}-digit code.`;
 inputGroup.style.setProperty("--otp-length", String(otpLength));
 
 let hasSubmitted = false;
@@ -111,7 +96,11 @@ function displayError(message) {
 }
 
 function handleEdit() {
-    statusMessage.textContent = "";
+    if (submitButton.disabled) {
+        return;
+    }
+
+    setMessage(statusMessage, "");
 
     if (hasSubmitted) {
         displayError(validateOtp(readCode()));
@@ -204,8 +193,12 @@ otpInputs.forEach((input, index) => {
 form.addEventListener("submit", (event) => {
     event.preventDefault();
 
+    if (submitButton.disabled) {
+        return;
+    }
+
     hasSubmitted = true;
-    statusMessage.textContent = "";
+    setMessage(statusMessage, "");
 
     const error = validateOtp(readCode());
     displayError(error);
@@ -221,15 +214,54 @@ form.addEventListener("submit", (event) => {
 
     // TODO: Integrate real OTP verification in a future task.
 
-    statusMessage.textContent =
-        "Input is valid. OTP verification is not connected yet.";
+    setMessage(statusMessage, "otpPending");
 });
 
 resendButton.addEventListener("click", () => {
+    if (resendButton.disabled) {
+        return;
+    }
+
     // TODO: Integrate the real resend OTP request in a future task.
 
-    statusMessage.textContent =
-        "Resending OTP is not connected yet.";
+    setMessage(statusMessage, "resendPending");
 });
 
-submitButton.disabled = false;
+function renderOtpLanguage() {
+    helpElement.textContent = t("otpHelp", { length: otpLength });
+
+    if (maskedRecipient) {
+        const recipientElement = document.createElement("strong");
+        recipientElement.textContent = maskedRecipient;
+
+        description.replaceChildren(
+            document.createTextNode(t("otpPrefix", { length: otpLength })),
+            recipientElement,
+            document.createTextNode(".")
+        );
+    } else {
+        description.textContent = t("otpDescription");
+    }
+
+    otpInputs.forEach((input, index) => {
+        input.setAttribute("aria-label", t("otpDigit", {
+            index: index + 1,
+            length: otpLength
+        }));
+    });
+
+    if (hasSubmitted) {
+        displayError(validateOtp(readCode()));
+    }
+}
+
+const languageReady = await initI18n({
+    titleKey: "otpPageTitle",
+    statusElement: statusMessage,
+    onChange: renderOtpLanguage
+});
+
+if (languageReady) {
+    submitButton.disabled = false;
+    resendButton.disabled = false;
+}
