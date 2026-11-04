@@ -1,0 +1,134 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap");
+
+:root {
+  --navy-950: #071a2f;
+  --navy-900: #0b2545;
+  --navy-800: #10365e;
+  --blue-600: #1261a9;
+  --blue-500: #1976c9;
+  --cyan-400: #3bd4c5;
+  --surface: #ffffff;
+  --canvas: #f3f7fa;
+  --ink: #12283f;
+  --muted: #65778a;
+  --line: #d9e3eb;
+  --danger: #c63b4a;
+
+  --font-family-base: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-family-heading: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-primary: var(--blue-600);
+  --color-primary-hover: var(--navy-900);
+  --color-focus-ring: rgba(25, 118, 201, 0.2);
+  --color-surface: var(--surface);
+  --color-surface-muted: #fbfdfe;
+  --color-text: var(--ink);
+  --color-text-muted: var(--muted);
+  --color-border: var(--line);
+  --color-error: var(--danger);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --radius-lg: 24px;
+  --radius-md: 12px;
+  --radius-control: var(--radius-md);
+  --control-min-height: 52px;
+  --shadow: 0 28px 70px rgba(18, 40, 63, 0.12);
+
+  --auth-content-max-width: 500px;
+}
+
+/* Giao diện chung của language switch component. */
+language-switch {
+  display: inline-flex;
+  max-width: 100%;
+}
+
+language-switch .language-switch__group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  width: 112px;
+  max-width: 100%;
+
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+
+  box-shadow: 0 4px 12px rgba(18, 40, 63, 0.05);
+}
+
+language-switch .language-switch__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 0;
+  min-height: 36px;
+  margin: 0;
+  padding: 6px 10px;
+
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+
+  cursor: pointer;
+
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+language-switch .language-switch__button:first-child {
+  border-radius:
+    calc(var(--radius-md) - 1px)
+    0
+    0
+    calc(var(--radius-md) - 1px);
+}
+
+language-switch .language-switch__button:last-child {
+  border-radius:
+    0
+    calc(var(--radius-md) - 1px)
+    calc(var(--radius-md) - 1px)
+    0;
+}
+
+language-switch .language-switch__button + .language-switch__button {
+  border-left: 1px solid var(--line);
+}
+
+/* Lựa chọn chưa được chọn. */
+language-switch .language-switch__button:hover:not([aria-pressed="true"]) {
+  background: var(--canvas);
+  color: var(--blue-600);
+}
+
+/* Lựa chọn đang được chọn. */
+language-switch .language-switch__button[aria-pressed="true"] {
+  background: var(--blue-600);
+  color: var(--surface);
+}
+
+language-switch .language-switch__button[aria-pressed="true"]:hover {
+  background: var(--navy-900);
+}
+
+language-switch .language-switch__button:focus-visible {
+  position: relative;
+  z-index: 1;
+
+  outline: 3px solid var(--blue-500);
+  outline-offset: 3px;
+}
