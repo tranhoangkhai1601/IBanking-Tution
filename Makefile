@@ -19,9 +19,10 @@ restart:
 	
 
 start:
-
+	$(COMPOSE) start $(s)
 
 stop:
+	$(COMPOSE) stop $(s)
 
 
 build:
@@ -31,5 +32,5 @@ rebuild:
 
 
 ps: ## Show container status
-	$(COMPOSE) status
+	$(COMPOSE) ps
 
