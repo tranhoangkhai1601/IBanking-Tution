@@ -1,3 +1,5 @@
+# This docker-compose just for local test
+# All database in one container psql
 volumes:
   postgres_data:
   redis_data:
@@ -15,32 +17,40 @@ services:
     environment: 
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+      POSTGRES_MULTIPLE_DATABASES: ${POSTGRES_MULTIPLE_DATABASES}
     ports:
       - "${DB_PORT_HOST:-5433}:${DB_PORT}"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./src/infra/databases/scripts/init-multi-postgres-databases.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+      - postgres_data:/var/lib/postgresql
+      - ./src/infra/databases/scripts/init-multi-postgres-databases.sh:/docker-entrypoint-initdb.d/init-multi-postgres-databases.sh
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
-    networks:
-      - ibanking_local
+      start_period: 30s 
+    networks: 
+      - ibanking_network
     restart: unless-stopped
   
   auth_service:
     build: 
-      context: .
-      dockerfile: ./src/services/auth_service/Dockerfile
+      context: ./src/services/auth-service
+      dockerfile: Dockerfile
     container_name: auth_service
+    volumes:
+      - ./src/services/auth-service/app:/app
+    #TODO: Remove port in the future - Just for testing now!!!!
+    ports:
+      - "8080:8080"
     environment:
       - DATABASE_URL=postgresql+asyncpg://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/auth_db
+      - PYTHONDONTWRITEBYTECODE=1
     depends_on:
       postgres:
         condition: service_healthy
-    networks:
-      - ibanking_local
+    networks: 
+      - ibanking_network
     restart: unless-stopped
