@@ -8,7 +8,7 @@ s ?=
 .PHONY: help up down clean restart start stop build rebuild logs ps
 
 up:
-	$(COMPOSE) up
+	$(COMPOSE) up -d
 down: ## Stop and remove container
 	$(COMPOSE) down
 
@@ -26,7 +26,7 @@ stop:
 
 
 build:
-
+	$(COMPOSE) up -d --build
 
 rebuild:
 
