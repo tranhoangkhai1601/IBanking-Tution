@@ -212,3 +212,17 @@
 .btn-submit.active:hover {
   background-color: #2563EB;
 }
+
+.balance-warning {
+  margin-top: 12px;
+  color: var(--danger-red);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.lookup-message {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--danger-red);
+}

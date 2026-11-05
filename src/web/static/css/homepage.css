@@ -7,7 +7,7 @@
 }
 
 
-/* Chia cột (2) */
+/* Chia cá»™t (2) */
 .home-content-grid {
   display: grid;
   grid-template-columns: 340px 1fr; 
@@ -15,7 +15,7 @@
   align-items: start;
 }
 
-/* chia 2 tầng */
+/* chia 2 táº§ng */
 .account-card {
   border: 2px solid var(--border-color);
   border-radius: var(--radius);
@@ -68,7 +68,7 @@
 }
 
 
-/* Lịch sử giao dịch */
+/* Lá»‹ch sá»­ giao dá»‹ch */
 /* khung */
 .history-card {
   border: 2px solid var(--border-color);
@@ -91,7 +91,7 @@
   letter-spacing: 0.5px;
 }
 
-/* Bảng lịch sử */
+/* Báº£ng lá»‹ch sá»­ */
 .history-table {
   width: 100%;
   border-collapse: collapse;

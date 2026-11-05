@@ -24,8 +24,8 @@
         <div class="main-body">
             <nav class="sidebar-menu">
                 <a href="./homepage.html" class="nav-item">Home</a>
-                <a href="./transaction.html" class="nav-item auth-only active">Pay tuition</a>
-                <a href="./profile.html" class="nav-item auth-only">Profile</a>
+                <a href="./transaction.html" class="nav-item active">Pay tuition</a>
+                <a href="./profile.html" class="nav-item">Profile</a>
             </nav>
 
             <main class="content-area">
@@ -56,10 +56,12 @@
                                     <label>Student ID (enter student ID only):</label>
                                     <div class="search-box-row">
                                         <input type="text" id="mssv-input" class="input-field"
-                                            placeholder="Enter the student ID to pay for...">
+                                            placeholder="Enter the student ID to pay for..." maxlength="8"
+                                            autocomplete="off" spellcheck="false">
                                         <button id="btn-search" class="btn-search" onclick="searchTuition()">Look
                                             up</button>
                                     </div>
+                                    <p id="lookup-message" class="lookup-message" style="display:none;"></p>
                                 </div>
                                 <div class="info-group">
                                     <label>Student full name:</label>
@@ -89,6 +91,9 @@
                                     VND</div>
                             </div>
                         </div>
+                        <p id="balance-warning" class="balance-warning" style="display:none;">
+                            Insufficient balance to pay this tuition.
+                        </p>
                     </section>
 
 

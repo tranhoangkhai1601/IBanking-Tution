@@ -25,6 +25,8 @@ function checkAuthStatus() {
   const btnSigninEl = document.getElementById('btn-signin');
   const btnLogoutEl = document.getElementById('btn-logout');
 
+
+// ẩn thông tin khi chưa đăng nhập
   document.querySelectorAll('.auth-only').forEach(el => {
     el.style.display = isLoggedIn ? '' : 'none';
   });
@@ -50,7 +52,6 @@ function checkAuthStatus() {
   }
 }
 
-// Mock Data
 function handleSignIn() {
   const mockUser = {
     name: "Đinh Ngọc Hoa",
