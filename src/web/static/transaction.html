@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/transaction.css">
 </head>
+
 <body>
 
     <div class="app-container">
@@ -22,8 +24,8 @@
         <div class="main-body">
             <nav class="sidebar-menu">
                 <a href="./homepage.html" class="nav-item">Home</a>
-                <a href="./transaction.html" class="nav-item active">Pay tuition</a>
-                <a href="./profile.html" class="nav-item">Profile</a>
+                <a href="./transaction.html" class="nav-item auth-only active">Pay tuition</a>
+                <a href="./profile.html" class="nav-item auth-only">Profile</a>
             </nav>
 
             <main class="content-area">
@@ -53,8 +55,10 @@
                                 <div class="info-group">
                                     <label>Student ID (enter student ID only):</label>
                                     <div class="search-box-row">
-                                        <input type="text" id="mssv-input" class="input-field" placeholder="Enter the student ID to pay for...">
-                                        <button id="btn-search" class="btn-search" onclick="searchTuition()">Look up</button>
+                                        <input type="text" id="mssv-input" class="input-field"
+                                            placeholder="Enter the student ID to pay for...">
+                                        <button id="btn-search" class="btn-search" onclick="searchTuition()">Look
+                                            up</button>
                                     </div>
                                 </div>
                                 <div class="info-group">
@@ -64,7 +68,8 @@
                             </div>
                             <div class="info-group">
                                 <label>Amount to pay:</label>
-                                <p id="tuition-amount" style="color: var(--secondary-blue); font-size: 20px; font-weight: 700;">0 VND</p>
+                                <p id="tuition-amount"
+                                    style="color: var(--secondary-blue); font-size: 20px; font-weight: 700;">0 VND</p>
                             </div>
                         </section>
                     </div>
@@ -80,7 +85,8 @@
                             </div>
                             <div class="balance-item">
                                 <label>Amount to pay:</label>
-                                <div class="amount" id="summary-tuition-amount" style="color: var(--secondary-blue);">0 VND</div>
+                                <div class="amount" id="summary-tuition-amount" style="color: var(--secondary-blue);">0
+                                    VND</div>
                             </div>
                         </div>
                     </section>
@@ -107,4 +113,5 @@
     <script src="./js/main.js"></script>
     <script src="./js/transaction.js"></script>
 </body>
+
 </html>

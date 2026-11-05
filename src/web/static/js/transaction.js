@@ -8,56 +8,14 @@ let currentTuitionFee = 0;
 let userBalance = 0;
 
 function renderTransactionPageAuth(isLoggedIn, user) {
-  const payerNameEl = document.getElementById('payer-name');
-  const payerPhoneEl = document.getElementById('payer-phone');
-  const payerEmailEl = document.getElementById('payer-email');
-  const userBalanceEl = document.getElementById('user-balance');
+  if (!isLoggedIn || !user) return; // main.js already redirects to the home page
 
-  const mssvInput = document.getElementById('mssv-input');
-  const btnSearch = document.getElementById('btn-search');
-  const chkTerms = document.getElementById('chk-terms');
+  document.getElementById('payer-name').innerText = user.name || '-';
+  document.getElementById('payer-phone').innerText = user.phone || '-';
+  document.getElementById('payer-email').innerText = user.email || '-';
 
-  if (isLoggedIn && user) {
-    // để show thôi
-    if (payerNameEl) payerNameEl.innerText = user.name || 'Đinh Ngọc Hoa';
-    if (payerPhoneEl) payerPhoneEl.innerText = user.phone || '0862123456';
-    if (payerEmailEl) payerEmailEl.innerText = user.email || '524k0031@student.tdtu.edu.vn';
-    userBalance = user.balance || 10000000;
-    if (userBalanceEl) userBalanceEl.innerText = formatVND(userBalance);
-
-    // bấm log in là vào luôn
-    if (mssvInput) mssvInput.disabled = false;
-    if (btnSearch) btnSearch.disabled = false;
-    if (chkTerms) chkTerms.disabled = false;
-  } else {
-
-    // giao diện chưa login
-    if (payerNameEl) payerNameEl.innerText = '-';
-    if (payerPhoneEl) payerPhoneEl.innerText = '-';
-    if (payerEmailEl) payerEmailEl.innerText = '-';
-    if (userBalanceEl) userBalanceEl.innerText = '0 VND';
-
-    const studentNameEl = document.getElementById('student-name');
-    const tuitionAmountEl = document.getElementById('tuition-amount');
-    const summaryAmountEl = document.getElementById('summary-tuition-amount');
-
-    if (studentNameEl) studentNameEl.innerText = '-';
-    if (tuitionAmountEl) tuitionAmountEl.innerText = '0 VND';
-    if (summaryAmountEl) summaryAmountEl.innerText = '0 VND';
-
-    if (mssvInput) {
-      mssvInput.value = '';
-      mssvInput.disabled = true;
-    }
-    if (btnSearch) btnSearch.disabled = true;
-    if (chkTerms) {
-      chkTerms.checked = false;
-      chkTerms.disabled = true;
-    }
-
-    currentTuitionFee = 0;
-    validateTransactionState();
-  }
+  userBalance = user.balance || 0;
+  document.getElementById('user-balance').innerText = formatVND(userBalance);
 }
 
 function searchTuition() {
