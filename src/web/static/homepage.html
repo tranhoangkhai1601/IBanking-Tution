@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iBanking - Home</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="./css/homepage.css">
+</head>
+
+<body>
+
+  <div class="app-container">
+    <header class="header-bar">
+      <div class="user-badge" id="user-display"></div>
+      <h1 class="header-title">HOME PAGE</h1>
+      <div class="auth-buttons">
+        <button id="btn-signin" class="btn-signin-nav" onclick="handleSignIn()">Sign in</button>
+        <button id="btn-logout" class="btn-logout-nav" onclick="handleLogout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="main-body">
+      <nav class="sidebar-menu">~
+        <a href="./homepage.html" class="nav-item active">Home</a>
+        <a href="./transaction.html" class="nav-item auth-only">Pay tuition</a>
+        <a href="./profile.html" class="nav-item auth-only">Profile</a>
+      </nav>
+
+      <main class="content-area">
+        <div class="homepage-layout">
+          <div class="home-content-grid">
+
+            <div class="account-card">
+              <div class="account-number-box">
+                <label>Account number:</label>
+                <div class="val" id="account-number">-</div>
+              </div>
+              <div class="account-balance-box">
+                <label>Balance:</label>
+                <div class="val" id="account-balance">0 VND</div>
+              </div>
+            </div>
+
+
+            <div class="history-card">
+              <h3>Transaction History</h3>
+              <div id="history-container">
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="./js/main.js"></script>
+  <script src="./js/homepage.js"></script>
+</body>
+
+</html>

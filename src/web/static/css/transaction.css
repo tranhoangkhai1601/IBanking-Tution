@@ -1,0 +1,214 @@
+.transaction-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  height: 100%;
+}
+
+/* khung */
+.section-card {
+  background-color: var(--card-white);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 26px 32px;
+  box-shadow: 0 4px 12px rgba(10, 37, 64, 0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.25s ease-in-out;
+}
+
+.section-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--secondary-blue);
+  box-shadow: 0 8px 24px rgba(10, 37, 64, 0.12);
+}
+
+.section-title {
+  text-align: center;
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--primary-navy);
+  text-transform: uppercase;
+  margin-bottom: 18px;
+  letter-spacing: 0.5px;
+}
+
+.grid-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  flex: 1.2;
+}
+
+.info-group {
+  margin-bottom: 16px;
+}
+
+/* Nhãn label */
+.info-group label {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: #64748B;
+  margin-bottom: 6px;
+}
+
+/* Làm to chữ hơn (nội dung) */
+.info-group p {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--neutral-dark);
+}
+
+.note-text {
+  font-size: 14px;
+  font-style: italic;
+  color: #64748B;
+  text-align: center;
+  margin-top: 12px;
+}
+
+.search-box-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  margin-bottom: 16px;
+}
+
+/* Ô nhập MSSV */
+.input-field {
+  flex: 1;
+  padding: 14px 18px;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--neutral-dark);
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: var(--secondary-blue);
+}
+
+/*  */
+.btn-search {
+  padding: 14px 30px;
+  background-color: var(--secondary-blue);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-search:hover {
+  background-color: #2563EB;
+}
+
+.transaction-layout > section:nth-child(2) {
+  flex: 1;
+}
+
+.balance-grid {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 100%;
+}
+
+.balance-item {
+  text-align: center;
+}
+
+.balance-item label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #64748B;
+}
+
+
+.balance-item .amount {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--primary-navy);
+  margin-top: 6px;
+}
+
+.transaction-layout > section:nth-child(3) {
+  flex: 1;
+}
+
+.confirm-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 28px;
+  height: 100%;
+}
+
+
+.terms-box {
+  flex: 1;
+  background-color: #F1F5F9;
+  border: 2px dashed var(--border-color);
+  padding: 18px 24px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--neutral-dark);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  user-select: none;
+}
+
+.terms-box:hover {
+  background-color: #E2E8F0;
+  border-color: var(--secondary-blue);
+  border-style: solid;
+}
+
+.terms-box:has(input[type="checkbox"]:checked) {
+  background-color: #EFF6FF;
+  border: 2px solid var(--secondary-blue);
+  color: var(--primary-navy);
+}
+
+.terms-box input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  accent-color: var(--secondary-blue);
+}
+
+
+.btn-submit {
+  padding: 18px 44px;
+  background-color: #CBD5E1;
+  color: #64748B;
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 800;
+  font-size: 17px;
+  cursor: not-allowed;
+  transition: all 0.2s;
+  min-width: 260px;
+}
+
+.btn-submit.active {
+  background-color: var(--secondary-blue);
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+}
+
+.btn-submit.active:hover {
+  background-color: #2563EB;
+}

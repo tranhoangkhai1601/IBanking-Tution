@@ -1,0 +1,132 @@
+.homepage-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  height: 100%;
+}
+
+
+/* Chia cột (2) */
+.home-content-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr; 
+  gap: 24px;
+  align-items: start;
+}
+
+/* chia 2 tầng */
+.account-card {
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius);
+  background-color: var(--card-white);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(10, 37, 64, 0.05);
+}
+
+ 
+/* Chia block (cho acc num & balance  */
+.account-number-box {
+  padding: 24px;
+  border-bottom: 2px solid var(--border-color); 
+  background-color: #F8FAFC;
+}
+
+.account-number-box label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #64748B;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.account-number-box .val {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary-navy);
+}
+
+.account-balance-box {
+  padding: 24px;
+  background-color: #FFFFFF;
+}
+
+.account-balance-box label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #64748B;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.account-balance-box .val {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--secondary-blue);
+}
+
+
+/* Lịch sử giao dịch */
+/* khung */
+.history-card {
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius);
+  background-color: var(--card-white);
+  padding: 24px;
+  min-height: 450px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(10, 37, 64, 0.05);
+}
+
+.history-card h3 {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--primary-navy);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+/* Bảng lịch sử */
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.history-table th, 
+.history-table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 15px;
+}
+
+.history-table th {
+  background-color: #F1F5F9;
+  font-weight: 700;
+  color: var(--primary-navy);
+}
+
+.history-table td {
+  font-weight: 600;
+  color: var(--neutral-dark);
+}
+
+.status-success {
+  color: #10B981;
+  font-weight: 700;
+}
+
+.status-pending {
+  color: #F59E0B;
+  font-weight: 700;
+}
+
+.status-failed {
+  color: #EF4444;
+  font-weight: 700;
+}
