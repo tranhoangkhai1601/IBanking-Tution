@@ -1,12 +1,14 @@
 const mockTuitionDatabase = {
-  "523V0003": { name: "Trần Hoàng Khải", amount: 3500000 },
-  "524K0008": { name: "Vũ Hùng Phi", amount: 4200000 },
-  "524K0031": { name: "Đinh Ngọc Hoa", amount: 5000000 },
-  "524K0032": { name: "Trường Giang", amount: 15000000 } // dòng test: học phí lớn hơn số dư mock (10tr)
+  "523V0003": { name: "Trần Hoàng Khải", amount: 3500000, semester: 'HK1/2026-2027', status: 'UNPAID' },
+  "524K0008": { name: "Vũ Hùng Phi", amount: 4200000, semester: 'HK1/2026-2027', status: 'UNPAID' },
+  "524K0031": { name: "Đinh Ngọc Hoa", amount: 5000000, semester: 'HK1/2026-2027', status: 'UNPAID' },
+  "524K0032": { name: "Trường Giang", amount: 15000000, semester: 'HK1/2026-2027', status: 'UNPAID' },
+  "524K0034": { name: "Sinh viên mẫu", amount: 3500000, semester: 'HK1/2026-2027', status: 'PAID' }
 };
 
-let currentTuitionFee = 0;
+let currentTuition = null;
 let userBalance = 0;
+let isProcessing = false;
 
 function renderTransactionPageAuth(isLoggedIn, user) {
   const payerNameEl = document.getElementById('payer-name');
@@ -17,6 +19,8 @@ function renderTransactionPageAuth(isLoggedIn, user) {
   const mssvInput = document.getElementById('mssv-input');
   const btnSearch = document.getElementById('btn-search');
   const chkTerms = document.getElementById('chk-terms');
+  const btnLogout = document.getElementById('btn-logout');
+  if (btnLogout) btnLogout.disabled = isProcessing;
 
   if (isLoggedIn && user) {
     if (payerNameEl) payerNameEl.innerText = user.name ?? '-';
@@ -25,9 +29,10 @@ function renderTransactionPageAuth(isLoggedIn, user) {
     userBalance = user.balance ?? 0;
     if (userBalanceEl) userBalanceEl.innerText = formatVND(userBalance);
 
-    if (mssvInput) mssvInput.disabled = false;
-    if (btnSearch) btnSearch.disabled = false;
-    if (chkTerms) chkTerms.disabled = false;
+    if (mssvInput) mssvInput.disabled = isProcessing;
+    if (btnSearch) btnSearch.disabled = isProcessing;
+    if (chkTerms) chkTerms.disabled = isProcessing;
+    validateTransactionState();
   } else {
     if (payerNameEl) payerNameEl.innerText = '-';
     if (payerPhoneEl) payerPhoneEl.innerText = '-';
@@ -61,24 +66,53 @@ function hideLookupMessage() {
 
 // Reset khi đổi đối tượng (ô tick và Confirm button)
 function resetPaymentState() {
-  currentTuitionFee = 0;
+  currentTuition = null;
 
   const chkTerms = document.getElementById('chk-terms');
   if (chkTerms) chkTerms.checked = false;
 
-  const studentNameEl = document.getElementById('student-name');
-  const tuitionAmountEl = document.getElementById('tuition-amount');
-  const summaryAmountEl = document.getElementById('summary-tuition-amount');
-  if (studentNameEl) studentNameEl.innerText = '-';
-  if (tuitionAmountEl) tuitionAmountEl.innerText = '0 VND';
-  if (summaryAmountEl) summaryAmountEl.innerText = '0 VND';
-
+  renderTuitionDetails();
   hideLookupMessage();
   validateTransactionState();
 }
 
+function renderTuitionDetails() {
+  const amountDue = currentTuition?.status === 'UNPAID' ? currentTuition.amount : 0;
+  const formattedFee = formatVND(amountDue);
+  const details = {
+    'student-name': currentTuition?.name ?? '-',
+    'tuition-semester': currentTuition?.semester ?? '-',
+    'tuition-status': currentTuition?.status ?? '-',
+    'tuition-amount': formattedFee,
+    'summary-tuition-amount': formattedFee
+  };
+
+  for (const [id, value] of Object.entries(details)) {
+    const element = document.getElementById(id);
+    if (element) element.innerText = value;
+  }
+}
+
+function getStoredTransactionHistory() {
+  try {
+    const stored = JSON.parse(localStorage.getItem('transactionHistory'));
+    if (Array.isArray(stored)) return stored;
+  } catch (e) { }
+  return [];
+}
+
+function hasSuccessfulPayment(tuition, history) {
+  return history.some(item => item?.studentId === tuition.studentId &&
+    item.semester === tuition.semester && item.status === 'Success');
+}
+
+function getStudentId() {
+  return document.getElementById('mssv-input').value.trim().toUpperCase();
+}
+
 function searchTuition() {
-  const mssv = document.getElementById('mssv-input').value.trim().toUpperCase();
+  if (isProcessing) return;
+  const mssv = getStudentId();
 
   // reset sau mỗi lần tra cứu
   resetPaymentState();
@@ -94,16 +128,11 @@ function searchTuition() {
     return;
   }
 
-  currentTuitionFee = data.amount;
-  const formattedFee = formatVND(currentTuitionFee);
-
-  const studentNameEl = document.getElementById('student-name');
-  const tuitionAmountEl = document.getElementById('tuition-amount');
-  const summaryAmountEl = document.getElementById('summary-tuition-amount');
-  if (studentNameEl) studentNameEl.innerText = data.name;
-  if (tuitionAmountEl) tuitionAmountEl.innerText = formattedFee;
-  if (summaryAmountEl) summaryAmountEl.innerText = formattedFee;
-
+  currentTuition = { ...data, studentId: mssv };
+  if (hasSuccessfulPayment(currentTuition, getStoredTransactionHistory())) {
+    currentTuition.status = 'PAID';
+  }
+  renderTuitionDetails();
   validateTransactionState();
 }
 
@@ -114,28 +143,29 @@ function validateTransactionState() {
   const warningEl = document.getElementById('balance-warning');
   const isChecked = chkTerms ? chkTerms.checked : false;
 
-  const hasTuition = currentTuitionFee > 0;
-  const isEnoughBalance = userBalance >= currentTuitionFee;
+  const hasTuition = currentTuition?.status === 'UNPAID' && currentTuition.amount > 0;
+  const isEnoughBalance = userBalance >= (currentTuition?.amount ?? 0);
 
   if (warningEl) {
     warningEl.style.display = (hasTuition && !isEnoughBalance) ? 'block' : 'none';
   }
 
   if (btnConfirm) {
-    if (hasTuition && isEnoughBalance && isChecked) {
-      btnConfirm.disabled = false;
-      btnConfirm.classList.add('active');
-    } else {
-      btnConfirm.disabled = true;
-      btnConfirm.classList.remove('active');
-    }
+    const canConfirm = !isProcessing && hasTuition && isEnoughBalance && isChecked;
+    btnConfirm.disabled = !canConfirm;
+    btnConfirm.classList.toggle('active', canConfirm);
+    btnConfirm.innerText = isProcessing ? 'PROCESSING...' : 'CONFIRM TRANSACTION';
   }
 }
 
 // Submit (Mock th)
 function submitTransaction() {
+  if (isProcessing) return;
+
+  const payer = getUser();
+  if (!payer?.isLoggedIn) return;
+
   const chkTerms = document.getElementById('chk-terms');
-  const btnConfirm = document.getElementById('btn-confirm-tx');
 
   // Bảo vệ thêm (dù button đã bị disable)
   if (!chkTerms || !chkTerms.checked) {
@@ -143,94 +173,106 @@ function submitTransaction() {
     return;
   }
 
-  if (currentTuitionFee <= 0) {
+  const tuition = currentTuition;
+  if (!tuition || tuition.studentId !== getStudentId()) {
+    resetPaymentState();
     showLookupMessage('Please look up a valid student ID first.');
     return;
   }
 
-  if (userBalance < currentTuitionFee) {
+  if (tuition.status !== 'UNPAID' || tuition.amount <= 0) {
+    showLookupMessage('This tuition has no outstanding balance.');
+    return;
+  }
+
+  if ((payer.balance ?? 0) < tuition.amount) {
     showLookupMessage('Insufficient balance.');
     return;
   }
 
-  // Tránh bấm nút nhiều lần
-  if (btnConfirm) {
-    btnConfirm.disabled = true;
-    btnConfirm.classList.remove('active');
-    btnConfirm.innerText = 'PROCESSING...';
-  }
+  isProcessing = true;
+  renderTransactionPageAuth(true, payer);
 
   // Gỉa lập xử lý thời gian (Cần API,OTP)
   setTimeout(() => {
-    // Trừ tiền
-    userBalance -= currentTuitionFee;
-
-    // Cập nhật số dư
-    const userBalanceEl = document.getElementById('user-balance');
-    if (userBalanceEl) userBalanceEl.innerText = formatVND(userBalance);
-
-    // Cập nhật localStorage
-    const user = getUser();
-    if (user) {
-      user.balance = userBalance;
-      localStorage.setItem('user', JSON.stringify(user));
-    }
-
-    // Cập nhật lịch sử khi có giao dịch
-    const today = new Date();
-    const dateStr = String(today.getDate()).padStart(2, '0') + '/' +
-      String(today.getMonth() + 1).padStart(2, '0') + '/' +
-      today.getFullYear();
-
-    const studentName = document.getElementById('student-name')?.innerText || 'Unknown';
-
-    const newTx = {
-      date: dateStr,
-      content: studentName,
-      amount: -currentTuitionFee,
-      status: "Success"
-    };
-
-    // Lấy history 
-    let history = [];
     try {
-      const stored = localStorage.getItem('transactionHistory');
-      if (stored) history = JSON.parse(stored);
-    } catch (e) { }
+      const user = getUser();
+      if (!user?.isLoggedIn || user.accountNumber !== payer.accountNumber) {
+        resetPaymentState();
+        showLookupMessage('Your session changed. Please look up the student ID again.');
+        return;
+      }
 
-    history.unshift(newTx); // thêm vào (đầu hàng)
-    localStorage.setItem('transactionHistory', JSON.stringify(history));
+      const history = getStoredTransactionHistory();
+      if (hasSuccessfulPayment(tuition, history)) {
+        currentTuition = { ...tuition, status: 'PAID' };
+        renderTuitionDetails();
+        showLookupMessage('This tuition has already been paid.');
+        return;
+      }
 
-    alert(
-      `Payment successful!\n\n` +
-      `Student: ${studentName}\n` +
-      `Amount: ${formatVND(currentTuitionFee)}\n` +
-      `Remaining balance: ${formatVND(userBalance)}`
-    );
+      const balance = user.balance ?? 0;
+      if (balance < tuition.amount) {
+        showLookupMessage('Insufficient balance.');
+        return;
+      }
 
-    // Reset form
-    const mssvInput = document.getElementById('mssv-input');
-    if (mssvInput) mssvInput.value = '';
-    resetPaymentState();
+      const remainingBalance = balance - tuition.amount;
+      const today = new Date();
+      const dateStr = String(today.getDate()).padStart(2, '0') + '/' +
+        String(today.getMonth() + 1).padStart(2, '0') + '/' +
+        today.getFullYear();
 
-    if (btnConfirm) {
-      btnConfirm.innerText = 'CONFIRM TRANSACTION';
+      const newTx = {
+        date: dateStr,
+        content: tuition.name,
+        studentId: tuition.studentId,
+        semester: tuition.semester,
+        amount: -tuition.amount,
+        status: 'Success'
+      };
+
+      localStorage.setItem('user', JSON.stringify({ ...user, balance: remainingBalance }));
+      try {
+        localStorage.setItem('transactionHistory', JSON.stringify([newTx, ...history]));
+      } catch (error) {
+        localStorage.setItem('user', JSON.stringify(user));
+        throw error;
+      }
+
+      alert(
+        `Payment successful!\n\n` +
+        `Student: ${tuition.name}\n` +
+        `Amount: ${formatVND(tuition.amount)}\n` +
+        `Remaining balance: ${formatVND(remainingBalance)}`
+      );
+
+      currentTuition = { ...tuition, status: 'PAID' };
+      chkTerms.checked = false;
+      renderTuitionDetails();
+    } catch (error) {
+      showLookupMessage('Unable to save the payment. Please try again.');
+    } finally {
+      isProcessing = false;
+      const user = getUser();
+      renderTransactionPageAuth(Boolean(user?.isLoggedIn), user);
     }
   }, 800);
-
-  // ô mssv
-  document.addEventListener('DOMContentLoaded', function () {
-    const mssvInput = document.getElementById('mssv-input');
-    if (!mssvInput) return;
-
-    mssvInput.addEventListener('input', function () {
-      const cleaned = this.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-      if (cleaned !== this.value) this.value = cleaned;
-      resetPaymentState();
-    });
-
-    mssvInput.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') searchTuition();
-    });
-  });
 }
+
+// ô mssv
+document.addEventListener('DOMContentLoaded', function () {
+  const mssvInput = document.getElementById('mssv-input');
+  if (!mssvInput) return;
+
+  mssvInput.addEventListener('input', function () {
+    if (isProcessing) return;
+    const cleaned = this.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    if (cleaned !== this.value) this.value = cleaned;
+    resetPaymentState();
+  });
+
+  mssvInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') searchTuition();
+  });
+});

@@ -3,8 +3,8 @@ function getTransactionHistory() {
   try {
     const stored = localStorage.getItem('transactionHistory');
     if (stored) return JSON.parse(stored);
-  } catch (e) {}
-  
+  } catch (e) { }
+
   // Mặc định lần đầu
   return [
     { date: "02/11/2026", content: "Tuition payment", amount: -3500000, status: "Success" }
