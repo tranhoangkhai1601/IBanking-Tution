@@ -8,14 +8,31 @@ let currentTuitionFee = 0;
 let userBalance = 0;
 
 function renderTransactionPageAuth(isLoggedIn, user) {
-  if (!isLoggedIn || !user) return; // main.js already redirects to the home page
+  // Chưa login thì trả về Home
+  if (!isLoggedIn || !user) return;
 
-  document.getElementById('payer-name').innerText = user.name || '-';
-  document.getElementById('payer-phone').innerText = user.phone || '-';
-  document.getElementById('payer-email').innerText = user.email || '-';
+  const payerNameEl = document.getElementById('payer-name');
+  const payerPhoneEl = document.getElementById('payer-phone');
+  const payerEmailEl = document.getElementById('payer-email');
+  const userBalanceEl = document.getElementById('user-balance');
+
+  // Info người thanh toán học phí
+  if (payerNameEl) payerNameEl.innerText = user.name || '-';
+  if (payerPhoneEl) payerPhoneEl.innerText = user.phone || '-';
+  if (payerEmailEl) payerEmailEl.innerText = user.email || '-';
 
   userBalance = user.balance || 0;
-  document.getElementById('user-balance').innerText = formatVND(userBalance);
+  if (userBalanceEl) userBalanceEl.innerText = formatVND(userBalance);
+
+  // tra cứu bằng mssv
+  const mssvInput = document.getElementById('mssv-input');
+  const btnSearch = document.getElementById('btn-search');
+  const chkTerms = document.getElementById('chk-terms');
+  if (mssvInput) mssvInput.disabled = false;
+  if (btnSearch) btnSearch.disabled = false;
+  if (chkTerms) chkTerms.disabled = false;
+
+  validateTransactionState();
 }
 
 function searchTuition() {

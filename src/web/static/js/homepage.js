@@ -1,7 +1,6 @@
 // Mock data transactions cho FE th (temp)
 const mockTransactionHistory = [
-  { date: "02/11/2026", content: "Tuition payment for student ID 524K0031", amount: -3500000, status: "Success" },
-  { date: "28/10/2026", content: "Account top-up", amount: 5000000, status: "Success" }
+  { date: "02/11/2026", content: "Tuition payment", amount: -3500000, status: "Success" },
 ];
 
 

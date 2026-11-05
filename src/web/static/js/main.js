@@ -1,55 +1,42 @@
 document.addEventListener("DOMContentLoaded", function () {
-
-  // luôn trả về mock data(test
-  const rawUser = localStorage.getItem('user');
-  let user = null;
-  
-  try {
-    user = JSON.parse(rawUser);
-  } catch (e) {
-    user = null;
-  }
-
-  if (!user || !user.name || !user.studentId) {
-    const defaultUser = {
-      name: "Đinh Ngọc Hoa",
-      studentId: "524K0031",
-      accountNumber: "1023456789",
-      phone: "0862123456",
-      email: "524k0031@student.tdtu.edu.vn",
-      balance: 10000000,
-      isLoggedIn: true
-    };
-    localStorage.setItem('user', JSON.stringify(defaultUser));
-  }
-
   checkAuthStatus();
 });
 
-
+function getUser() {
+  try {
+    return JSON.parse(localStorage.getItem('user'));
+  } catch (e) {
+    return null;
+  }
+}
 
 function checkAuthStatus() {
-  const user = JSON.parse(localStorage.getItem('user'));
-  const isLoggedIn = user && user.isLoggedIn;
+  const user = getUser();
+  const isLoggedIn = !!(user && user.isLoggedIn);
+
+  const isHomePage = window.location.pathname.endsWith('homepage.html') ||
+                     window.location.pathname.endsWith('/');
+  if (!isLoggedIn && !isHomePage) {
+    window.location.href = './homepage.html';
+    return;
+  }
 
   const userDisplayEl = document.getElementById('user-display');
   const btnSigninEl = document.getElementById('btn-signin');
   const btnLogoutEl = document.getElementById('btn-logout');
 
-  if (isLoggedIn && user) {
+  document.querySelectorAll('.auth-only').forEach(el => {
+    el.style.display = isLoggedIn ? '' : 'none';
+  });
+
+  if (isLoggedIn) {
     if (userDisplayEl) {
-      // trên thanh display (sau khi login)
       userDisplayEl.style.display = 'flex';
-      userDisplayEl.innerHTML = `
-        <span class="user-name">${user.name || 'Đinh Ngọc Hoa'}</span>
-        <span class="user-id">${user.studentId || '524K0031'}</span>
-      `;
+      userDisplayEl.innerHTML = `<span class="user-name">${user.name}</span>`;
     }
     if (btnSigninEl) btnSigninEl.style.display = 'none';
     if (btnLogoutEl) btnLogoutEl.style.display = 'inline-block';
   } else {
-
-    // chưa login
     if (userDisplayEl) userDisplayEl.style.display = 'none';
     if (btnSigninEl) btnSigninEl.style.display = 'inline-block';
     if (btnLogoutEl) btnLogoutEl.style.display = 'none';
@@ -63,23 +50,22 @@ function checkAuthStatus() {
   }
 }
 
-// login/out với mock data (temp)
+// Mock Data
 function handleSignIn() {
-  const defaultUser = {
+  const mockUser = {
     name: "Đinh Ngọc Hoa",
-    studentId: "524K0031",
     accountNumber: "1023456789",
     phone: "0862123456",
-    email: "524k0031@student.tdtu.edu.vn",
+    email: "524K0031@gmail.com",
     balance: 10000000,
     isLoggedIn: true
   };
-  localStorage.setItem('user', JSON.stringify(defaultUser));
+  localStorage.setItem('user', JSON.stringify(mockUser));
   checkAuthStatus();
 }
 
 function handleLogout() {
-  const user = JSON.parse(localStorage.getItem('user')) || {};
+  const user = getUser() || {};
   user.isLoggedIn = false;
   localStorage.setItem('user', JSON.stringify(user));
   checkAuthStatus();
