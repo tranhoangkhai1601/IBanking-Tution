@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>iBanking - Pay Tuition</title>
+        <link rel="stylesheet" href="./css/dashboard.css">
+    </head>
+
+    <body>
+
+        <div class="app-container">
+            <header class="header-bar">
+                <div class="user-badge" id="user-display"></div>
+                <h1 class="header-title">PAY TUITION</h1>
+                <div class="auth-buttons">
+                    <button id="btn-signin" class="btn-signin-nav"
+                        onclick="handleSignIn()">Sign in</button>
+                    <button id="btn-logout" class="btn-logout-nav"
+                        onclick="handleLogout()">Logout</button>
+                </div>
+            </header>
+
+            <div class="main-body">
+                <nav class="sidebar-menu">
+                    <a href="./homepage.html" class="nav-item">Home</a>
+                    <a href="./transaction.html" class="nav-item active">Pay
+                        tuition</a>
+                    <a href="./profile.html" class="nav-item">Profile</a>
+                </nav>
+
+                <main class="content-area">
+                    <div class="dashboard-layout transaction-layout">
+
+                        <div class="grid-two-col">
+                            <section class="dashboard-card section-card">
+                                <h3 class="section-title">PAYER</h3>
+                                <div class="info-group">
+                                    <label>Full name:</label>
+                                    <p id="payer-name">-</p>
+                                </div>
+                                <div class="info-group">
+                                    <label>Phone number:</label>
+                                    <p id="payer-phone">-</p>
+                                </div>
+                                <div class="info-group">
+                                    <label>Email:</label>
+                                    <p id="payer-email">-</p>
+                                </div>
+                            </section>
+
+                            <section class="dashboard-card section-card">
+                                <div>
+                                    <h3 class="section-title">TUITION
+                                        INFORMATION</h3>
+                                    <div class="info-group">
+                                        <label>Student ID (enter student ID
+                                            only):</label>
+                                        <div class="search-box-row">
+                                            <input type="text" id="mssv-input"
+                                                class="input-field"
+                                                placeholder="Enter the student ID to pay for..."
+                                                maxlength="8"
+                                                autocomplete="off"
+                                                spellcheck="false">
+                                            <button id="btn-search"
+                                                class="btn-search"
+                                                onclick="searchTuition()">Look
+                                                up</button>
+                                        </div>
+                                        <p id="lookup-message"
+                                            class="lookup-message"
+                                            style="display:none;"></p>
+                                    </div>
+                                    <div class="tuition-details">
+                                        <div class="info-group">
+                                            <label>Student full name:</label>
+                                            <p id="student-name">-</p>
+                                        </div>
+                                        <div class="info-group">
+                                            <label>Semester:</label>
+                                            <p id="tuition-semester">-</p>
+                                        </div>
+                                        <div class="info-group">
+                                            <label>Amount to pay:</label>
+                                            <p id="tuition-amount"
+                                                style="color: var(--secondary-blue); font-size: 20px; font-weight: 700;">0
+                                                VND</p>
+                                        </div>
+                                        <div class="info-group">
+                                            <label>Status:</label>
+                                            <p id="tuition-status">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+
+                        <section class="dashboard-card section-card">
+                            <h3 class="section-title">ACCOUNT BALANCE</h3>
+                            <div class="balance-grid">
+                                <div class="balance-item">
+                                    <label>Available balance:</label>
+                                    <div class="amount" id="user-balance">0
+                                        VND</div>
+                                </div>
+                                <div class="balance-item">
+                                    <label>Amount to pay:</label>
+                                    <div class="amount"
+                                        id="summary-tuition-amount"
+                                        style="color: var(--secondary-blue);">0
+                                        VND</div>
+                                </div>
+                            </div>
+                            <p id="balance-warning" class="balance-warning"
+                                style="display:none;">
+                                Insufficient balance to pay this tuition.
+                            </p>
+                        </section>
+
+                        <section class="dashboard-card section-card">
+                            <h3 class="section-title">CONFIRM PAYMENT</h3>
+                            <div class="confirm-row">
+                                <div class="terms-box">
+                                    <input type="checkbox" id="chk-terms"
+                                        onchange="validateTransactionState()">
+                                    <label for="chk-terms">System terms and
+                                        conditions</label>
+                                </div>
+                                <button id="btn-confirm-tx" class="btn-submit"
+                                    disabled onclick="submitTransaction()">
+                                    CONFIRM TRANSACTION
+                                </button>
+                            </div>
+                        </section>
+
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <script src="./js/main.js"></script>
+        <script src="./js/transaction.js"></script>
+    </body>
+
+</html>
