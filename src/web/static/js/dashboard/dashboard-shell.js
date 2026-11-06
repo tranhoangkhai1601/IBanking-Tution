@@ -2,9 +2,11 @@ import '../components/auth-brand.js';
 import '../components/language-switch.js';
 import '../components/menu-toggle.js';
 import { APP_CONFIG, PAGE_PATHS, STORAGE_KEYS } from '../../config/config.js';
-import { initI18n } from '../../i18n/i18n.js';
+import { initI18n, t } from '../../i18n/i18n.js';
+import { isAccountStorageKey } from './customer-accounts.js';
 
 export function getUser() {
+  // Khi nối backend, lấy phiên và hồ sơ khách hàng từ API xác thực thay cho cờ isLoggedIn trong localStorage.
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEYS.user));
   } catch {
@@ -47,15 +49,18 @@ export async function initDashboard({ titleKey, render, requiresAuth = false }) 
   });
   if (!ready) return false;
 
-  // Trang được khôi phục từ Back/Forward Cache có thể đang hiển thị số dư cũ.
   window.addEventListener('pageshow', (event) => {
     if (event.persisted) renderPage();
+  });
+  window.addEventListener('storage', (event) => {
+    if (event.storageArea === localStorage && isAccountStorageKey(event.key)) renderPage();
   });
 
   signIn.addEventListener('click', () => {
     window.location.assign(PAGE_PATHS.login);
   });
   logout.addEventListener('click', () => {
+    // Khi nối backend, gọi API kết thúc phiên rồi cập nhật trạng thái giao diện.
     const user = getUser() || {};
     localStorage.setItem(STORAGE_KEYS.user, JSON.stringify({ ...user, isLoggedIn: false }));
     renderPage();
@@ -66,5 +71,14 @@ export async function initDashboard({ titleKey, render, requiresAuth = false }) 
 }
 
 export function formatVND(amount) {
-  return `${(amount || 0).toLocaleString(APP_CONFIG.currencyLocale)} ${APP_CONFIG.currencyCode}`;
+  if (!Number.isFinite(amount)) return '—';
+  return `${amount.toLocaleString(APP_CONFIG.currencyLocale)} ${APP_CONFIG.currencyCode}`;
+}
+
+export function renderAccountStatus(element, active) {
+  const key = typeof active === 'boolean'
+    ? (active ? 'dashboardAccountActive' : 'dashboardAccountInactive')
+    : 'dashboardAccountStatusUnavailable';
+  element.textContent = t(key);
+  element.classList.toggle('status-success', active === true);
 }
