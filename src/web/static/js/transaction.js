@@ -51,17 +51,18 @@ function renderTransactionPageAuth(isLoggedIn, user) {
   }
 }
 
-// Hiện hoặc ẩn thông báo
-function showLookupMessage(text) {
-  const el = document.getElementById('lookup-message');
-  if (!el) return;
-  el.innerText = text;
-  el.style.display = 'block';
+function setLookupMessage(text) {
+  const message = document.getElementById('lookup-message');
+  const input = document.getElementById('mssv-input');
+  if (message) message.textContent = text;
+  if (input) input.setAttribute('aria-invalid', String(Boolean(text)));
 }
 
-function hideLookupMessage() {
-  const el = document.getElementById('lookup-message');
-  if (el) el.style.display = 'none';
+function setPaymentMessage(text, isError = false) {
+  const message = document.getElementById('payment-message');
+  if (!message) return;
+  message.classList.toggle('status-message--error', isError);
+  message.textContent = text;
 }
 
 // Reset khi đổi đối tượng (ô tick và Confirm button)
@@ -72,7 +73,8 @@ function resetPaymentState() {
   if (chkTerms) chkTerms.checked = false;
 
   renderTuitionDetails();
-  hideLookupMessage();
+  setLookupMessage('');
+  setPaymentMessage('');
   validateTransactionState();
 }
 
@@ -118,13 +120,13 @@ function searchTuition() {
   resetPaymentState();
 
   if (!mssv) {
-    showLookupMessage('Please enter a student ID.');
+    setLookupMessage('Please enter a student ID.');
     return;
   }
 
   const data = mockTuitionDatabase[mssv];
   if (!data) {
-    showLookupMessage('No tuition information found for this student ID.');
+    setLookupMessage('No tuition information found for this student ID.');
     return;
   }
 
@@ -147,14 +149,15 @@ function validateTransactionState() {
   const isEnoughBalance = userBalance >= (currentTuition?.amount ?? 0);
 
   if (warningEl) {
-    warningEl.style.display = (hasTuition && !isEnoughBalance) ? 'block' : 'none';
+    warningEl.textContent = hasTuition && !isEnoughBalance
+      ? 'Insufficient balance to pay this tuition.'
+      : '';
   }
 
   if (btnConfirm) {
     const canConfirm = !isProcessing && hasTuition && isEnoughBalance && isChecked;
     btnConfirm.disabled = !canConfirm;
-    btnConfirm.classList.toggle('active', canConfirm);
-    btnConfirm.innerText = isProcessing ? 'PROCESSING...' : 'CONFIRM TRANSACTION';
+    btnConfirm.innerText = isProcessing ? 'Processing…' : 'Confirm transaction';
   }
 }
 
@@ -169,27 +172,28 @@ function submitTransaction() {
 
   // Bảo vệ thêm (dù button đã bị disable)
   if (!chkTerms || !chkTerms.checked) {
-    showLookupMessage('Please accept the terms and conditions.');
+    setPaymentMessage('Please accept the terms and conditions.', true);
     return;
   }
 
   const tuition = currentTuition;
   if (!tuition || tuition.studentId !== getStudentId()) {
     resetPaymentState();
-    showLookupMessage('Please look up a valid student ID first.');
+    setPaymentMessage('Please look up a valid student ID first.', true);
     return;
   }
 
   if (tuition.status !== 'UNPAID' || tuition.amount <= 0) {
-    showLookupMessage('This tuition has no outstanding balance.');
+    setPaymentMessage('This tuition has no outstanding balance.');
     return;
   }
 
   if ((payer.balance ?? 0) < tuition.amount) {
-    showLookupMessage('Insufficient balance.');
+    renderTransactionPageAuth(true, payer);
     return;
   }
 
+  setPaymentMessage('');
   isProcessing = true;
   renderTransactionPageAuth(true, payer);
 
@@ -199,7 +203,7 @@ function submitTransaction() {
       const user = getUser();
       if (!user?.isLoggedIn || user.accountNumber !== payer.accountNumber) {
         resetPaymentState();
-        showLookupMessage('Your session changed. Please look up the student ID again.');
+        setPaymentMessage('Your session changed. Please look up the student ID again.', true);
         return;
       }
 
@@ -207,13 +211,12 @@ function submitTransaction() {
       if (hasSuccessfulPayment(tuition, history)) {
         currentTuition = { ...tuition, status: 'PAID' };
         renderTuitionDetails();
-        showLookupMessage('This tuition has already been paid.');
+        setPaymentMessage('This tuition has already been paid.');
         return;
       }
 
       const balance = user.balance ?? 0;
       if (balance < tuition.amount) {
-        showLookupMessage('Insufficient balance.');
         return;
       }
 
@@ -240,18 +243,16 @@ function submitTransaction() {
         throw error;
       }
 
-      alert(
-        `Payment successful!\n\n` +
-        `Student: ${tuition.name}\n` +
-        `Amount: ${formatVND(tuition.amount)}\n` +
-        `Remaining balance: ${formatVND(remainingBalance)}`
+      setPaymentMessage(
+        `Payment successful for ${tuition.name}. Paid ${formatVND(tuition.amount)}. ` +
+        `Remaining balance: ${formatVND(remainingBalance)}.`
       );
 
       currentTuition = { ...tuition, status: 'PAID' };
       chkTerms.checked = false;
       renderTuitionDetails();
     } catch (error) {
-      showLookupMessage('Unable to save the payment. Please try again.');
+      setPaymentMessage('Unable to save the payment. Please try again.', true);
     } finally {
       isProcessing = false;
       const user = getUser();

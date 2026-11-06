@@ -2,8 +2,14 @@
 function getTransactionHistory() {
   try {
     const stored = localStorage.getItem('transactionHistory');
-    if (stored) return JSON.parse(stored);
-  } catch (e) { }
+    if (stored !== null) {
+      const history = JSON.parse(stored);
+      return Array.isArray(history) && history.every(item => typeof item?.status === 'string')
+        ? history : null;
+    }
+  } catch (e) {
+    return null;
+  }
 
   // Mặc định lần đầu
   return [
@@ -27,17 +33,23 @@ function renderHomePageAuth(isLoggedIn, user) {
     if (historyContainerEl) {
       const history = getTransactionHistory();
 
-      if (history.length === 0) {
+      if (history === null) {
         historyContainerEl.innerHTML = `
-          <div style="text-align: center; padding: 40px 20px; color: #64748B; font-weight: 600;">
+          <p class="status-message status-message--error" role="alert">
+            Unable to load transaction history. Please try again.
+          </p>
+        `;
+      } else if (history.length === 0) {
+        historyContainerEl.innerHTML = `
+          <p class="status-message" role="status">
             No transactions yet.
-          </div>
+          </p>
         `;
       } else {
         const rows = history.map(item => {
           const isNegative = item.amount < 0;
           const amountStyle = isNegative
-            ? 'style="color: var(--danger-red); font-weight: 700;"'
+            ? 'style="color: var(--color-error); font-weight: 700;"'
             : 'style="color: #10B981; font-weight: 700;"';
           const formattedAmount = (isNegative ? '' : '+') + formatVND(item.amount);
           const statusClass = 'status-' + item.status.toLowerCase();
@@ -75,9 +87,10 @@ function renderHomePageAuth(isLoggedIn, user) {
 
     if (historyContainerEl) {
       historyContainerEl.innerHTML = `
-        <div style="text-align: center; padding: 40px 20px; color: #64748B; font-weight: 600; font-size: 16px;">
-          🔒 Please <a href="#" onclick="handleSignIn(); return false;" style="color: var(--secondary-blue); text-decoration: underline;">sign in</a> to view your account information and transaction history.
-        </div>
+        <p class="status-message" role="status">
+          Please <a href="#" onclick="handleSignIn(); return false;">sign in</a>
+          to view your account information and transaction history.
+        </p>
       `;
     }
   }

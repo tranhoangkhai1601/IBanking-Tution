@@ -5,17 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>iBanking - Home</title>
+    <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/dashboard.css">
   </head>
 
-  <body>
+  <body class="dashboard-page">
 
     <div class="app-container">
       <header class="header-bar">
+        <menu-toggle controls="dashboard-menu"></menu-toggle>
+        <div class="header-identity">
+          <auth-brand class="dashboard-brand" variant="compact">
+            <span class="brand__name">iBanking</span>
+          </auth-brand>
+          <h1 class="header-title">Home</h1>
+        </div>
         <div class="user-badge" id="user-display"></div>
-        <h1 class="header-title">HOME PAGE</h1>
         <div class="auth-buttons">
-          <button id="btn-signin" class="btn-signin-nav"
+          <button id="btn-signin" class="primary-button btn-signin-nav"
             onclick="handleSignIn()">Sign in</button>
           <button id="btn-logout" class="btn-logout-nav"
             onclick="handleLogout()">Logout</button>
@@ -23,12 +30,15 @@
       </header>
 
       <div class="main-body">
-        <nav class="sidebar-menu">
-          <a href="./homepage.html" class="nav-item active">Home</a>
-          <a href="./transaction.html" class="nav-item auth-only">Pay
-            tuition</a>
-          <a href="./profile.html" class="nav-item auth-only">Profile</a>
-        </nav>
+        <div id="dashboard-menu" class="sidebar-panel">
+          <nav class="sidebar-menu" aria-label="Main navigation">
+            <a href="./homepage.html" class="nav-item active"
+              aria-current="page">Home</a>
+            <a href="./transaction.html" class="nav-item auth-only">Pay
+              tuition</a>
+            <a href="./profile.html" class="nav-item auth-only">Profile</a>
+          </nav>
+        </div>
 
         <main class="content-area">
           <div class="dashboard-layout">
@@ -46,7 +56,7 @@
               </div>
 
               <div class="dashboard-card history-card">
-                <h3 id="history-title">Transaction History</h3>
+                <h3 id="history-title">Transaction history</h3>
                 <div id="history-container" role="region"
                   aria-labelledby="history-title" tabindex="0">
                 </div>
@@ -58,6 +68,8 @@
       </div>
     </div>
 
+    <script type="module" src="./js/components/auth-brand.js"></script>
+    <script type="module" src="./js/components/menu-toggle.js"></script>
     <script src="./js/main.js"></script>
     <script src="./js/homepage.js"></script>
   </body>

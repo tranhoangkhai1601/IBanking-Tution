@@ -5,17 +5,24 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>iBanking - Pay Tuition</title>
+        <link rel="stylesheet" href="./css/style.css">
         <link rel="stylesheet" href="./css/dashboard.css">
     </head>
 
-    <body>
+    <body class="dashboard-page">
 
         <div class="app-container">
             <header class="header-bar">
+                <menu-toggle controls="dashboard-menu"></menu-toggle>
+                <div class="header-identity">
+                    <auth-brand class="dashboard-brand" variant="compact">
+                        <span class="brand__name">iBanking</span>
+                    </auth-brand>
+                    <h1 class="header-title">Pay tuition</h1>
+                </div>
                 <div class="user-badge" id="user-display"></div>
-                <h1 class="header-title">PAY TUITION</h1>
                 <div class="auth-buttons">
-                    <button id="btn-signin" class="btn-signin-nav"
+                    <button id="btn-signin" class="primary-button btn-signin-nav"
                         onclick="handleSignIn()">Sign in</button>
                     <button id="btn-logout" class="btn-logout-nav"
                         onclick="handleLogout()">Logout</button>
@@ -23,19 +30,22 @@
             </header>
 
             <div class="main-body">
-                <nav class="sidebar-menu">
-                    <a href="./homepage.html" class="nav-item">Home</a>
-                    <a href="./transaction.html" class="nav-item active">Pay
-                        tuition</a>
-                    <a href="./profile.html" class="nav-item">Profile</a>
-                </nav>
+                <div id="dashboard-menu" class="sidebar-panel">
+                    <nav class="sidebar-menu" aria-label="Main navigation">
+                        <a href="./homepage.html" class="nav-item">Home</a>
+                        <a href="./transaction.html" class="nav-item active"
+                            aria-current="page">Pay
+                            tuition</a>
+                        <a href="./profile.html" class="nav-item">Profile</a>
+                    </nav>
+                </div>
 
                 <main class="content-area">
                     <div class="dashboard-layout transaction-layout">
 
                         <div class="grid-two-col">
                             <section class="dashboard-card section-card">
-                                <h3 class="section-title">PAYER</h3>
+                                <h3 class="section-title">Payer</h3>
                                 <div class="info-group">
                                     <label>Full name:</label>
                                     <p id="payer-name">-</p>
@@ -52,8 +62,7 @@
 
                             <section class="dashboard-card section-card">
                                 <div>
-                                    <h3 class="section-title">TUITION
-                                        INFORMATION</h3>
+                                    <h3 class="section-title">Tuition information</h3>
                                     <div class="info-group">
                                         <label>Student ID (enter student ID
                                             only):</label>
@@ -63,15 +72,15 @@
                                                 placeholder="Enter the student ID to pay for..."
                                                 maxlength="8"
                                                 autocomplete="off"
-                                                spellcheck="false">
+                                                spellcheck="false"
+                                                aria-describedby="lookup-message">
                                             <button id="btn-search"
-                                                class="btn-search"
+                                                class="primary-button btn-search"
                                                 onclick="searchTuition()">Look
                                                 up</button>
                                         </div>
                                         <p id="lookup-message"
-                                            class="lookup-message"
-                                            style="display:none;"></p>
+                                            class="field__error" role="alert"></p>
                                     </div>
                                     <div class="tuition-details">
                                         <div class="info-group">
@@ -84,9 +93,7 @@
                                         </div>
                                         <div class="info-group">
                                             <label>Amount to pay:</label>
-                                            <p id="tuition-amount"
-                                                style="color: var(--secondary-blue); font-size: 20px; font-weight: 700;">0
-                                                VND</p>
+                                            <p id="tuition-amount">0 VND</p>
                                         </div>
                                         <div class="info-group">
                                             <label>Status:</label>
@@ -98,7 +105,7 @@
                         </div>
 
                         <section class="dashboard-card section-card">
-                            <h3 class="section-title">ACCOUNT BALANCE</h3>
+                            <h3 class="section-title">Account balance</h3>
                             <div class="balance-grid">
                                 <div class="balance-item">
                                     <label>Available balance:</label>
@@ -108,19 +115,16 @@
                                 <div class="balance-item">
                                     <label>Amount to pay:</label>
                                     <div class="amount"
-                                        id="summary-tuition-amount"
-                                        style="color: var(--secondary-blue);">0
-                                        VND</div>
+                                        id="summary-tuition-amount">0 VND</div>
                                 </div>
                             </div>
-                            <p id="balance-warning" class="balance-warning"
-                                style="display:none;">
-                                Insufficient balance to pay this tuition.
-                            </p>
+                            <p id="balance-warning"
+                                class="status-message status-message--error balance-warning"
+                                role="status" aria-atomic="true"></p>
                         </section>
 
                         <section class="dashboard-card section-card">
-                            <h3 class="section-title">CONFIRM PAYMENT</h3>
+                            <h3 class="section-title">Confirm payment</h3>
                             <div class="confirm-row">
                                 <div class="terms-box">
                                     <input type="checkbox" id="chk-terms"
@@ -128,11 +132,14 @@
                                     <label for="chk-terms">System terms and
                                         conditions</label>
                                 </div>
-                                <button id="btn-confirm-tx" class="btn-submit"
+                                <button id="btn-confirm-tx"
+                                    class="primary-button btn-submit"
                                     disabled onclick="submitTransaction()">
-                                    CONFIRM TRANSACTION
+                                    Confirm transaction
                                 </button>
                             </div>
+                            <p id="payment-message" class="status-message payment-message"
+                                role="status" aria-atomic="true"></p>
                         </section>
 
                     </div>
@@ -140,6 +147,8 @@
             </div>
         </div>
 
+        <script type="module" src="./js/components/auth-brand.js"></script>
+        <script type="module" src="./js/components/menu-toggle.js"></script>
         <script src="./js/main.js"></script>
         <script src="./js/transaction.js"></script>
     </body>
