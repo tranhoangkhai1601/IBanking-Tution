@@ -1,20 +1,25 @@
-from fastapi import FastAPI
-from config import config
+import uuid
+from fastapi import FastAPI, status, HTTPException
 from contextlib import asynccontextmanager
+from sqlalchemy.ext.asyncio import AsyncSession
+from database import init_db, get_session, async_engine, AsyncSessionLocal
+from models import Auth_Credentials, Matrix_Permission, Auth_Sessions
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    from init_db import init_models
-    await init_models()
+    await init_db()
+
+    async with AsyncSessionLocal() as session:
+        async with session.begin():
+            pass
+        
     yield
+    await async_engine.dispose()
 
-app = FastAPI(title="Auth Service", version="1.0.0", lifespan=lifespan)
+app = FastAPI(lifespan=lifespan)
 
-
-
-@app.get("/health")
-async def health_check():
+@app.get("/health", status_code=status.HTTP_200_OK)
+async def get_health():
     return {
-        "status": "running",
-        "environment": config.DATABASE_URL
+        "server": "healthy"
     }
