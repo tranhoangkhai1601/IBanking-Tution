@@ -23,6 +23,11 @@
 **/Makefile
 **/__pycache__
 *.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+*.pytest_cache/
 LICENSE
 README.md
 local/data/
