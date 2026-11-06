@@ -7,30 +7,37 @@ from sqlalchemy import String, Integer, Float, DateTime, func, Index, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
+class Base(DeclarativeBase):
+    pass
 class RoleType(IntEnum):
     customer = 3000
     inactive_customer=3001
     moderator = 3002
     bank_teller = 3003
 
-class Base(DeclarativeBase):
-    pass
 
 class Auth_Sessions(Base):
     __tablename__ = "Auth_Sessions"
 
     session_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, server_default=func.uuidv7())
     customer_id: Mapped[uuid.UUID] = mapped_column(index=True)
-    refresh_token: Mapped[str] = mapped_column(unique=True)
+    refresh_token: Mapped[str] = mapped_column()
     ip_address: Mapped[str | None]
     device_info: Mapped[str | None]
     is_active: Mapped[bool] = mapped_column(default=False)
     expires_at: Mapped[datetime]
-    create_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    create_at: Mapped[datetime] = mapped_column(primary_key=True, server_default=func.now())
     extra_data: Mapped[dict] = mapped_column(JSONB, server_default='{}')
 
     __table_args__ = (
+        UniqueConstraint('refresh_token', 'create_at'),
+
         Index('ix_auth_sessions_extra', 'extra_data', postgresql_using='gin'),
+
+        # TODO: Just enable when table have init value
+        # {
+        #     "postgresql_partition_by": "RANGE (create_at)"
+        # }
     )
 
 class Auth_Credentials(Base):
@@ -60,10 +67,6 @@ class Roles(Base):
         Index("ix_roles_extra", 'extra_data', postgresql_using='gin'),
     )
 
-    __mapper_args__ = {
-        "order_by": role_id
-    }
-
 class Features(Base):
     __tablename__ = "Features"
 
@@ -83,7 +86,7 @@ class Matrix_Permission(Base):
 
     feature_id: Mapped[int] = mapped_column(ForeignKey("Features.feature_id"), primary_key=True)
     role_id: Mapped[RoleType] = mapped_column(ForeignKey("Roles.role_id"), primary_key=True)
-    permission: Mapped[int] = mapped_column(type=BIGINT, default=0)
+    permission: Mapped[int] = mapped_column(BIGINT, default=0)
     extra_data: Mapped[dict] =  mapped_column(JSONB, server_default="{}")
 
     __table_args__ = (
