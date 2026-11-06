@@ -4,49 +4,66 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iBanking - Home</title>
+    <script src="./i18n/i18n-boot.js"></script>
+    <title>IBanking-Tution</title>
+    <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/dashboard.css">
   </head>
 
-  <body>
+  <body class="dashboard-page">
 
     <div class="app-container">
       <header class="header-bar">
-        <div class="user-badge" id="user-display"></div>
-        <h1 class="header-title">HOME PAGE</h1>
-        <div class="auth-buttons">
-          <button id="btn-signin" class="btn-signin-nav"
-            onclick="handleSignIn()">Sign in</button>
-          <button id="btn-logout" class="btn-logout-nav"
-            onclick="handleLogout()">Logout</button>
+        <menu-toggle controls="dashboard-menu"></menu-toggle>
+        <div class="header-identity">
+          <auth-brand class="dashboard-brand" variant="compact">
+            <span class="brand__name">iBanking</span>
+          </auth-brand>
+          <h1 class="header-title" data-i18n="dashboardHome">Home</h1>
+        </div>
+        <div class="header-actions">
+          <div class="user-badge" id="user-display" hidden>
+            <span class="user-name"></span>
+          </div>
+          <language-switch></language-switch>
+          <div class="auth-buttons">
+            <button type="button" id="btn-signin" class="primary-button btn-signin-nav"
+              data-i18n="dashboardSignIn" disabled>Sign in</button>
+            <button type="button" id="btn-logout" class="btn-logout-nav"
+              data-i18n="dashboardLogout" hidden disabled>Logout</button>
+          </div>
         </div>
       </header>
 
       <div class="main-body">
-        <nav class="sidebar-menu">
-          <a href="./homepage.html" class="nav-item active">Home</a>
-          <a href="./transaction.html" class="nav-item auth-only">Pay
-            tuition</a>
-          <a href="./profile.html" class="nav-item auth-only">Profile</a>
-        </nav>
+        <div id="dashboard-menu" class="sidebar-panel">
+          <nav class="sidebar-menu" aria-label="Main navigation" data-i18n-aria-label="dashboardNavigation">
+            <a href="./homepage.html" class="nav-item active"
+              aria-current="page" data-i18n="dashboardHome">Home</a>
+            <a href="./transaction.html" class="nav-item auth-only" data-i18n="dashboardPayTuition" hidden>Pay
+              tuition</a>
+            <a href="./profile.html" class="nav-item auth-only" data-i18n="dashboardProfile" hidden>Profile</a>
+          </nav>
+        </div>
 
         <main class="content-area">
+          <p id="dashboard-i18n-status" class="status-message status-message--error" role="alert"></p>
           <div class="dashboard-layout">
             <div class="home-content-grid">
 
               <div class="dashboard-card account-card">
                 <div class="account-number-box">
-                  <label>Account number:</label>
+                  <label data-i18n="dashboardAccountNumber">Account number:</label>
                   <div class="val" id="account-number">-</div>
                 </div>
                 <div class="account-balance-box">
-                  <label>Balance:</label>
+                  <label data-i18n="dashboardBalance">Balance:</label>
                   <div class="val" id="account-balance">0 VND</div>
                 </div>
               </div>
 
               <div class="dashboard-card history-card">
-                <h3 id="history-title">Transaction History</h3>
+                <h3 id="history-title" data-i18n="dashboardHistory">Transaction history</h3>
                 <div id="history-container" role="region"
                   aria-labelledby="history-title" tabindex="0">
                 </div>
@@ -58,8 +75,7 @@
       </div>
     </div>
 
-    <script src="./js/main.js"></script>
-    <script src="./js/homepage.js"></script>
+    <script type="module" src="./js/dashboard/homepage.js"></script>
   </body>
 
 </html>

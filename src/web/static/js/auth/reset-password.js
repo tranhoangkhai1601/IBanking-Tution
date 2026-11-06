@@ -1,9 +1,12 @@
-import "./components/auth-brand.js";
-import "./components/language-switch.js";
+import "../components/auth-brand.js";
+import "../components/language-switch.js";
 
-import { APP_CONFIG } from "../config/config.js";
+import { APP_CONFIG } from "../../config/config.js";
 import { validateResetPassword } from "./auth-validation.js";
-import { initI18n, t, setMessage } from "./i18n.js";
+import { initI18n, t, setMessage } from "../../i18n/i18n.js";
+import { clearRecoveryFlow, requireRecoveryStep } from "./recovery-storage.js";
+
+const recovery = requireRecoveryStep("reset");
 
 const form = document.getElementById("reset-password-form");
 const submitButton = document.getElementById("reset-password-submit");
@@ -28,6 +31,10 @@ inputs.password.minLength = APP_CONFIG.minPasswordLength;
 
 let hasSubmitted = false;
 let isComplete = false;
+
+window.addEventListener("pageshow", (event) => {
+    if (event.persisted && !isComplete) requireRecoveryStep("reset");
+});
 
 function readForm() {
     return validateResetPassword({
@@ -102,11 +109,12 @@ export function showResetError(key = "resetServerError") {
 
 // Chỉ gọi sau khi server xác nhận đã đổi mật khẩu.
 export function showResetSuccess() {
-    if (isComplete || submitButton.disabled) {
+    if (isComplete || submitButton.disabled || !requireRecoveryStep("reset")) {
         return;
     }
 
     isComplete = true;
+    clearRecoveryFlow();
     hasSubmitted = false;
 
     clearResetError();
@@ -181,7 +189,7 @@ form.addEventListener("submit", (event) => {
     // showResetError("resetServerError");
 });
 
-const languageReady = await initI18n({
+const languageReady = recovery && await initI18n({
     titleKey: "resetPageTitle",
     statusElement: pageError,
 

@@ -1,5 +1,5 @@
-import { APP_CONFIG } from "../config/config.js";
-import { t } from "./i18n.js";
+import { APP_CONFIG } from "../../config/config.js";
+import { t } from "../../i18n/i18n.js";
 
 export const AUTH_MESSAGES = Object.freeze({
   get identifierRequired() {

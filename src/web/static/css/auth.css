@@ -1,21 +1,8 @@
-.auth-page,
-.auth-page *,
-.auth-page *::before,
-.auth-page *::after {
-  box-sizing: border-box;
-}
-
 .auth-page {
-  margin: 0;
-  background: var(--canvas);
-  color: var(--ink);
-  font-family: var(--font-family-base);
+  --auth-content-max-width: 500px;
+
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-}
-
-.auth-page [hidden] {
-  display: none !important;
 }
 
 /* Giữ khung giao diện, chưa hiện chữ mặc định trong lúc tải bản dịch. */
@@ -25,12 +12,6 @@
 .i18n-pending .auth-card > *,
 .i18n-pending language-switch {
   visibility: hidden;
-}
-
-.auth-page button,
-.auth-page a,
-.auth-page input {
-  font-family: inherit;
 }
 
 .app-shell {
@@ -50,9 +31,7 @@
   min-height: 100svh;
   overflow: hidden;
   padding: clamp(32px, 4vw, 64px);
-  background:
-    linear-gradient(145deg, rgba(59, 212, 197, 0.08), transparent 42%),
-    linear-gradient(155deg, var(--navy-800), var(--navy-950) 75%);
+  background: var(--brand-background);
   color: var(--surface);
 }
 
@@ -91,38 +70,6 @@
   background: rgba(31, 188, 177, 0.14);
   filter: blur(70px);
   pointer-events: none;
-}
-
-.brand {
-  display: inline-flex;
-  align-items: center;
-  min-width: 0;
-  gap: 11px;
-}
-
-.brand__mark {
-  display: grid;
-  width: 38px;
-  height: 38px;
-  flex: 0 0 auto;
-  place-items: center;
-  color: var(--cyan-400);
-}
-
-.brand__mark svg {
-  width: 100%;
-  height: 100%;
-}
-
-.brand__name {
-  min-width: 0;
-  color: var(--surface);
-  font-family: var(--font-family-heading);
-  font-size: 22px;
-  font-weight: 800;
-  line-height: 1.2;
-  letter-spacing: -0.6px;
-  overflow-wrap: anywhere;
 }
 
 .brand-panel__content {
@@ -327,7 +274,7 @@
 
 .field input[aria-invalid="true"] {
   border-color: var(--danger);
-  background: #fffafb;
+  background: var(--color-surface-error);
 }
 
 .field input[aria-invalid="true"]:focus {
@@ -353,15 +300,6 @@
 .field__action:hover {
   background: #edf4f8;
   color: var(--blue-600);
-}
-
-.field__error {
-  margin: 7px 0 0;
-  color: var(--danger);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.5;
-  overflow-wrap: anywhere;
 }
 
 .text-link,
@@ -403,50 +341,17 @@
 
 .field__action:focus-visible,
 .text-link:focus-visible,
-.back-link:focus-visible,
-.primary-button:focus-visible {
+.back-link:focus-visible {
   outline: 3px solid var(--color-focus-ring);
   outline-offset: 3px;
 }
 
 .primary-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
   width: 100%;
-  min-height: var(--control-min-height);
-  padding: 13px 20px;
-  border: 0;
-  border-radius: var(--radius-md);
-  background: linear-gradient(135deg, #0f5a9c, #0c477f);
-  box-shadow: 0 8px 20px rgba(18, 97, 169, 0.19);
-  color: var(--surface);
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1.5;
-  cursor: pointer;
-  transition: box-shadow 160ms ease, transform 160ms ease;
 }
 
-.primary-button svg,
 .back-link svg {
   flex: 0 0 auto;
-}
-
-.primary-button:hover:not(:disabled) {
-  box-shadow: 0 12px 24px rgba(18, 97, 169, 0.25);
-  transform: translateY(-1px);
-}
-
-.primary-button:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.primary-button:disabled {
-  background: #718da7;
-  box-shadow: none;
-  cursor: not-allowed;
 }
 
 .security-note {
@@ -482,23 +387,6 @@
 .screen-icon svg {
   width: 26px;
   height: 26px;
-}
-
-.status-message {
-  margin: 0;
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.6;
-  overflow-wrap: anywhere;
-}
-
-.status-message:not(:empty) {
-  margin-bottom: var(--space-4);
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  background: var(--canvas);
 }
 
 @media (max-width: 960px) {
@@ -674,7 +562,7 @@
 
 .otp-grid input[aria-invalid="true"] {
   border-color: var(--danger);
-  background: #fffafb;
+  background: var(--color-surface-error);
 }
 
 .otp-grid input[aria-invalid="true"]:focus {
@@ -787,12 +675,4 @@
 
 .reset-success .primary-button {
   text-decoration: none;
-}
-
-.status-message--error {
-  color: var(--danger);
-}
-
-.status-message--error:not(:empty) {
-  border-color: var(--danger);
 }

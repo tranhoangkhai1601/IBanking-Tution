@@ -4,7 +4,7 @@ import {
     getLanguage,
     setLanguage,
     LANGUAGE_EVENT
-} from "../language.js";
+} from "../../i18n/language.js";
 
 class LanguageSwitch extends HTMLElement {
     constructor() {
