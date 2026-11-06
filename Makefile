@@ -1,3 +1,4 @@
+include .env
 # Ibanking - Local development stack
 
 COMPOSE := docker compose -f docker-compose.yaml
@@ -5,7 +6,7 @@ COMPOSE := docker compose -f docker-compose.yaml
 # e.g. 
 s ?=
 
-.PHONY: help up down clean restart start stop build rebuild logs ps
+.PHONY: help up down clean restart start stop build rebuild logs ps psql test
 
 up:
 	$(COMPOSE) up -d
@@ -29,8 +30,14 @@ build:
 	$(COMPOSE) up -d --build
 
 rebuild:
-
+	$(COMPOSE) down -v
+	$(COMPOSE) up -d --build
 
 ps: ## Show container status
 	$(COMPOSE) ps
 
+psql: ## make psql s=db_name
+	docker exec -it postgres_db psql -U ${DB_USER} -d $(s)
+
+test:
+	docker exec -it $(s) pytest test.py
