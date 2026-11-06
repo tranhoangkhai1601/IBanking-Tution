@@ -1,5 +1,6 @@
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from config import config
+from models import Base
 
 postgres_db_url = config.DATABASE_URL
 
@@ -9,3 +10,11 @@ AsyncSessionLocal = async_sessionmaker(
     bind=async_engine,
     expire_on_commit=False,
 )
+
+async def init_db():
+    async with async_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+async def get_session() -> AsyncSession:
+    async with AsyncSessionLocal() as session:
+        yield session
