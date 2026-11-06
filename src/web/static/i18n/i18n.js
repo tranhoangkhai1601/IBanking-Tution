@@ -10,6 +10,7 @@ import {
 
 let dictionaries = {};
 let loadingPromise = null;
+const messageValues = new WeakMap();
 
 // Tải các bản dịch một lần trong mỗi lần mở trang.
 function loadDictionaries() {
@@ -17,7 +18,7 @@ function loadDictionaries() {
         loadingPromise = Promise.all(
             Object.keys(LANGUAGES).map(async (language) => {
                 const url = new URL(
-                    `../locales/${language}.json`,
+                    `./locales/${language}.json`,
                     import.meta.url
                 );
 
@@ -57,15 +58,17 @@ export function t(key, values = {}) {
 }
 
 // Ghi nhớ khóa để thông báo đang hiển thị cũng đổi ngôn ngữ.
-export function setMessage(element, key) {
+export function setMessage(element, key, values = {}) {
     if (!key) {
         delete element.dataset.i18n;
+        messageValues.delete(element);
         element.textContent = "";
         return;
     }
 
     element.dataset.i18n = key;
-    element.textContent = t(key);
+    messageValues.set(element, values);
+    element.textContent = t(key, values);
 }
 
 export async function initI18n({
@@ -93,7 +96,7 @@ export async function initI18n({
         document.title = `${t(titleKey)} | ${APP_CONFIG.appName}`;
 
         document.querySelectorAll("[data-i18n]").forEach((element) => {
-            element.textContent = t(element.dataset.i18n);
+            element.textContent = t(element.dataset.i18n, messageValues.get(element));
         });
 
         document
@@ -134,6 +137,15 @@ export async function initI18n({
     } finally {
         document.documentElement.classList.remove("i18n-pending");
     }
+
+    // Giữ nội dung cũ ẩn khi trang được khôi phục từ Back/Forward Cache.
+    // language.js đọc lại ngôn ngữ đã lưu trước khi nội dung hiện trở lại.
+    window.addEventListener("pagehide", (event) => {
+        if (event.persisted) document.documentElement.classList.add("i18n-pending");
+    });
+    window.addEventListener("pageshow", (event) => {
+        if (event.persisted) document.documentElement.classList.remove("i18n-pending");
+    });
 
     return true;
 }

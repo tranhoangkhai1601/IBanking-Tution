@@ -4,7 +4,8 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>iBanking - Pay Tuition</title>
+        <script src="./i18n/i18n-boot.js"></script>
+        <title>IBanking-Tution</title>
         <link rel="stylesheet" href="./css/style.css">
         <link rel="stylesheet" href="./css/dashboard.css">
     </head>
@@ -18,65 +19,72 @@
                     <auth-brand class="dashboard-brand" variant="compact">
                         <span class="brand__name">iBanking</span>
                     </auth-brand>
-                    <h1 class="header-title">Pay tuition</h1>
+                    <h1 class="header-title" data-i18n="dashboardPayTuition">Pay tuition</h1>
                 </div>
-                <div class="user-badge" id="user-display"></div>
-                <div class="auth-buttons">
-                    <button id="btn-signin" class="primary-button btn-signin-nav"
-                        onclick="handleSignIn()">Sign in</button>
-                    <button id="btn-logout" class="btn-logout-nav"
-                        onclick="handleLogout()">Logout</button>
+                <div class="header-actions">
+                  <div class="user-badge" id="user-display" hidden>
+                    <span class="user-name"></span>
+                  </div>
+                  <language-switch></language-switch>
+                  <div class="auth-buttons">
+                    <button type="button" id="btn-signin" class="primary-button btn-signin-nav"
+                      data-i18n="dashboardSignIn" disabled>Sign in</button>
+                    <button type="button" id="btn-logout" class="btn-logout-nav"
+                      data-i18n="dashboardLogout" hidden disabled>Logout</button>
+                  </div>
                 </div>
             </header>
 
             <div class="main-body">
                 <div id="dashboard-menu" class="sidebar-panel">
-                    <nav class="sidebar-menu" aria-label="Main navigation">
-                        <a href="./homepage.html" class="nav-item">Home</a>
+                    <nav class="sidebar-menu" aria-label="Main navigation" data-i18n-aria-label="dashboardNavigation">
+                        <a href="./homepage.html" class="nav-item" data-i18n="dashboardHome">Home</a>
                         <a href="./transaction.html" class="nav-item active"
-                            aria-current="page">Pay
+                            aria-current="page" data-i18n="dashboardPayTuition">Pay
                             tuition</a>
-                        <a href="./profile.html" class="nav-item">Profile</a>
+                        <a href="./profile.html" class="nav-item" data-i18n="dashboardProfile">Profile</a>
                     </nav>
                 </div>
 
                 <main class="content-area">
+                    <p id="dashboard-i18n-status" class="status-message status-message--error" role="alert"></p>
                     <div class="dashboard-layout transaction-layout">
 
                         <div class="grid-two-col">
                             <section class="dashboard-card section-card">
-                                <h3 class="section-title">Payer</h3>
+                                <h3 class="section-title" data-i18n="dashboardPayer">Payer</h3>
                                 <div class="info-group">
-                                    <label>Full name:</label>
+                                    <label data-i18n="dashboardFullName">Full name:</label>
                                     <p id="payer-name">-</p>
                                 </div>
                                 <div class="info-group">
-                                    <label>Phone number:</label>
+                                    <label data-i18n="dashboardPhone">Phone number:</label>
                                     <p id="payer-phone">-</p>
                                 </div>
                                 <div class="info-group">
-                                    <label>Email:</label>
+                                    <label data-i18n="dashboardEmail">Email:</label>
                                     <p id="payer-email">-</p>
                                 </div>
                             </section>
 
                             <section class="dashboard-card section-card">
                                 <div>
-                                    <h3 class="section-title">Tuition information</h3>
+                                    <h3 class="section-title" data-i18n="dashboardTuitionInfo">Tuition information</h3>
                                     <div class="info-group">
-                                        <label>Student ID (enter student ID
+                                        <label for="mssv-input" data-i18n="dashboardStudentId">Student ID (enter student ID
                                             only):</label>
                                         <div class="search-box-row">
                                             <input type="text" id="mssv-input"
                                                 class="input-field"
                                                 placeholder="Enter the student ID to pay for..."
+                                                data-i18n-placeholder="dashboardStudentPlaceholder"
                                                 maxlength="8"
                                                 autocomplete="off"
-                                                spellcheck="false"
+                                                spellcheck="false" disabled
                                                 aria-describedby="lookup-message">
                                             <button id="btn-search"
                                                 class="primary-button btn-search"
-                                                onclick="searchTuition()">Look
+                                                data-i18n="dashboardLookUp" disabled>Look
                                                 up</button>
                                         </div>
                                         <p id="lookup-message"
@@ -84,19 +92,19 @@
                                     </div>
                                     <div class="tuition-details">
                                         <div class="info-group">
-                                            <label>Student full name:</label>
+                                            <label data-i18n="dashboardStudentName">Student full name:</label>
                                             <p id="student-name">-</p>
                                         </div>
                                         <div class="info-group">
-                                            <label>Semester:</label>
+                                            <label data-i18n="dashboardSemester">Semester:</label>
                                             <p id="tuition-semester">-</p>
                                         </div>
                                         <div class="info-group">
-                                            <label>Amount to pay:</label>
+                                            <label data-i18n="dashboardAmountToPay">Amount to pay:</label>
                                             <p id="tuition-amount">0 VND</p>
                                         </div>
                                         <div class="info-group">
-                                            <label>Status:</label>
+                                            <label data-i18n="dashboardStatus">Status:</label>
                                             <p id="tuition-status">-</p>
                                         </div>
                                     </div>
@@ -105,15 +113,15 @@
                         </div>
 
                         <section class="dashboard-card section-card">
-                            <h3 class="section-title">Account balance</h3>
+                            <h3 class="section-title" data-i18n="dashboardAccountBalance">Account balance</h3>
                             <div class="balance-grid">
                                 <div class="balance-item">
-                                    <label>Available balance:</label>
+                                    <label data-i18n="dashboardAvailableBalance">Available balance:</label>
                                     <div class="amount" id="user-balance">0
                                         VND</div>
                                 </div>
                                 <div class="balance-item">
-                                    <label>Amount to pay:</label>
+                                    <label data-i18n="dashboardAmountToPay">Amount to pay:</label>
                                     <div class="amount"
                                         id="summary-tuition-amount">0 VND</div>
                                 </div>
@@ -124,17 +132,17 @@
                         </section>
 
                         <section class="dashboard-card section-card">
-                            <h3 class="section-title">Confirm payment</h3>
+                            <h3 class="section-title" data-i18n="dashboardConfirmPayment">Confirm payment</h3>
                             <div class="confirm-row">
                                 <div class="terms-box">
                                     <input type="checkbox" id="chk-terms"
-                                        onchange="validateTransactionState()">
-                                    <label for="chk-terms">System terms and
+                                        disabled>
+                                    <label for="chk-terms" data-i18n="dashboardTerms">System terms and
                                         conditions</label>
                                 </div>
                                 <button id="btn-confirm-tx"
                                     class="primary-button btn-submit"
-                                    disabled onclick="submitTransaction()">
+                                    data-i18n="dashboardConfirmTransaction" disabled>
                                     Confirm transaction
                                 </button>
                             </div>
@@ -147,10 +155,7 @@
             </div>
         </div>
 
-        <script type="module" src="./js/components/auth-brand.js"></script>
-        <script type="module" src="./js/components/menu-toggle.js"></script>
-        <script src="./js/main.js"></script>
-        <script src="./js/transaction.js"></script>
+        <script type="module" src="./js/dashboard/transaction.js"></script>
     </body>
 
 </html>

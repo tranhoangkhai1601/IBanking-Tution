@@ -1,5 +1,6 @@
 const MENU_BUTTON_MARKUP = `
-  <button type="button" class="menu-toggle" aria-label="Toggle navigation menu">
+  <button type="button" class="menu-toggle" aria-label="Toggle navigation menu"
+    data-i18n-aria-label="dashboardToggleMenu">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor"
         stroke-width="2" stroke-linecap="round"></path>

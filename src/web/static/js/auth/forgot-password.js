@@ -1,11 +1,12 @@
-import "./components/auth-brand.js";
-import "./components/language-switch.js";
+import "../components/auth-brand.js";
+import "../components/language-switch.js";
 
+import { PAGE_PATHS } from "../../config/config.js";
 import { validateIdentifier } from "./auth-validation.js";
-import { initI18n, setMessage } from "./i18n.js";
+import { initI18n, setMessage } from "../../i18n/i18n.js";
 import {
-  clearRecoveryRecipient,
-  saveRecoveryRecipient
+  clearRecoveryFlow,
+  startRecoveryFlow
 } from "./recovery-storage.js";
 
 const form = document.getElementById("forgot-password-form");
@@ -15,6 +16,8 @@ const submitButton = document.getElementById("forgot-password-submit");
 const statusMessage = document.getElementById("forgot-password-status");
 
 let hasSubmitted = false;
+
+clearRecoveryFlow();
 
 function displayError(message) {
   identifierInput.setAttribute(
@@ -32,8 +35,6 @@ identifierInput.addEventListener("input", () => {
   }
 
   setMessage(statusMessage, "");
-
-  clearRecoveryRecipient();
 
   if (!hasSubmitted) {
     return;
@@ -89,9 +90,14 @@ form.addEventListener("submit", (event) => {
 
   const maskedRecipient = maskIdentifier(identifierInput.value);
 
-  saveRecoveryRecipient(maskedRecipient);
+  if (!startRecoveryFlow(maskedRecipient)) {
+    statusMessage.classList.add("status-message--error");
+    setMessage(statusMessage, "recoveryFlowError");
+    return;
+  }
 
-  window.location.assign("./otp.html");
+  submitButton.disabled = true;
+  window.location.assign(PAGE_PATHS.otp);
 });
 
 const languageReady = await initI18n({
@@ -107,4 +113,10 @@ const languageReady = await initI18n({
 
 if (languageReady) {
   submitButton.disabled = false;
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+      clearRecoveryFlow();
+      submitButton.disabled = false;
+    }
+  });
 }

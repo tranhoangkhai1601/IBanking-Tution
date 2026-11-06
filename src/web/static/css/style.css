@@ -192,15 +192,17 @@ language-switch {
 language-switch .language-switch__group {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-1);
 
   width: 112px;
   max-width: 100%;
+  padding: 3px;
 
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--surface);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--canvas);
 
-  box-shadow: 0 4px 12px rgba(18, 40, 63, 0.05);
+  box-shadow: 0 4px 12px rgba(18, 40, 63, 0.08);
 }
 
 language-switch .language-switch__button {
@@ -211,58 +213,38 @@ language-switch .language-switch__button {
   min-width: 0;
   min-height: 36px;
   margin: 0;
-  padding: 6px 10px;
+  padding: 6px 8px;
 
   border: 0;
+  border-radius: 999px;
   background: transparent;
-  color: var(--muted);
+  color: var(--color-text-muted);
 
-  font: inherit;
+  font-family: var(--font-family-heading);
   font-size: 12px;
-  font-weight: 700;
-  line-height: 1.4;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.04em;
 
   cursor: pointer;
 
   transition:
     background-color 160ms ease,
-    color 160ms ease;
-}
-
-language-switch .language-switch__button:first-child {
-  border-radius:
-    calc(var(--radius-md) - 1px)
-    0
-    0
-    calc(var(--radius-md) - 1px);
-}
-
-language-switch .language-switch__button:last-child {
-  border-radius:
-    0
-    calc(var(--radius-md) - 1px)
-    calc(var(--radius-md) - 1px)
-    0;
-}
-
-language-switch .language-switch__button + .language-switch__button {
-  border-left: 1px solid var(--line);
+    color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 /* Lựa chọn chưa được chọn. */
 language-switch .language-switch__button:hover:not([aria-pressed="true"]) {
-  background: var(--canvas);
-  color: var(--blue-600);
+  background-color: var(--color-surface);
+  color: var(--color-primary);
 }
 
 /* Lựa chọn đang được chọn. */
 language-switch .language-switch__button[aria-pressed="true"] {
-  background: var(--blue-600);
-  color: var(--surface);
-}
-
-language-switch .language-switch__button[aria-pressed="true"]:hover {
-  background: var(--navy-900);
+  background: var(--primary-button-background);
+  box-shadow: 0 2px 6px rgba(18, 97, 169, 0.25);
+  color: var(--color-surface);
 }
 
 language-switch .language-switch__button:focus-visible {
@@ -270,5 +252,11 @@ language-switch .language-switch__button:focus-visible {
   z-index: 1;
 
   outline: 3px solid var(--blue-500);
-  outline-offset: 3px;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  language-switch .language-switch__button {
+    transition: none;
+  }
 }

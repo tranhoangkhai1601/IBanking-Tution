@@ -1,9 +1,9 @@
-import "./components/auth-brand.js";
-import "./components/language-switch.js";
+import "../components/auth-brand.js";
+import "../components/language-switch.js";
 
-import { APP_CONFIG } from "../config/config.js";
+import { APP_CONFIG, PAGE_PATHS, STORAGE_KEYS } from "../../config/config.js";
 import { validateLogin } from "./auth-validation.js";
-import { initI18n, t, setMessage } from "./i18n.js";
+import { initI18n, t, setMessage } from "../../i18n/i18n.js";
 
 const form = document.getElementById("login-form");
 const loginButton = document.getElementById("login-submit");
@@ -83,9 +83,26 @@ form.addEventListener("submit", (event) => {
         return;
     }
 
-    // TODO: Integrate the real login flow here in a future task.
+    // Demo: Không thực hiện xác thực với máy chủ, chỉ lưu thông tin người dùng vào localStorage.
+    loginButton.disabled = true;
+    try {
+        localStorage.setItem(STORAGE_KEYS.user, JSON.stringify({
+            name: "Đinh Ngọc Hoa",
+            accountNumber: "1023456789",
+            phone: "0862123456",
+            email: "524K0031@gmail.com",
+            balance: 10000000,
+            isLoggedIn: true
+        }));
+    } catch {
+        statusMessage.classList.add("status-message--error");
+        setMessage(statusMessage, "loginSessionError");
+        loginButton.disabled = false;
+        return;
+    }
 
-    setMessage(statusMessage, "loginPending");
+    inputs.password.value = "";
+    window.location.replace(PAGE_PATHS.homepage);
 });
 
 const passwordToggle = document.getElementById("password-toggle");

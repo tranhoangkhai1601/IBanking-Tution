@@ -1,10 +1,15 @@
-import "./components/auth-brand.js";
-import "./components/language-switch.js";
+import "../components/auth-brand.js";
+import "../components/language-switch.js";
 
-import { APP_CONFIG } from "../config/config.js";
+import { APP_CONFIG, PAGE_PATHS } from "../../config/config.js";
 import { validateOtp } from "./auth-validation.js";
-import { initI18n, t, setMessage } from "./i18n.js";
-import { readRecoveryRecipient } from "./recovery-storage.js";
+import { initI18n, t, setMessage } from "../../i18n/i18n.js";
+import { advanceRecoveryFlow, requireRecoveryStep } from "./recovery-storage.js";
+
+const recovery = requireRecoveryStep("otp");
+window.addEventListener("pageshow", (event) => {
+    if (event.persisted) requireRecoveryStep("otp");
+});
 
 const form = document.getElementById("otp-form");
 const inputGroup = document.getElementById("otp-inputs");
@@ -48,7 +53,7 @@ renderOtpTimer();
 const otpLength = APP_CONFIG.otpLength;
 const description = document.getElementById("otp-description");
 
-const maskedRecipient = readRecoveryRecipient();
+const maskedRecipient = recovery?.maskedRecipient;
 
 inputGroup.style.setProperty("--otp-length", String(otpLength));
 
@@ -211,10 +216,16 @@ form.addEventListener("submit", (event) => {
         return;
     }
 
-    // TODO: Integrate real OTP verification in a future task.
+    // Khi nối backend, chỉ chuyển bước sau khi server xác minh OTP.
+    if (!requireRecoveryStep("otp")) return;
+    if (!advanceRecoveryFlow()) {
+        statusMessage.classList.add("status-message--error");
+        setMessage(statusMessage, "recoveryFlowError");
+        return;
+    }
 
-    setMessage(statusMessage, "otpPending");
-    window.location.assign("./reset-password.html");
+    submitButton.disabled = true;
+    window.location.assign(PAGE_PATHS.resetPassword);
 });
 
 resendButton.addEventListener("click", () => {
@@ -255,7 +266,7 @@ function renderOtpLanguage() {
     }
 }
 
-const languageReady = await initI18n({
+const languageReady = recovery && await initI18n({
     titleKey: "otpPageTitle",
     statusElement: statusMessage,
     onChange: renderOtpLanguage
