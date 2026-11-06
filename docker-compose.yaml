@@ -76,6 +76,28 @@ services:
     restart:
       unless-stopped
 
+  payment_service:
+    build: 
+      context: ./src/services/payment-service/app
+      dockerfile: Dockerfile
+    container_name: payment_service
+    volumes:
+      - ./src/services/payment-service/app:/app
+    #TODO: Remove in the future
+    ports:
+      - "8082:8080"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/payment_db
+      - PYTHONDONTWRITEBYTECODE=1
+    depends_on:
+      postgres:
+        - condition: service_healthy
+    networks:
+      - ibanking_network
+    restart:
+      unless-stopped
+
+
 
   redis:
     image: redis:8.4-alpine
