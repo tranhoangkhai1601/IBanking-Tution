@@ -1,7 +1,7 @@
 import { APP_CONFIG } from "../../config/config.js";
 import { t } from "../../i18n/i18n.js";
 
-export const AUTH_MESSAGES = Object.freeze({
+const AUTH_MESSAGES = Object.freeze({
   get identifierRequired() {
     return t("identifierRequired");
   },
@@ -51,7 +51,7 @@ export function validateIdentifier(value) {
   return "";
 }
 
-export function validatePassword(password) {
+function validatePassword(password) {
   if (password.length === 0) {
     return AUTH_MESSAGES.passwordRequired;
   }

@@ -23,18 +23,10 @@ const otpTimeElement = document.getElementById("otp-time");
 
 resendButton.disabled = true;
 
-// Giá trị mẫu để xem giao diện, đơn vị giây.
-let otpRemainingSeconds = 90;
-// Hiên thị thời gian còn lại để nhập OTP, ẩn nếu không có giá trị.
-function renderOtpTimer() {
-    if (otpRemainingSeconds === null) {
-        otpExpiryElement.hidden = true;
-        return;
-    }
-
+function renderOtpTimer(remainingSeconds) {
     const totalSeconds = Math.max(
         0,
-        Math.floor(otpRemainingSeconds)
+        Math.floor(remainingSeconds)
     );
 
     const minutes = String(
@@ -48,7 +40,8 @@ function renderOtpTimer() {
     otpTimeElement.textContent = `${minutes}:${seconds}`;
     otpExpiryElement.hidden = false;
 }
-renderOtpTimer();
+// Khi nối backend, tính thời gian còn lại từ mốc hết hạn trong phản hồi và cập nhật đồng hồ.
+renderOtpTimer(90);
 
 const otpLength = APP_CONFIG.otpLength;
 const description = document.getElementById("otp-description");
@@ -62,6 +55,7 @@ let hasSubmitted = false;
 const otpInputs = Array.from({ length: otpLength }, (_, index) => {
     const input = document.createElement("input");
 
+    input.className = "input-field";
     input.type = "text";
     input.name = `otp-digit-${index + 1}`;
     input.inputMode = "numeric";
@@ -216,7 +210,8 @@ form.addEventListener("submit", (event) => {
         return;
     }
 
-    // Khi nối backend, chỉ chuyển bước sau khi server xác minh OTP.
+    // Khi nối backend, gửi mã OTP cùng mã yêu cầu khôi phục đến API xác minh.
+    // Chỉ chuyển sang đặt lại mật khẩu sau khi máy chủ xác nhận mã.
     if (!requireRecoveryStep("otp")) return;
     if (!advanceRecoveryFlow()) {
         statusMessage.classList.add("status-message--error");
@@ -233,8 +228,7 @@ resendButton.addEventListener("click", () => {
         return;
     }
 
-    // TODO: Integrate the real resend OTP request in a future task.
-
+    // Khi nối backend, gọi API gửi lại OTP và cập nhật thời hạn theo phản hồi mới.
     setMessage(statusMessage, "resendPending");
 });
 

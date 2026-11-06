@@ -97,7 +97,7 @@ function clearResetError() {
     statusMessage.hidden = true;
 }
 
-// Chỉ gọi khi server trả về lỗi tương ứng.
+// Điểm hiển thị lỗi từ API đặt lại mật khẩu.
 export function showResetError(key = "resetServerError") {
     if (isComplete) {
         return;
@@ -107,7 +107,7 @@ export function showResetError(key = "resetServerError") {
     statusMessage.hidden = false;
 }
 
-// Chỉ gọi sau khi server xác nhận đã đổi mật khẩu.
+// Điểm hiển thị thành công sau khi API xác nhận đã đổi mật khẩu.
 export function showResetSuccess() {
     if (isComplete || submitButton.disabled || !requireRecoveryStep("reset")) {
         return;
@@ -178,15 +178,9 @@ form.addEventListener("submit", (event) => {
         return;
     }
 
-    // Demo UI: hiển thị màn hình thành công khi dữ liệu đúng định dạng.
-    // TODO: Khi có backend, chỉ gọi hàm này sau phản hồi thành công từ server.
+    // Khi nối backend, gửi mật khẩu mới cùng thông tin xác minh bước OTP đến API đặt lại mật khẩu.
+    // Gọi showResetSuccess() sau khi thành công, hoặc showResetError() với khóa bản dịch phù hợp khi có lỗi.
     showResetSuccess();
-    //
-    // Server báo mật khẩu đã được sử dụng:
-    // showResetError("passwordReused");
-    //
-    // Server báo lỗi chung:
-    // showResetError("resetServerError");
 });
 
 const languageReady = recovery && await initI18n({
