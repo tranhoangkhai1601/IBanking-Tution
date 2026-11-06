@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="./i18n/i18n-boot.js"></script>
+    <title>IBanking-Tution</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/dashboard.css">
+    <link rel="stylesheet" href="./css/profile.css">
+  </head>
+
+  <body class="dashboard-page">
+    <div class="app-container">
+      <header class="header-bar">
+        <menu-toggle controls="dashboard-menu"></menu-toggle>
+        <div class="header-identity">
+          <auth-brand class="dashboard-brand" variant="compact">
+            <span class="brand__name">iBanking</span>
+          </auth-brand>
+          <h1 class="header-title" data-i18n="dashboardProfile">Profile</h1>
+        </div>
+        <div class="header-actions">
+          <div class="user-badge" id="user-display" hidden>
+            <span class="user-name"></span>
+          </div>
+          <language-switch></language-switch>
+          <div class="auth-buttons">
+            <button type="button" id="btn-signin" class="primary-button btn-signin-nav"
+              data-i18n="dashboardSignIn" disabled>Sign in</button>
+            <button type="button" id="btn-logout" class="btn-logout-nav"
+              data-i18n="dashboardLogout" hidden disabled>Logout</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="main-body">
+        <div id="dashboard-menu" class="sidebar-panel">
+          <nav class="sidebar-menu" aria-label="Main navigation" data-i18n-aria-label="dashboardNavigation">
+            <a href="./homepage.html" class="nav-item" data-i18n="dashboardHome">Home</a>
+            <a href="./transaction.html" class="nav-item auth-only" data-i18n="dashboardPayTuition" hidden>Pay tuition</a>
+            <a href="./profile.html" class="nav-item active auth-only" aria-current="page"
+              data-i18n="dashboardProfile" hidden>Profile</a>
+          </nav>
+        </div>
+
+        <main class="content-area">
+          <p id="dashboard-i18n-status" class="status-message status-message--error" role="alert"></p>
+          <div class="dashboard-layout" id="profile-content" hidden>
+            <section class="dashboard-card section-card" aria-labelledby="personal-title">
+              <div class="profile-section-heading">
+                <h2 id="personal-title" class="section-title" data-i18n="profilePersonalTitle">Personal information</h2>
+                <button type="button" id="profile-edit" class="outline-button profile-button" data-i18n="profileEdit">Edit</button>
+              </div>
+              <dl class="profile-fields">
+                <div class="profile-identity">
+                  <dt>
+                    <span id="profile-avatar" class="profile-avatar" aria-hidden="true"></span>
+                    <span data-i18n="dashboardFullName">Full name:</span>
+                  </dt>
+                  <dd id="profile-name">—</dd>
+                </div>
+                <div>
+                  <dt data-i18n="dashboardEmail">Email:</dt>
+                  <dd id="profile-email">—</dd>
+                </div>
+                <div>
+                  <dt data-i18n="dashboardPhone">Phone number:</dt>
+                  <dd id="profile-phone">—</dd>
+                </div>
+              </dl>
+            </section>
+
+            <section aria-labelledby="accounts-title">
+              <h2 id="accounts-title" class="section-title profile-accounts-title" tabindex="-1"
+                data-i18n="dashboardAccounts">Accounts</h2>
+              <p id="profile-demo-note" class="profile-demo-note" data-i18n="dashboardSampleAccountDetails" hidden>
+                Some account details are sample data.
+              </p>
+              <ul id="profile-accounts" class="profile-account-grid" role="list" hidden></ul>
+              <div id="profile-empty" class="dashboard-card section-card" hidden>
+                <p class="status-message" data-i18n="dashboardNoAccounts">No accounts yet.</p>
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <dialog id="profile-edit-dialog" class="app-dialog" aria-labelledby="profile-edit-title">
+      <form id="profile-edit-form" class="profile-dialog-form">
+        <h2 id="profile-edit-title" class="section-title" data-i18n="profileEditTitle">Edit personal information</h2>
+        <label for="profile-edit-name" data-i18n="dashboardFullName">Full name:</label>
+        <input id="profile-edit-name" name="name" class="input-field" autocomplete="name" required
+          pattern=".*\S.*" autofocus>
+        <label for="profile-edit-email" data-i18n="dashboardEmail">Email:</label>
+        <input id="profile-edit-email" name="email" class="input-field" type="email" autocomplete="email">
+        <label for="profile-edit-phone" data-i18n="dashboardPhone">Phone number:</label>
+        <input id="profile-edit-phone" name="phone" class="input-field" type="tel" autocomplete="tel">
+        <p class="profile-preview-note" data-i18n="profilePreviewNote">Preview changes reset when you reload the page.</p>
+        <div class="profile-dialog-actions">
+          <button class="outline-button profile-button" id="profile-edit-cancel" type="button"
+            data-i18n="profileCancel">Cancel</button>
+          <button class="primary-button" type="submit" data-i18n="profileSave">Save changes</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="profile-delete-dialog" class="app-dialog" aria-labelledby="profile-delete-title"
+      aria-describedby="profile-delete-message">
+      <form id="profile-delete-form" class="profile-dialog-form" method="dialog">
+        <h2 id="profile-delete-title" class="section-title" data-i18n="profileDelete">Delete account</h2>
+        <p id="profile-delete-message"></p>
+        <p class="profile-preview-note" data-i18n="profilePreviewNote">Preview changes reset when you reload the page.</p>
+        <div class="profile-dialog-actions">
+          <button class="outline-button profile-button" type="submit" value="cancel"
+            data-i18n="profileCancel" autofocus>Cancel</button>
+          <button class="outline-button profile-button profile-button--danger" type="submit" value="delete"
+            data-i18n="profileDelete">Delete account</button>
+        </div>
+      </form>
+    </dialog>
+
+    <template id="profile-account-template">
+      <li class="dashboard-card section-card profile-account">
+        <div class="profile-account-heading">
+          <div>
+            <h3 data-account-title></h3>
+            <p class="profile-account-type" data-account-type hidden></p>
+          </div>
+          <span class="account-status" data-account-status></span>
+        </div>
+        <dl class="profile-fields profile-account-fields">
+          <div class="profile-balance">
+            <dt data-i18n="dashboardBalance">Balance:</dt>
+            <dd data-account-balance></dd>
+          </div>
+          <div>
+            <dt data-i18n="profileOpened">Opened on:</dt>
+            <dd data-account-date></dd>
+          </div>
+        </dl>
+        <p class="profile-account-description" data-account-description></p>
+        <div class="profile-account-actions">
+          <button type="button" class="outline-button profile-button profile-button--danger"
+            data-i18n="profileDelete">Delete account</button>
+        </div>
+      </li>
+    </template>
+
+    <script type="module" src="./js/dashboard/profile.js"></script>
+  </body>
+
+</html>

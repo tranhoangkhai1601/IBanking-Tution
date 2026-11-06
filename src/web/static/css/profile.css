@@ -1,0 +1,187 @@
+.profile-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr) minmax(0, 0.8fr);
+  align-items: center;
+  gap: var(--space-5);
+  overflow-wrap: anywhere;
+}
+
+.profile-fields dt {
+  margin-bottom: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.profile-fields dd {
+  font-weight: 700;
+}
+
+.profile-identity {
+  position: relative;
+  display: flex;
+  min-height: 52px;
+  flex-direction: column;
+  justify-content: center;
+  padding-inline-start: calc(52px + var(--space-3));
+}
+
+.profile-avatar {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 0;
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  transform: translateY(-50%);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--canvas);
+  color: var(--color-primary);
+  font-family: var(--font-family-heading);
+  font-weight: 800;
+}
+
+.profile-identity dd {
+  font-size: 18px;
+}
+
+.profile-section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.profile-section-heading .section-title,
+.profile-dialog-form .section-title {
+  margin: 0;
+}
+
+.profile-accounts-title {
+  margin-bottom: var(--space-4);
+}
+
+.profile-demo-note {
+  margin-bottom: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.profile-account-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: var(--space-4);
+  list-style: none;
+}
+
+.profile-account {
+  justify-content: flex-start;
+  gap: var(--space-4);
+}
+
+.profile-account-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.profile-account-heading h3 {
+  color: var(--navy-950);
+  font-family: var(--font-family-heading);
+  font-size: 18px;
+}
+
+.profile-account-type,
+.profile-preview-note {
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.profile-account-fields {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-4);
+  font-variant-numeric: tabular-nums;
+}
+
+.profile-balance {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--canvas);
+}
+
+.profile-balance dd {
+  color: var(--navy-950);
+  font-family: var(--font-family-heading);
+  font-size: clamp(20px, 3vw, 26px);
+  font-weight: 800;
+}
+
+.profile-account-description {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.profile-account-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+}
+
+.profile-button {
+  background: var(--color-surface);
+}
+
+.profile-button--danger {
+  color: var(--color-error);
+}
+
+.profile-button--danger:hover {
+  background: var(--color-surface-error);
+  border-color: currentColor;
+}
+
+.profile-dialog-form {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.profile-dialog-form label {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.profile-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.profile-dialog-actions .primary-button {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  font-size: 14px;
+}
+
+#profile-empty .status-message {
+  margin: 0;
+}
+
+@media (max-width: 850px) {
+  .profile-fields:not(.profile-account-fields) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+  }
+}
