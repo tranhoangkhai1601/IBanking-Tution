@@ -78,7 +78,7 @@ services:
 
   payment_service:
     build: 
-      context: ./src/services/payment-service/app
+      context: ./src/services/payment-service
       dockerfile: Dockerfile
     container_name: payment_service
     volumes:
@@ -91,7 +91,7 @@ services:
       - PYTHONDONTWRITEBYTECODE=1
     depends_on:
       postgres:
-        - condition: service_healthy
+        condition: service_healthy
     networks:
       - ibanking_network
     restart:
