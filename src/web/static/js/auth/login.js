@@ -83,7 +83,8 @@ form.addEventListener("submit", (event) => {
         return;
     }
 
-    // Demo: Không thực hiện xác thực với máy chủ, chỉ lưu thông tin người dùng vào localStorage.
+    // Khi nối backend, gửi thông tin đăng nhập đến API xác thực và chỉ chuyển trang sau khi máy chủ tạo phiên.
+    // Thay hồ sơ mẫu bên dưới bằng thông tin khách hàng từ phiên đã xác thực.
     loginButton.disabled = true;
     try {
         localStorage.setItem(STORAGE_KEYS.user, JSON.stringify({

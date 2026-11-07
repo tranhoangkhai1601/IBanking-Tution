@@ -85,9 +85,8 @@ form.addEventListener("submit", (event) => {
     return;
   }
 
-  // Chuyển trang để xem giao diện OTP.
-  // TODO: Khi có backend, chỉ chuyển sau khi yêu cầu gửi mã được xử lý.
-
+  // Khi nối backend, gửi email hoặc số điện thoại đến API yêu cầu OTP.
+  // Chuyển bước sau khi API chấp nhận yêu cầu và dùng thông tin người nhận đã che từ phản hồi.
   const maskedRecipient = maskIdentifier(identifierInput.value);
 
   if (!startRecoveryFlow(maskedRecipient)) {

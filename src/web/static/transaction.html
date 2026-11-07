@@ -8,6 +8,7 @@
         <title>IBanking-Tution</title>
         <link rel="stylesheet" href="./css/style.css">
         <link rel="stylesheet" href="./css/dashboard.css">
+        <link rel="stylesheet" href="./css/transaction.css">
     </head>
 
     <body class="dashboard-page">
@@ -117,8 +118,8 @@
                             <div class="balance-grid">
                                 <div class="balance-item">
                                     <label data-i18n="dashboardAvailableBalance">Available balance:</label>
-                                    <div class="amount" id="user-balance">0
-                                        VND</div>
+                                    <div class="amount" id="user-balance">—</div>
+                                    <p id="payment-account-number" class="payment-account-number" hidden></p>
                                 </div>
                                 <div class="balance-item">
                                     <label data-i18n="dashboardAmountToPay">Amount to pay:</label>
@@ -129,6 +130,13 @@
                             <p id="balance-warning"
                                 class="status-message status-message--error balance-warning"
                                 role="status" aria-atomic="true"></p>
+                            <div class="info-group payment-description">
+                                <label for="payment-description" data-i18n="dashboardPaymentDescription">
+                                    Description (optional)
+                                </label>
+                                <textarea id="payment-description" class="input-field" rows="3" maxlength="500"
+                                    disabled></textarea>
+                            </div>
                         </section>
 
                         <section class="dashboard-card section-card">

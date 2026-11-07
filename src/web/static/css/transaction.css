@@ -1,0 +1,184 @@
+/* Bố cục tra cứu và thanh toán học phí. */
+.grid-two-col {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.tuition-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 20px;
+  overflow-wrap: anywhere;
+}
+
+.info-group {
+  margin-bottom: 16px;
+}
+
+/* Nhãn label */
+.info-group label {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+/* Làm to chữ hơn (nội dung) */
+.info-group p:not(.field__error) {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.search-box-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  margin-bottom: 16px;
+}
+
+.search-box-row .input-field {
+  flex: 1;
+}
+
+.balance-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  gap: 16px;
+}
+
+.balance-item {
+  text-align: center;
+}
+
+.balance-item label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.balance-item .amount {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--navy-950);
+  margin-top: 6px;
+}
+
+.payment-account-number {
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.payment-description {
+  margin: var(--space-5) 0 0;
+}
+
+.payment-description textarea {
+  display: block;
+  width: 100%;
+  resize: vertical;
+}
+
+#tuition-amount,
+#summary-tuition-amount {
+  color: var(--color-primary);
+}
+
+#tuition-amount {
+  font-size: 20px;
+}
+
+.confirm-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 28px;
+}
+
+.terms-box {
+  flex: 1;
+  background-color: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  padding: 18px 24px;
+  border-radius: var(--radius-control);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  user-select: none;
+}
+
+.terms-box:hover {
+  background-color: var(--canvas);
+  border-color: var(--color-primary);
+}
+
+.terms-box:has(input[type="checkbox"]:checked) {
+  background-color: var(--canvas);
+  border-color: var(--color-primary);
+  color: var(--navy-950);
+}
+
+.terms-box input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+}
+
+.btn-submit {
+  min-width: 240px;
+}
+
+.balance-warning:not(:empty),
+.payment-message:not(:empty) {
+  margin: var(--space-4) 0 0;
+}
+
+#lookup-message:empty {
+  margin: 0;
+}
+
+/* Tablet và cửa sổ hẹp */
+@media (max-width: 1050px) {
+  .grid-two-col {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .confirm-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .btn-submit {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .terms-box,
+  .btn-submit {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-box-row {
+    flex-direction: column;
+  }
+
+  .balance-item .amount {
+    font-size: 20px;
+  }
+}

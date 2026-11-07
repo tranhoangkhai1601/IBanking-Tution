@@ -33,7 +33,7 @@ function saveRecoveryFlow(flow) {
     }
 }
 
-// Trạng thái này điều khiển các bước demo trong cùng một tab.
+// Trạng thái này điều khiển các bước demo trong một tab. Khi nối backend, máy chủ xác thực quyền chuyển bước.
 export function startRecoveryFlow(maskedRecipient) {
     return saveRecoveryFlow({ step: "otp", maskedRecipient });
 }

@@ -1,5 +1,6 @@
 import { STORAGE_KEYS } from '../../config/config.js';
-import { initDashboard, getUser, formatVND } from './dashboard-shell.js';
+import { formatVND, getUser, initDashboard } from './dashboard-shell.js';
+import { getAccountKey, getCustomerAccounts, readStoredTransactionHistory } from './customer-accounts.js';
 import { setMessage, t } from '../../i18n/i18n.js';
 
 const mockTuitionDatabase = {
@@ -11,71 +12,67 @@ const mockTuitionDatabase = {
 };
 
 let currentTuition = null;
-let userBalance = 0;
+let paymentAccount = null;
 let isProcessing = false;
+const studentIdInput = document.getElementById('mssv-input');
+const searchButton = document.getElementById('btn-search');
+const termsCheckbox = document.getElementById('chk-terms');
+const confirmButton = document.getElementById('btn-confirm-tx');
+const descriptionInput = document.getElementById('payment-description');
 
 function renderTransactionPageAuth(isLoggedIn, user) {
   const payerNameEl = document.getElementById('payer-name');
   const payerPhoneEl = document.getElementById('payer-phone');
   const payerEmailEl = document.getElementById('payer-email');
   const userBalanceEl = document.getElementById('user-balance');
+  const paymentAccountNumber = document.getElementById('payment-account-number');
 
-  const mssvInput = document.getElementById('mssv-input');
-  const btnSearch = document.getElementById('btn-search');
-  const chkTerms = document.getElementById('chk-terms');
-  const btnLogout = document.getElementById('btn-logout');
-  if (btnLogout) btnLogout.disabled = isProcessing;
-
-  if (isLoggedIn && user) {
-    if (payerNameEl) payerNameEl.innerText = user.name ?? '-';
-    if (payerPhoneEl) payerPhoneEl.innerText = user.phone ?? '-';
-    if (payerEmailEl) payerEmailEl.innerText = user.email ?? '-';
-    userBalance = user.balance ?? 0;
-    if (userBalanceEl) userBalanceEl.innerText = formatVND(userBalance);
-
-    if (mssvInput) mssvInput.disabled = isProcessing;
-    if (btnSearch) btnSearch.disabled = isProcessing;
-    if (chkTerms) chkTerms.disabled = isProcessing;
-    renderTuitionDetails();
-    validateTransactionState();
-  } else {
-    if (payerNameEl) payerNameEl.innerText = '-';
-    if (payerPhoneEl) payerPhoneEl.innerText = '-';
-    if (payerEmailEl) payerEmailEl.innerText = '-';
-    userBalance = 0;
-    if (userBalanceEl) userBalanceEl.innerText = formatVND(0);
-
-    if (mssvInput) {
-      mssvInput.value = '';
-      mssvInput.disabled = true;
-    }
-    if (btnSearch) btnSearch.disabled = true;
-    if (chkTerms) chkTerms.disabled = true;
-
-    resetPaymentState();
+  const payer = isLoggedIn ? user : null;
+  const selectedAccount = payer ? getCustomerAccounts(payer).selectedAccount : null;
+  if (getAccountKey(paymentAccount) !== getAccountKey(selectedAccount)) {
+    termsCheckbox.checked = false;
   }
+  paymentAccount = selectedAccount;
+
+  payerNameEl.textContent = payer?.name ?? '-';
+  payerPhoneEl.textContent = payer?.phone ?? '-';
+  payerEmailEl.textContent = payer?.email ?? '-';
+  userBalanceEl.textContent = formatVND(paymentAccount?.balance);
+  paymentAccountNumber.hidden = !paymentAccount?.accountNumber;
+  paymentAccountNumber.textContent = paymentAccount?.accountNumber ?? '';
+
+  const formDisabled = !payer || isProcessing;
+  document.getElementById('btn-logout').disabled = isProcessing;
+  studentIdInput.disabled = formDisabled;
+  searchButton.disabled = formDisabled;
+  descriptionInput.disabled = formDisabled;
+  termsCheckbox.disabled = formDisabled || !paymentAccount;
+
+  if (!payer) {
+    studentIdInput.value = '';
+    resetPaymentState();
+    return;
+  }
+
+  renderTuitionDetails();
+  validateTransactionState();
 }
 
 function setLookupMessage(key) {
   const message = document.getElementById('lookup-message');
-  const input = document.getElementById('mssv-input');
-  if (message) setMessage(message, key);
-  if (input) input.setAttribute('aria-invalid', String(Boolean(key)));
+  setMessage(message, key);
+  studentIdInput.setAttribute('aria-invalid', String(Boolean(key)));
 }
 
 function setPaymentMessage(key, isError = false, values) {
   const message = document.getElementById('payment-message');
-  if (!message) return;
   message.classList.toggle('status-message--error', isError);
   setMessage(message, key, values);
 }
 
-// Reset khi đổi đối tượng (ô tick và Confirm button)
 function resetPaymentState() {
   currentTuition = null;
-
-  const chkTerms = document.getElementById('chk-terms');
-  if (chkTerms) chkTerms.checked = false;
+  termsCheckbox.checked = false;
 
   renderTuitionDetails();
   setLookupMessage('');
@@ -98,17 +95,8 @@ function renderTuitionDetails() {
   };
 
   for (const [id, value] of Object.entries(details)) {
-    const element = document.getElementById(id);
-    if (element) element.innerText = value;
+    document.getElementById(id).textContent = value;
   }
-}
-
-function getStoredTransactionHistory() {
-  try {
-    const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.transactionHistory));
-    if (Array.isArray(stored)) return stored;
-  } catch (e) { }
-  return [];
 }
 
 function hasSuccessfulPayment(tuition, history) {
@@ -117,14 +105,13 @@ function hasSuccessfulPayment(tuition, history) {
 }
 
 function getStudentId() {
-  return document.getElementById('mssv-input').value.trim().toUpperCase();
+  return studentIdInput.value.trim().toUpperCase();
 }
 
 function searchTuition() {
   if (isProcessing) return;
   const mssv = getStudentId();
 
-  // reset sau mỗi lần tra cứu
   resetPaymentState();
 
   if (!mssv) {
@@ -132,6 +119,7 @@ function searchTuition() {
     return;
   }
 
+  // Khi nối backend, tra cứu học phí theo mã sinh viên và dùng số tiền, học kỳ, trạng thái từ API.
   const data = mockTuitionDatabase[mssv];
   if (!data) {
     setLookupMessage('dashboardTuitionNotFound');
@@ -139,45 +127,34 @@ function searchTuition() {
   }
 
   currentTuition = { ...data, studentId: mssv };
-  if (hasSuccessfulPayment(currentTuition, getStoredTransactionHistory())) {
+  if (hasSuccessfulPayment(currentTuition, readStoredTransactionHistory() ?? [])) {
     currentTuition.status = 'PAID';
   }
   renderTuitionDetails();
   validateTransactionState();
 }
 
-// trạng thái giao dịch (mock data tạm th)
 function validateTransactionState() {
-  const chkTerms = document.getElementById('chk-terms');
-  const btnConfirm = document.getElementById('btn-confirm-tx');
-  const warningEl = document.getElementById('balance-warning');
-  const isChecked = chkTerms ? chkTerms.checked : false;
-
   const hasTuition = currentTuition?.status === 'UNPAID' && currentTuition.amount > 0;
-  const isEnoughBalance = userBalance >= (currentTuition?.amount ?? 0);
+  const isEnoughBalance = paymentAccount && paymentAccount.balance >= (currentTuition?.amount ?? 0);
 
-  if (warningEl) {
-    setMessage(warningEl, hasTuition && !isEnoughBalance ? 'dashboardInsufficientBalance' : '');
-  }
+  let warning = '';
+  if (!paymentAccount) warning = 'dashboardNoPaymentAccount';
+  else if (hasTuition && !isEnoughBalance) warning = 'dashboardInsufficientBalance';
+  setMessage(document.getElementById('balance-warning'), warning);
 
-  if (btnConfirm) {
-    const canConfirm = !isProcessing && hasTuition && isEnoughBalance && isChecked;
-    btnConfirm.disabled = !canConfirm;
-    setMessage(btnConfirm, isProcessing ? 'dashboardProcessing' : 'dashboardConfirmTransaction');
-  }
+  const canConfirm = !isProcessing && hasTuition && isEnoughBalance && termsCheckbox.checked;
+  confirmButton.disabled = !canConfirm;
+  setMessage(confirmButton, isProcessing ? 'dashboardProcessing' : 'dashboardConfirmTransaction');
 }
 
-// Submit (Mock th)
 function submitTransaction() {
   if (isProcessing) return;
 
   const payer = getUser();
   if (!payer?.isLoggedIn) return;
 
-  const chkTerms = document.getElementById('chk-terms');
-
-  // Bảo vệ thêm (dù button đã bị disable)
-  if (!chkTerms || !chkTerms.checked) {
+  if (!termsCheckbox.checked) {
     setPaymentMessage('dashboardTermsRequired', true);
     return;
   }
@@ -194,71 +171,29 @@ function submitTransaction() {
     return;
   }
 
-  if ((payer.balance ?? 0) < tuition.amount) {
+  const { selectedAccount } = getCustomerAccounts(payer);
+  const accountKey = getAccountKey(selectedAccount);
+  if (!selectedAccount || accountKey !== getAccountKey(paymentAccount) || selectedAccount.balance < tuition.amount) {
     renderTransactionPageAuth(true, payer);
     return;
   }
 
+  const description = descriptionInput.value.trim();
   setPaymentMessage('');
   isProcessing = true;
   renderTransactionPageAuth(true, payer);
 
-  // Gỉa lập xử lý thời gian (Cần API,OTP)
-  setTimeout(() => {
+  // Khi nối backend, thay bộ hẹn giờ bằng API thanh toán, gửi account_id và thông tin khoản học phí đã tra cứu.
+  // Máy chủ kiểm tra quyền dùng tài khoản, số dư và giao dịch trùng; xác minh OTP nếu luồng thanh toán yêu cầu.
+  setTimeout(async () => {
     try {
-      const user = getUser();
-      if (!user?.isLoggedIn || user.accountNumber !== payer.accountNumber) {
-        resetPaymentState();
-        setPaymentMessage('dashboardSessionChanged', true);
-        return;
+      const finish = () => completePayment(payer.accountNumber, accountKey, tuition, description);
+      if (navigator.locks) {
+        await navigator.locks.request(STORAGE_KEYS.transactionHistory, finish);
+      } else {
+        finish();
       }
-
-      const history = getStoredTransactionHistory();
-      if (hasSuccessfulPayment(tuition, history)) {
-        currentTuition = { ...tuition, status: 'PAID' };
-        renderTuitionDetails();
-        setPaymentMessage('dashboardAlreadyPaid');
-        return;
-      }
-
-      const balance = user.balance ?? 0;
-      if (balance < tuition.amount) {
-        return;
-      }
-
-      const remainingBalance = balance - tuition.amount;
-      const today = new Date();
-      const dateStr = String(today.getDate()).padStart(2, '0') + '/' +
-        String(today.getMonth() + 1).padStart(2, '0') + '/' +
-        today.getFullYear();
-
-      const newTx = {
-        date: dateStr,
-        content: tuition.name,
-        studentId: tuition.studentId,
-        semester: tuition.semester,
-        amount: -tuition.amount,
-        status: 'Success'
-      };
-
-      localStorage.setItem(STORAGE_KEYS.user, JSON.stringify({ ...user, balance: remainingBalance }));
-      try {
-        localStorage.setItem(STORAGE_KEYS.transactionHistory, JSON.stringify([newTx, ...history]));
-      } catch (error) {
-        localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(user));
-        throw error;
-      }
-
-      setPaymentMessage('dashboardPaymentSuccess', false, {
-        student: tuition.name,
-        amount: formatVND(tuition.amount),
-        balance: formatVND(remainingBalance)
-      });
-
-      currentTuition = { ...tuition, status: 'PAID' };
-      chkTerms.checked = false;
-      renderTuitionDetails();
-    } catch (error) {
+    } catch {
       setPaymentMessage('dashboardPaymentError', true);
     } finally {
       isProcessing = false;
@@ -268,6 +203,68 @@ function submitTransaction() {
   }, 800);
 }
 
+function completePayment(payerKey, paymentAccountKey, tuition, description) {
+  const user = getUser();
+  if (!user?.isLoggedIn || user.accountNumber !== payerKey) {
+    resetPaymentState();
+    setPaymentMessage('dashboardSessionChanged', true);
+    return;
+  }
+
+  const storedHistory = readStoredTransactionHistory();
+  if (storedHistory === null) {
+    setPaymentMessage('dashboardPaymentError', true);
+    return;
+  }
+
+  const history = storedHistory ?? [];
+  const { selectedAccount } = getCustomerAccounts(user, history);
+  if (getAccountKey(selectedAccount) !== paymentAccountKey) {
+    termsCheckbox.checked = false;
+    setPaymentMessage('dashboardPaymentAccountChanged', true);
+    return;
+  }
+
+  if (hasSuccessfulPayment(tuition, history)) {
+    currentTuition = { ...tuition, status: 'PAID' };
+    setPaymentMessage('dashboardAlreadyPaid');
+    return;
+  }
+
+  if (selectedAccount.balance < tuition.amount) return;
+
+  const today = new Date();
+  const dateStr = String(today.getDate()).padStart(2, '0') + '/' +
+    String(today.getMonth() + 1).padStart(2, '0') + '/' +
+    today.getFullYear();
+  const newTx = {
+    date: dateStr,
+    studentName: tuition.name,
+    description,
+    studentId: tuition.studentId,
+    semester: tuition.semester,
+    amount: -tuition.amount,
+    status: 'Success',
+    payerKey,
+    paymentAccountKey,
+    paymentAccount: {
+      accountNumber: selectedAccount.accountNumber
+    }
+  };
+
+  // Bản demo dùng cùng một bản ghi cho lịch sử và khoản trừ. Khi nối API, cập nhật theo giao dịch và số dư máy chủ trả về.
+  localStorage.setItem(STORAGE_KEYS.transactionHistory, JSON.stringify([newTx, ...history]));
+  setPaymentMessage('dashboardPaymentSuccess', false, {
+    student: tuition.name,
+    amount: formatVND(tuition.amount),
+    balance: formatVND(selectedAccount.balance - tuition.amount)
+  });
+
+  currentTuition = { ...tuition, status: 'PAID' };
+  termsCheckbox.checked = false;
+  descriptionInput.value = '';
+}
+
 const ready = await initDashboard({
   titleKey: 'dashboardPayTuition',
   render: renderTransactionPageAuth,
@@ -275,19 +272,18 @@ const ready = await initDashboard({
 });
 
 if (ready) {
-  const mssvInput = document.getElementById('mssv-input');
-  document.getElementById('btn-search').addEventListener('click', searchTuition);
-  document.getElementById('chk-terms').addEventListener('change', validateTransactionState);
-  document.getElementById('btn-confirm-tx').addEventListener('click', submitTransaction);
+  searchButton.addEventListener('click', searchTuition);
+  termsCheckbox.addEventListener('change', validateTransactionState);
+  confirmButton.addEventListener('click', submitTransaction);
 
-  mssvInput.addEventListener('input', function () {
+  studentIdInput.addEventListener('input', () => {
     if (isProcessing) return;
-    const cleaned = this.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-    if (cleaned !== this.value) this.value = cleaned;
+    const cleaned = studentIdInput.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    if (cleaned !== studentIdInput.value) studentIdInput.value = cleaned;
     resetPaymentState();
   });
 
-  mssvInput.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') searchTuition();
+  studentIdInput.addEventListener('keydown', event => {
+    if (event.key === 'Enter') searchTuition();
   });
 }

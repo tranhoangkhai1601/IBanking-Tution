@@ -1,0 +1,216 @@
+/* Danh sách tài khoản trên Trang chủ. */
+.home-accounts-card,
+.history-card {
+  padding: 24px;
+}
+
+/* Bố cục hai cột */
+.home-content-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.home-account-list {
+  list-style: none;
+}
+
+.home-account-list--scrollable {
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding-inline-end: var(--space-2);
+}
+
+.home-account-list--scrollable:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.home-account-list li {
+  display: grid;
+  gap: var(--space-1);
+  padding-block: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  overflow-wrap: anywhere;
+}
+
+.home-account-list strong {
+  color: var(--navy-950);
+}
+
+.home-account-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-2);
+}
+
+.home-account-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.home-account-select {
+  grid-column: 2;
+  padding: var(--space-1) var(--space-2);
+  border-color: var(--color-primary);
+  font-size: 13px;
+}
+
+.home-account-select[aria-pressed="true"] {
+  background: var(--color-primary);
+  color: var(--color-surface);
+}
+
+.home-account-select:disabled {
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.home-account-balance,
+.home-accounts-note {
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.home-account-balance strong {
+  display: block;
+  color: var(--blue-500);
+  font-variant-numeric: tabular-nums;
+}
+
+.home-accounts-card .status-message {
+  margin: 0;
+}
+
+/* Lịch sử giao dịch */
+
+.history-card .section-title {
+  margin-bottom: 20px;
+}
+
+/* Bảng lịch sử giao dịch */
+#history-container {
+  overflow: auto;
+}
+
+.history-table {
+  width: 100%;
+  min-width: 28rem;
+  border-collapse: collapse;
+}
+
+.history-table th,
+.history-table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 15px;
+}
+
+.history-table th {
+  position: sticky;
+  top: 0;
+  background-color: var(--canvas);
+  font-weight: 700;
+  color: var(--navy-950);
+}
+
+.history-table td {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.history-table .history-amount--debit {
+  color: var(--color-error);
+  font-weight: 700;
+}
+
+.history-table .history-amount--credit {
+  color: #087b5b;
+  font-weight: 700;
+}
+
+.history-payment-account {
+  min-width: 8rem;
+  overflow-wrap: anywhere;
+}
+
+.history-detail-button {
+  padding: var(--space-1) var(--space-2);
+  white-space: nowrap;
+}
+
+.history-detail-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.history-detail-fields dt {
+  margin-bottom: var(--space-1);
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.history-detail-fields dd {
+  font-weight: 600;
+}
+
+.history-detail-wide {
+  grid-column: 1 / -1;
+}
+
+.history-detail-note {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.history-detail-note dd {
+  font-weight: 400;
+  white-space: pre-wrap;
+}
+
+.history-detail-dialog form {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-5);
+}
+
+.status-pending {
+  color: #946200;
+  font-weight: 700;
+}
+
+.status-failed {
+  color: var(--color-error);
+  font-weight: 700;
+}
+
+#history-container .status-message a {
+  color: var(--color-primary);
+}
+
+@media (max-width: 1050px) {
+  .home-content-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 760px) {
+  .home-accounts-card,
+  .history-card {
+    padding: 16px;
+  }
+
+  .history-table th,
+  .history-table td {
+    padding: 12px;
+  }
+}
