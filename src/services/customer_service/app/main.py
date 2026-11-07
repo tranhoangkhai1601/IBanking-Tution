@@ -7,7 +7,7 @@ from database import async_session_local, async_engine, init_db, get_session
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     
-    init_db()
+    await init_db()
 
     async with async_session_local() as session:
         async with session.begin():

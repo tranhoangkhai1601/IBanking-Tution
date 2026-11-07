@@ -25,8 +25,15 @@ class Customers(Base):
     __tablename__ = "Customers"
 
     customer_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, server_default=func.uuidv7())
-    phone: Mapped[str] = mapped_column(String(50), unique=True)
-    email: Mapped[str] = mapped_column(String(255), unique=True)
+
+    # TODO: encrypt for AES decrypt to get plaintext
+    phone_encrypt: Mapped[str] = mapped_column(String(255))
+    email_encrypt: Mapped[str] = mapped_column(String(255))
+
+    # TODO: hash by HMAC just for look up when login
+    phone_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    email_hash: Mapped[str] = mapped_column(String(64), unique=True,index=True)
+
     full_name: Mapped[str]
     status: Mapped[bool] = mapped_column(default=True)
     language: Mapped[LanguageType] = mapped_column(Integer)
@@ -77,7 +84,7 @@ class Transaction_Lines(Base):
 
     __table_args__ = (
         Index("ix_transaction_line_extra", 'extra_data', postgresql_using='gin'),
-        Index("ix_account_history", "account_id", "create_at"),
+        Index("ix_account_history", "account_id"),
         {
             "postgresql_partition_by": "RANGE (create_at)"
         },
