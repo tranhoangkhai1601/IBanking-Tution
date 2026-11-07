@@ -17,7 +17,7 @@ clean: ## Stop and remove container - volume
 	$(COMPOSE) down -v
 
 restart:
-	
+	$(COMPOSE) restart $(s)
 
 start:
 	$(COMPOSE) start $(s)
@@ -40,4 +40,6 @@ psql: ## make psql s=db_name
 	docker exec -it postgres_db psql -U ${DB_USER} -d $(s)
 
 test:
-	docker exec -it $(s) pytest test.py
+	docker exec -it auth_service pytest test.py
+	docker exec -it customer_service pytest test.py
+	docker exec -it payment_service pytest test.py
