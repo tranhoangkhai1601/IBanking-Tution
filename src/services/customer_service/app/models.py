@@ -2,7 +2,7 @@
 from enum import IntEnum
 from datetime import datetime
 import uuid
-from sqlalchemy import func, Index, String, Integer, Float, ForeignKey
+from sqlalchemy import func, Index, String, Integer, Float, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -81,8 +81,9 @@ class Transaction_Lines(Base):
 
     create_at: Mapped[datetime] = mapped_column(primary_key=True, server_default=func.now())
     extra_data: Mapped[dict] = mapped_column(JSONB, server_default='{}')
-
+    
     __table_args__ = (
+        UniqueConstraint("transaction_id", "entry_type", "create_at"),
         Index("ix_transaction_line_extra", 'extra_data', postgresql_using='gin'),
         Index("ix_account_history", "account_id"),
         {
