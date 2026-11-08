@@ -97,7 +97,26 @@ services:
     restart:
       unless-stopped
 
-
+  tuition_service:
+    build:
+      context: ./src/services/tuition-service
+      dockerfile: Dockerfile
+    container_name: tuition_service
+    volumes:
+      - ./src/services/tuition-service/app:/app
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/tuition_db
+      - PYTHONDONTWRITEBYTECODE=1
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # TODO: Remove!! heheh
+    ports:
+      - "8083:8080"
+    networks:
+      - ibanking_network
+    restart:
+      unless-stopped
 
   redis:
     image: redis:8.4-alpine
