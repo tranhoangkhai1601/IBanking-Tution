@@ -1,8 +1,9 @@
 
 from enum import IntEnum
 from datetime import datetime
+from decimal import Decimal
 import uuid
-from sqlalchemy import func, Index, String, Integer, Float, ForeignKey, UniqueConstraint
+from sqlalchemy import func, Index, String, Integer, Float, ForeignKey, UniqueConstraint, Numeric
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -20,6 +21,11 @@ class LanguageType(IntEnum):
 class AccountType(IntEnum):
     debit = 10
     credit = 11
+
+class OutBoxStatus(IntEnum):
+    NOTSEND = 10
+    SUCCESS = 11
+    FAILED = 12
 
 class Customers(Base):
     __tablename__ = "Customers"
@@ -57,7 +63,7 @@ class Customer_Details(Base):
     account_type: Mapped[AccountType] = mapped_column(Integer, default=AccountType.credit)
     account_open_date: Mapped[datetime] = mapped_column(server_default=func.now())
 
-    balance: Mapped[float] = mapped_column(Float, default=0.0)
+    balance: Mapped[Decimal] = mapped_column(Numeric(19, 4))
     # TODO: IF have register feat in the future, change default account_active to False
     account_active: Mapped[bool] = mapped_column(default=True)
 
@@ -75,7 +81,7 @@ class Transaction_Lines(Base):
     account_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("Customer_Details.account_id"))
     transaction_id: Mapped[uuid.UUID] = mapped_column(index=True)
 
-    amount: Mapped[float] = mapped_column(Float)
+    amount: Mapped[Decimal] = mapped_column(Numeric(19, 4), default=Decimal('0.0000'))
     entry_type: Mapped[EntryTypeEnum] = mapped_column(Integer)
     description: Mapped[str]
 
@@ -90,3 +96,15 @@ class Transaction_Lines(Base):
             "postgresql_partition_by": "RANGE (create_at)"
         },
     )
+
+class Outbox_Events(Base):
+    __tablename__ = "Outbox_Events"
+
+    event_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, server_default=func.uuidv7())
+    aggregate_type: Mapped[str] = mapped_column(String(50))
+    aggregate_id: Mapped[str] = mapped_column(String(50)) 
+    event_type: Mapped[str] = mapped_column(String(50)) 
+    payload: Mapped[dict] = mapped_column(JSONB) 
+    
+    status: Mapped[OutBoxStatus] = mapped_column(Integer, default=10, index=True)
+    create_at: Mapped[datetime] = mapped_column(server_default=func.now())
