@@ -15,7 +15,10 @@ class RoleType(IntEnum):
     moderator = 3002
     bank_teller = 3003
 
-
+class Providers(IntEnum):
+    google = 3000
+    email = 3001
+    phone = 3002
 class Auth_Sessions(Base):
     __tablename__ = "Auth_Sessions"
 
@@ -35,16 +38,32 @@ class Auth_Sessions(Base):
         Index('ix_auth_sessions_extra', 'extra_data', postgresql_using='gin'),
 
         # TODO: Just enable when table have init value
-        # {
-        #     "postgresql_partition_by": "RANGE (create_at)"
-        # }
+        {
+            "postgresql_partition_by": "RANGE (create_at)"
+        }
+    )
+
+class Auth_Providers(Base):
+    __tablename__ = "Auth_Providers"
+
+    identity_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, server_default=func.uuidv7())
+    customer_id: Mapped[uuid.UUID] = mapped_column(index=True, ForeignKey="Auth_Credentials.customer_id")
+
+    # TODO: identity_hash is encrypt of Email, Phone - provider to identify which signin method
+    provider: Mapped[Providers] = mapped_column(Integer)
+    identity_hash: Mapped[str] = mapped_column(String, index=True)
+    # TODO: Use HMAC for this case :)) Remember that if you read this note
+    
+    create_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("provider", "identity_hash"),
     )
 
 class Auth_Credentials(Base):
     __tablename__ = "Auth_Credentials"
 
-    auth_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, server_default=func.uuidv7())
-    customer_id: Mapped[uuid.UUID] = mapped_column(unique=True)
+    customer_id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
     role_id: Mapped[RoleType] = mapped_column(ForeignKey("Roles.role_id"))
     password: Mapped[str | None]
     password_changed_at: Mapped[datetime | None] = mapped_column(server_default=func.now())
