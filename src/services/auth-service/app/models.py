@@ -43,22 +43,6 @@ class Auth_Sessions(Base):
         }
     )
 
-class Auth_Providers(Base):
-    __tablename__ = "Auth_Providers"
-
-    identity_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, server_default=func.uuidv7())
-    customer_id: Mapped[uuid.UUID] = mapped_column(index=True, ForeignKey="Auth_Credentials.customer_id")
-
-    # TODO: identity_hash is encrypt of Email, Phone - provider to identify which signin method
-    provider: Mapped[Providers] = mapped_column(Integer)
-    identity_hash: Mapped[str] = mapped_column(String, index=True)
-    # TODO: Use HMAC for this case :)) Remember that if you read this note
-    
-    create_at: Mapped[datetime] = mapped_column(server_default=func.now())
-
-    __table_args__ = (
-        UniqueConstraint("provider", "identity_hash"),
-    )
 
 class Auth_Credentials(Base):
     __tablename__ = "Auth_Credentials"
@@ -73,6 +57,23 @@ class Auth_Credentials(Base):
 
     __table_args__ = (
         Index('ix_auth_credential_extra', 'extra_data', postgresql_using='gin'),
+    )
+
+class Auth_Providers(Base):
+    __tablename__ = "Auth_Providers"
+
+    identity_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, server_default=func.uuidv7())
+    customer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("Auth_Credentials.customer_id"), index=True)
+
+    # TODO: identity_hash is encrypt of Email, Phone - provider to identify which signin method
+    provider: Mapped[Providers] = mapped_column(Integer)
+    identity_hash: Mapped[str] = mapped_column(String, index=True)
+    # TODO: Use HMAC for this case :)) Remember that if you read this note
+    
+    create_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("provider", "identity_hash"),
     )
 
 class Roles(Base):
