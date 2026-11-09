@@ -1,0 +1,138 @@
+# This docker-compose just for local test
+# All database in one container psql
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+
+networks:
+  ibanking_network:
+    name: ibanking_local
+    driver: bridge
+
+services:
+  postgres:
+    image: postgres:18.6
+    container_name: postgres_db
+    environment: 
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+      POSTGRES_MULTIPLE_DATABASES: ${POSTGRES_MULTIPLE_DATABASES}
+    ports:
+      - "${DB_PORT_HOST:-5433}:${DB_PORT}"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./src/infra/databases/scripts/init-multi-postgres-databases.sh:/docker-entrypoint-initdb.d/init-multi-postgres-databases.sh
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s 
+    networks: 
+      - ibanking_network
+    restart: unless-stopped
+  
+  auth_service:
+    build: 
+      context: ./src/services/auth-service
+      dockerfile: Dockerfile
+    container_name: auth_service
+    volumes:
+      - ./src/services/auth-service/app:/app
+    #TODO: Remove port in the future - Just for testing now!!!!
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/auth_db
+      - PYTHONDONTWRITEBYTECODE=1
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: 
+      - ibanking_network
+    restart: unless-stopped
+
+  customer_service:
+    build:
+      context: ./src/services/customer_service
+      dockerfile: Dockerfile
+    container_name: customer_service
+    volumes:
+      - ./src/services/customer_service/app:/app
+    #TODO: Remove in the future
+    ports:
+      - "8081:8080"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/customer_db
+      - PYTHONDONTWRITEBYTECODE=1
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ibanking_network
+    restart:
+      unless-stopped
+
+  payment_service:
+    build: 
+      context: ./src/services/payment-service
+      dockerfile: Dockerfile
+    container_name: payment_service
+    volumes:
+      - ./src/services/payment-service/app:/app
+    #TODO: Remove in the future
+    ports:
+      - "8082:8080"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/payment_db
+      - PYTHONDONTWRITEBYTECODE=1
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ibanking_network
+    restart:
+      unless-stopped
+
+  tuition_service:
+    build:
+      context: ./src/services/tuition-service
+      dockerfile: Dockerfile
+    container_name: tuition_service
+    volumes:
+      - ./src/services/tuition-service/app:/app
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/tuition_db
+      - PYTHONDONTWRITEBYTECODE=1
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # TODO: Remove!! heheh
+    ports:
+      - "8083:8080"
+    networks:
+      - ibanking_network
+    restart:
+      unless-stopped
+
+  redis:
+    image: redis:8.4-alpine
+    container_name: redis
+    command: redis-server --requirepass ${REDIS_PASS}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASS}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "6380:6379"
+    networks:
+      - ibanking_network
+    restart:
+      unless-stopped
+    
