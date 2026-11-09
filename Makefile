@@ -43,3 +43,10 @@ test:
 	docker exec -it auth_service pytest test.py
 	docker exec -it customer_service pytest test.py
 	docker exec -it payment_service pytest test.py
+	docker exec -it tuition_service pytest test.py
+
+logs:
+	docker logs auth_service
+	docker logs customer_service
+	docker logs payment_service
+	docker logs tuition_service
