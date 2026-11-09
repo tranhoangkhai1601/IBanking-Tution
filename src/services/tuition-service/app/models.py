@@ -1,6 +1,5 @@
 
-
-import datetime
+from datetime import datetime
 import uuid
 from enum import IntEnum
 from decimal import Decimal
@@ -32,7 +31,7 @@ class Tuition(Base):
     semester: Mapped[int] = mapped_column(Integer) # TODO: 1 2 3
     academic_year: Mapped[int] = mapped_column(Integer)
     status: Mapped[statusType] = mapped_column(Integer)
-    expire_at: Mapped[datetime]
+    expires_at: Mapped[datetime]
     create_at: Mapped[datetime] = mapped_column(server_default=func.now())
     update_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
 
