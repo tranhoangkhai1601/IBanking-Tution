@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="./i18n/i18n-boot.js"></script>
+    <title>IBanking-Tution</title>
+    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="./css/dashboard.css" />
+    <link rel="stylesheet" href="./css/homepage.css" />
+  </head>
+
+  <body class="dashboard-page">
+    <div class="app-container">
+      <header class="header-bar">
+        <menu-toggle controls="dashboard-menu"></menu-toggle>
+        <div class="header-identity">
+          <auth-brand class="dashboard-brand" variant="compact">
+            <span class="brand__name">iBanking</span>
+          </auth-brand>
+          <h1 class="header-title" data-i18n="dashboardHome">Home</h1>
+        </div>
+        <div class="header-actions">
+          <div class="user-badge" id="user-display" hidden>
+            <span class="user-name"></span>
+          </div>
+          <language-switch></language-switch>
+          <div class="auth-buttons">
+            <button
+              type="button"
+              id="btn-signin"
+              class="primary-button btn-signin-nav"
+              data-i18n="dashboardSignIn"
+              disabled
+            >
+              Sign in
+            </button>
+            <button
+              type="button"
+              id="btn-logout"
+              class="btn-logout-nav"
+              data-i18n="dashboardLogout"
+              hidden
+              disabled
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="main-body">
+        <div id="dashboard-menu" class="sidebar-panel">
+          <nav
+            class="sidebar-menu"
+            aria-label="Main navigation"
+            data-i18n-aria-label="dashboardNavigation"
+          >
+            <a
+              href="./index"
+              class="nav-item active"
+              aria-current="page"
+              data-i18n="dashboardHome"
+              >Home</a
+            >
+            <a
+              href="./transaction"
+              class="nav-item auth-only"
+              data-i18n="dashboardPayTuition"
+              hidden
+              >Pay tuition</a
+            >
+            <a
+              href="./profile"
+              class="nav-item auth-only"
+              data-i18n="dashboardProfile"
+              hidden
+              >Profile</a
+            >
+          </nav>
+        </div>
+
+        <main class="content-area">
+          <p
+            id="dashboard-i18n-status"
+            class="status-message status-message--error"
+            role="alert"
+          ></p>
+          <div class="dashboard-layout">
+            <div class="home-content-grid">
+              <section
+                class="dashboard-card home-accounts-card"
+                aria-labelledby="home-accounts-title"
+              >
+                <h2
+                  id="home-accounts-title"
+                  class="section-title"
+                  data-i18n="dashboardAccounts"
+                >
+                  Accounts
+                </h2>
+                <ul
+                  id="home-accounts"
+                  class="home-account-list"
+                  role="list"
+                  aria-labelledby="home-accounts-title"
+                  hidden
+                ></ul>
+                <p
+                  id="home-accounts-note"
+                  class="home-accounts-note"
+                  data-i18n="dashboardSampleAccountDetails"
+                  hidden
+                >
+                  Some account details are sample data.
+                </p>
+                <p
+                  id="home-accounts-status"
+                  class="status-message"
+                  role="status"
+                ></p>
+              </section>
+
+              <div class="dashboard-card history-card">
+                <h3
+                  id="history-title"
+                  class="section-title"
+                  data-i18n="dashboardHistory"
+                >
+                  Transaction history
+                </h3>
+                <div
+                  id="history-container"
+                  role="region"
+                  aria-labelledby="history-title"
+                  tabindex="0"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <dialog
+      id="history-detail-dialog"
+      class="app-dialog history-detail-dialog"
+      aria-labelledby="history-detail-title"
+    >
+      <h2
+        id="history-detail-title"
+        class="section-title"
+        data-i18n="dashboardHistoryDetails"
+      >
+        Transaction details
+      </h2>
+      <dl class="history-detail-fields">
+        <div>
+          <dt data-i18n="dashboardHistoryDate">Date</dt>
+          <dd id="history-detail-date"></dd>
+        </div>
+        <div>
+          <dt data-i18n="dashboardHistoryStatus">Status</dt>
+          <dd id="history-detail-status"></dd>
+        </div>
+        <div>
+          <dt data-i18n="dashboardHistoryStudent">Student</dt>
+          <dd id="history-detail-student"></dd>
+        </div>
+        <div>
+          <dt data-i18n="dashboardHistoryStudentId">Student ID</dt>
+          <dd id="history-detail-student-id"></dd>
+        </div>
+        <div>
+          <dt data-i18n="dashboardHistorySemester">Semester</dt>
+          <dd id="history-detail-semester"></dd>
+        </div>
+        <div>
+          <dt data-i18n="dashboardHistoryAmount">Amount</dt>
+          <dd id="history-detail-amount"></dd>
+        </div>
+        <div class="history-detail-wide">
+          <dt data-i18n="dashboardAccountNumber">Account number:</dt>
+          <dd id="history-detail-account"></dd>
+        </div>
+        <div class="history-detail-wide history-detail-note">
+          <dt data-i18n="dashboardHistoryDescription">Description</dt>
+          <dd id="history-detail-description"></dd>
+        </div>
+      </dl>
+      <form method="dialog">
+        <button
+          type="submit"
+          class="primary-button"
+          data-i18n="dashboardClose"
+          autofocus
+        >
+          Close
+        </button>
+      </form>
+    </dialog>
+
+    <template id="home-account-template">
+      <li>
+        <div class="home-account-controls">
+          <strong data-account-title></strong>
+          <button
+            type="button"
+            class="outline-button home-account-select"
+            aria-pressed="false"
+            data-select-account
+          ></button>
+        </div>
+        <div class="home-account-summary">
+          <p class="home-account-balance">
+            <span data-balance-label>Balance:</span>
+            <strong data-account-balance></strong>
+          </p>
+          <span class="account-status" data-account-status></span>
+        </div>
+      </li>
+    </template>
+
+    <script type="module" src="./js/dashboard/homepage.js"></script>
+  </body>
+</html>

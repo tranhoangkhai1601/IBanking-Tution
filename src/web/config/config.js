@@ -6,17 +6,17 @@ export const APP_CONFIG = Object.freeze({
   defaultLanguage: "en",
   // Số dư và số tiền giao dịch đều tính theo VND
   currencyLocale: "vi-VN",
-  currencyCode: "VND"
+  currencyCode: "VND",
 });
 
 export const PAGE_PATHS = Object.freeze({
-  homepage: "./homepage.html",
-  login: "./login.html",
-  forgotPassword: "./forgot-password.html",
+  homepage: "./index",
+  login: "./login",
+  forgotPassword: "./forgot-password",
   otp: "./otp.html",
-  resetPassword: "./reset-password.html",
-  transaction: "./transaction.html",
-  profile: "./profile.html",
+  resetPassword: "./reset-password",
+  transaction: "./transaction",
+  profile: "./profile",
 });
 
 export const STORAGE_KEYS = Object.freeze({
@@ -24,10 +24,10 @@ export const STORAGE_KEYS = Object.freeze({
   transactionHistory: "transactionHistory",
   selectedPaymentAccount: "ibanking.selectedPaymentAccount",
   recoveryFlow: "ibanking.recoveryFlow",
-  language: "ibanking.language"
+  language: "ibanking.language",
 });
 
 export const LANGUAGES = Object.freeze({
   en: "English",
-  vi: "Tiếng Việt"
+  vi: "Tiếng Việt",
 });
