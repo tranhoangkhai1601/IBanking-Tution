@@ -2,8 +2,10 @@ import uuid
 from fastapi import FastAPI, status, HTTPException
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
-from database import init_db, get_session, async_engine, AsyncSessionLocal
-from models import Auth_Credentials, Matrix_Permission, Auth_Sessions
+from databases.database import init_db, get_session, async_engine, AsyncSessionLocal
+from databases.models import Auth_Credentials, Matrix_Permission, Auth_Sessions
+from config import config
+from routers.v1.auth import authRouter
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -16,7 +18,16 @@ async def lifespan(app: FastAPI):
     yield
     await async_engine.dispose()
 
-app = FastAPI(lifespan=lifespan)
+IS_PROD = config.SERVER_ENV == "production"
+
+app = FastAPI(lifespan=lifespan,
+              title=config.PROJECT_NAME,
+              version=config.PROJECT_VERSION,
+              docs_url=None if IS_PROD else "/docs",
+              redoc_url=None if IS_PROD else "/redoc",
+              openapi_url=None if IS_PROD else "/openapi.json")
+app.include_router(router=authRouter, tags=["auth"])
+
 
 @app.get("/health", status_code=status.HTTP_200_OK)
 async def get_health():
