@@ -40,10 +40,10 @@ psql: ## make psql s=db_name
 	docker exec -it postgres_db psql -U ${DB_USER} -d $(s)
 
 test:
-	docker exec -it auth_service pytest test.py
-	docker exec -it customer_service pytest test.py
-	docker exec -it payment_service pytest test.py
-	docker exec -it tuition_service pytest test.py
+	docker exec -it auth_service python -m pytest tests/test.py -v
+	docker exec -it customer_service pytest test.py -v
+	docker exec -it payment_service pytest test.py -v
+	docker exec -it tuition_service pytest test.py -v
 
 logs:
 	docker logs auth_service
