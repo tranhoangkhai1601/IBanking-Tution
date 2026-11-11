@@ -1,4 +1,3 @@
-import uuid
 from fastapi import FastAPI, status, HTTPException
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
