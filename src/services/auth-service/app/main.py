@@ -1,9 +1,11 @@
+
 from fastapi import FastAPI, status, HTTPException
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
 from databases.database import init_db, get_session, async_engine, AsyncSessionLocal
-from databases.models import Auth_Credentials, Matrix_Permission, Auth_Sessions
+from databases.models import auth_credentials, matrix_permission, auth_sessions
 from config import config
+from databases.scripts.seed import seed_auth_db
 from routers.v1.auth import authRouter
 
 @asynccontextmanager
@@ -12,8 +14,8 @@ async def lifespan(app: FastAPI):
 
     async with AsyncSessionLocal() as session:
         async with session.begin():
-            pass
-        
+            await seed_auth_db(session)
+
     yield
     await async_engine.dispose()
 

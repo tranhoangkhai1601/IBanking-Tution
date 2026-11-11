@@ -22,8 +22,8 @@ class OutBoxStatus(IntEnum):
     FAILED = 12
     PROCESSING = 13
 
-class Auth_Sessions(Base):
-    __tablename__ = "Auth_Sessions"
+class auth_sessions(Base):
+    __tablename__ = "auth_sessions"
 
     session_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, server_default=func.uuidv7())
     customer_id: Mapped[uuid.UUID] = mapped_column(index=True)
@@ -47,11 +47,11 @@ class Auth_Sessions(Base):
     )
 
 
-class Auth_Credentials(Base):
-    __tablename__ = "Auth_Credentials"
+class auth_credentials(Base):
+    __tablename__ = "auth_credentials"
 
     customer_id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
-    role_id: Mapped[RoleType] = mapped_column(ForeignKey("Roles.role_id"))
+    role_id: Mapped[RoleType] = mapped_column(ForeignKey("roles.role_id"))
 
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     phone: Mapped[str] = mapped_column(String(20), unique=True, index=True)
@@ -66,8 +66,8 @@ class Auth_Credentials(Base):
         Index('ix_auth_credential_extra', 'extra_data', postgresql_using='gin'),
     )
 
-class Roles(Base):
-    __tablename__ = "Roles"
+class roles(Base):
+    __tablename__ = "roles"
 
     role_id: Mapped[RoleType] = mapped_column(Integer, primary_key=True)
     role_name: Mapped[str] = mapped_column(unique=True)
@@ -77,8 +77,8 @@ class Roles(Base):
         Index("ix_roles_extra", 'extra_data', postgresql_using='gin'),
     )
 
-class Features(Base):
-    __tablename__ = "Features"
+class features(Base):
+    __tablename__ = "features"
 
     feature_id: Mapped[int] = mapped_column(
         Sequence("feature_id_seq", start=3000),
@@ -88,14 +88,14 @@ class Features(Base):
     extra_data: Mapped[dict] =  mapped_column(JSONB, server_default="{}")
 
     __table_args__ = (
-        Index("ix_features_extra", 'extra_data', postgresql_using='gin'),
+        Index("ix_feature_extra", 'extra_data', postgresql_using='gin'),
     )
 
-class Matrix_Permission(Base):
-    __tablename__ = "Matrix_Permission"
+class matrix_permission(Base):
+    __tablename__ = "matrix_permission"
 
-    feature_id: Mapped[int] = mapped_column(ForeignKey("Features.feature_id"), primary_key=True)
-    role_id: Mapped[RoleType] = mapped_column(ForeignKey("Roles.role_id"), primary_key=True)
+    feature_id: Mapped[int] = mapped_column(ForeignKey("features.feature_id"), primary_key=True)
+    role_id: Mapped[RoleType] = mapped_column(ForeignKey("roles.role_id"), primary_key=True)
     permission: Mapped[int] = mapped_column(BIGINT, default=0)
     extra_data: Mapped[dict] =  mapped_column(JSONB, server_default="{}")
 
@@ -105,7 +105,7 @@ class Matrix_Permission(Base):
     )
 
 class Outbox_Events(Base):
-    __tablename__ = "Outbox_Events"
+    __tablename__ = "outbox_events"
 
     event_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, server_default=func.uuidv7())
     aggregate_type: Mapped[str] = mapped_column(String(50))
