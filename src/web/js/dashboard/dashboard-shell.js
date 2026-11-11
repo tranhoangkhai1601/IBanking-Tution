@@ -6,9 +6,9 @@ import { initI18n, t } from '../../i18n/i18n.js';
 import { isAccountStorageKey } from './customer-accounts.js';
 
 export function getUser() {
-  // Khi nối backend, lấy phiên và hồ sơ khách hàng từ API xác thực thay cho cờ isLoggedIn trong localStorage.
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.user));
+    const user = JSON.parse(localStorage.getItem(STORAGE_KEYS.user));
+    return user && typeof user === 'object' && !Array.isArray(user) ? user : null;
   } catch {
     return null;
   }
@@ -35,7 +35,7 @@ export async function initDashboard({ titleKey, render, requiresAuth = false }) 
     }
 
     userDisplay.hidden = !isLoggedIn;
-    userName.textContent = isLoggedIn ? user.name ?? '' : '';
+    userName.textContent = isLoggedIn ? user.full_name ?? user.name ?? '' : '';
     signIn.hidden = isLoggedIn;
     logout.hidden = !isLoggedIn;
     authLinks.forEach(link => { link.hidden = !isLoggedIn; });

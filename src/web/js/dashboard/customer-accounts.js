@@ -46,8 +46,16 @@ export function getAccountKey(account) {
   return account?.account_id ?? account?.accountNumber;
 }
 
+export function getAccountDisplayId(account) {
+  return account?.account_num ?? account?.accountNumber ?? account?.account_id ?? '';
+}
+
+export function getUserKey(user) {
+  return user?.customer_id ?? user?.accountNumber ?? user?.email;
+}
+
 export function canPayWithAccount(account) {
-  return account.account_active !== false && Number.isFinite(account.balance);
+  return account?.account_active !== false && Number.isFinite(account?.balance);
 }
 
 // Lớp lưu trữ demo dùng chung. Phân biệt chưa có lịch sử (undefined) và dữ liệu lỗi (null).
@@ -66,32 +74,45 @@ export function readStoredTransactionHistory() {
 }
 
 export function selectPaymentAccount(user, account) {
-  // Lựa chọn đang lưu theo số tài khoản demo. Để đồng bộ đa thiết bị, lưu account_id theo customer_id qua API.
-  localStorage.setItem(selectionPrefix + user.accountNumber, getAccountKey(account));
+  const userKey = getUserKey(user);
+  if (!userKey || !getAccountKey(account)) return;
+
+  localStorage.setItem(selectionPrefix + userKey, getAccountKey(account));
 }
 
 export function isAccountStorageKey(key) {
-  return key === null || key === STORAGE_KEYS.transactionHistory || key.startsWith(selectionPrefix);
+  return key === null ||
+    key === STORAGE_KEYS.user ||
+    key === STORAGE_KEYS.transactionHistory ||
+    key.startsWith(selectionPrefix);
 }
 
 export function getCustomerAccounts(user, history = readStoredTransactionHistory() ?? []) {
-  // Khi nối backend, tải tài khoản và số dư VND theo phiên đã xác thực; dùng account_id do máy chủ trả về.
-  if (!user.accountNumber) {
+  const userKey = getUserKey(user);
+  if (!userKey) {
     return { accounts: [], isDemo: false, selectedAccount: null };
   }
 
-  const isDemo = user.accountNumber === demoSessionAccountNumber;
-
-  const sessionAccount = {
-    accountNumber: user.accountNumber,
-    balance: user.balance
-  };
+  const hasServerAccounts = Array.isArray(user.accounts);
+  const isDemo = !hasServerAccounts && user.accountNumber === demoSessionAccountNumber;
   const [primaryAccount, ...otherAccounts] = demoAccounts;
-  const records = isDemo ? [{ ...primaryAccount, ...sessionAccount }, ...otherAccounts] : [sessionAccount];
+  const records = hasServerAccounts
+    ? user.accounts.map(account => ({
+      ...account,
+      balance: typeof account.balance === 'number'
+        ? account.balance
+        : typeof account.balance === 'string'
+          ? Number(account.balance)
+          : Number.NaN
+    }))
+    : user.accountNumber
+      ? isDemo
+        ? [{ ...primaryAccount, ...user }, ...otherAccounts]
+        : [{ accountNumber: user.accountNumber, balance: user.balance }]
+      : [];
   const debits = new Map();
-  // Chỉ trừ các khoản có mã tài khoản trong lịch sử demo. Khi nối API, dùng số dư từ máy chủ thay cho phép tính này.
   for (const payment of history) {
-    if (payment?.payerKey === user.accountNumber && payment.status === 'Success' &&
+    if (payment?.payerKey === userKey && payment.status === 'Success' &&
         payment.paymentAccountKey && Number.isFinite(payment.amount) && payment.amount < 0) {
       const key = payment.paymentAccountKey;
       debits.set(key, (debits.get(key) ?? 0) + payment.amount);
@@ -103,7 +124,12 @@ export function getCustomerAccounts(user, history = readStoredTransactionHistory
     return debit === undefined ? account : { ...account, balance: account.balance + debit };
   });
   const eligibleAccounts = accounts.filter(canPayWithAccount);
-  const savedKey = localStorage.getItem(selectionPrefix + user.accountNumber);
+  let savedKey = null;
+  try {
+    savedKey = localStorage.getItem(selectionPrefix + userKey);
+  } catch {
+    // Continue with the first eligible account if storage is unavailable.
+  }
   const selectedAccount = eligibleAccounts.find(account => getAccountKey(account) === savedKey)
     ?? eligibleAccounts[0] ?? null;
 

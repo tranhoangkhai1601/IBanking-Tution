@@ -1,6 +1,9 @@
 import { STORAGE_KEYS } from '../../config/config.js';
 import { formatVND, getUser, initDashboard } from './dashboard-shell.js';
-import { getAccountKey, getCustomerAccounts, readStoredTransactionHistory } from './customer-accounts.js';
+import {
+  getAccountDisplayId, getAccountKey, getCustomerAccounts, getUserKey,
+  readStoredTransactionHistory
+} from './customer-accounts.js';
 import { setMessage, t } from '../../i18n/i18n.js';
 
 const mockTuitionDatabase = {
@@ -34,12 +37,13 @@ function renderTransactionPageAuth(isLoggedIn, user) {
   }
   paymentAccount = selectedAccount;
 
-  payerNameEl.textContent = payer?.name ?? '-';
+  payerNameEl.textContent = payer?.full_name ?? payer?.name ?? '-';
   payerPhoneEl.textContent = payer?.phone ?? '-';
   payerEmailEl.textContent = payer?.email ?? '-';
   userBalanceEl.textContent = formatVND(paymentAccount?.balance);
-  paymentAccountNumber.hidden = !paymentAccount?.accountNumber;
-  paymentAccountNumber.textContent = paymentAccount?.accountNumber ?? '';
+  const accountDisplayId = getAccountDisplayId(paymentAccount);
+  paymentAccountNumber.hidden = !accountDisplayId;
+  paymentAccountNumber.textContent = accountDisplayId;
 
   const formDisabled = !payer || isProcessing;
   document.getElementById('btn-logout').disabled = isProcessing;
@@ -99,9 +103,10 @@ function renderTuitionDetails() {
   }
 }
 
-function hasSuccessfulPayment(tuition, history) {
-  return history.some(item => item?.studentId === tuition.studentId &&
-    item.semester === tuition.semester && item.status === 'Success');
+function hasSuccessfulPayment(tuition, history, userKey) {
+  return history.some(item => item?.payerKey === userKey &&
+    item.studentId === tuition.studentId && item.semester === tuition.semester &&
+    item.status === 'Success');
 }
 
 function getStudentId() {
@@ -127,7 +132,11 @@ function searchTuition() {
   }
 
   currentTuition = { ...data, studentId: mssv };
-  if (hasSuccessfulPayment(currentTuition, readStoredTransactionHistory() ?? [])) {
+  if (hasSuccessfulPayment(
+    currentTuition,
+    readStoredTransactionHistory() ?? [],
+    getUserKey(getUser())
+  )) {
     currentTuition.status = 'PAID';
   }
   renderTuitionDetails();
@@ -187,7 +196,7 @@ function submitTransaction() {
   // Máy chủ kiểm tra quyền dùng tài khoản, số dư và giao dịch trùng; xác minh OTP nếu luồng thanh toán yêu cầu.
   setTimeout(async () => {
     try {
-      const finish = () => completePayment(payer.accountNumber, accountKey, tuition, description);
+      const finish = () => completePayment(getUserKey(payer), accountKey, tuition, description);
       if (navigator.locks) {
         await navigator.locks.request(STORAGE_KEYS.transactionHistory, finish);
       } else {
@@ -205,7 +214,7 @@ function submitTransaction() {
 
 function completePayment(payerKey, paymentAccountKey, tuition, description) {
   const user = getUser();
-  if (!user?.isLoggedIn || user.accountNumber !== payerKey) {
+  if (!user?.isLoggedIn || getUserKey(user) !== payerKey) {
     resetPaymentState();
     setPaymentMessage('dashboardSessionChanged', true);
     return;
@@ -225,7 +234,7 @@ function completePayment(payerKey, paymentAccountKey, tuition, description) {
     return;
   }
 
-  if (hasSuccessfulPayment(tuition, history)) {
+  if (hasSuccessfulPayment(tuition, history, getUserKey(user))) {
     currentTuition = { ...tuition, status: 'PAID' };
     setPaymentMessage('dashboardAlreadyPaid');
     return;
@@ -248,7 +257,7 @@ function completePayment(payerKey, paymentAccountKey, tuition, description) {
     payerKey,
     paymentAccountKey,
     paymentAccount: {
-      accountNumber: selectedAccount.accountNumber
+      accountNumber: getAccountDisplayId(selectedAccount)
     }
   };
 

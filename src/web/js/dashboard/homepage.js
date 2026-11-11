@@ -1,7 +1,8 @@
 import { formatVND, initDashboard, renderAccountStatus } from './dashboard-shell.js';
 import { setMessage, t } from '../../i18n/i18n.js';
 import {
-  canPayWithAccount, getAccountKey, getCustomerAccounts, readStoredTransactionHistory, selectPaymentAccount
+  canPayWithAccount, getAccountDisplayId, getAccountKey, getCustomerAccounts, getUserKey,
+  readStoredTransactionHistory, selectPaymentAccount
 } from './customer-accounts.js';
 
 const historyStatuses = {
@@ -53,7 +54,7 @@ function renderHomeAccounts(user, { accounts, isDemo, selectedAccount }) {
   const template = document.getElementById('home-account-template');
   const items = accounts.map(account => {
     const row = template.content.cloneNode(true);
-    const title = account.accountNumber || t('dashboardAccount');
+    const title = getAccountDisplayId(account) || t('dashboardAccount');
     row.querySelector('[data-account-title]').textContent = title;
     renderAccountStatus(row.querySelector('[data-account-status]'), account.account_active);
     row.querySelector('[data-balance-label]').textContent = t('dashboardBalance');
@@ -145,7 +146,7 @@ function renderHistoryRow(body, item, accountsByKey, userAccountNumber) {
     : null;
   const accountCell = row.insertCell();
   accountCell.className = 'history-payment-account';
-  accountCell.textContent = paymentAccount?.accountNumber || '—';
+  accountCell.textContent = getAccountDisplayId(paymentAccount) || '—';
 
   const statusKey = Object.hasOwn(historyStatuses, item.status) ? historyStatuses[item.status] : '';
   const statusClass = statusKey ? `status-${item.status.toLowerCase()}` : '';
@@ -162,7 +163,7 @@ function renderHistoryRow(body, item, accountsByKey, userAccountNumber) {
   button.addEventListener('click', () => showHistoryDetails(item, {
     student,
     amount: amountCell.textContent,
-    accountNumber: paymentAccount?.accountNumber,
+    accountNumber: getAccountDisplayId(paymentAccount),
     statusKey,
     statusClass,
     ownsPayment
@@ -218,7 +219,7 @@ function renderTransactionHistory(history, user, accounts) {
   const body = historyContainerEl.querySelector('tbody');
   const accountsByKey = new Map(accounts.map(account => [getAccountKey(account), account]));
   for (const item of history) {
-    renderHistoryRow(body, item, accountsByKey, user.accountNumber);
+    renderHistoryRow(body, item, accountsByKey, getUserKey(user));
   }
   limitHistoryRows(body.rows, body.previousElementSibling);
   historyContainerEl.scrollLeft = scrollLeft;
@@ -237,7 +238,9 @@ function renderHomePageAuth(isLoggedIn, user) {
   const { accounts, isDemo, selectedAccount } = getCustomerAccounts(user, storedHistory ?? []);
   renderHomeAccounts(user, { accounts, isDemo, selectedAccount });
 
-  const history = storedHistory === undefined ? demoHistory : storedHistory;
+  const history = storedHistory === undefined
+    ? (isDemo ? demoHistory : [])
+    : storedHistory;
   renderTransactionHistory(history, user, accounts);
 }
 await initDashboard({ titleKey: 'dashboardHome', render: renderHomePageAuth });

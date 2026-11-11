@@ -81,9 +81,7 @@ form.addEventListener("submit", async (event) => {
         firstInvalidInput.focus();
         return;
     }
-    const isPhone = PHONE_PATTERN.test(identifierValue) && !EMAIL_PATTERN.test(identifierValue);
-    const isEmail = EMAIL_PATTERN.test(identifierValue) && !PHONE_PATTERN.test(identifierValue);
-    const LoginType = (isEmail == true ? 1 : 2);
+    const loginType = EMAIL_PATTERN.test(identifierValue) ? 1 : 2;
     loginButton.disabled = true;
     try {
         const response = await fetch('/api/v1/auth/login', {
@@ -94,23 +92,33 @@ form.addEventListener("submit", async (event) => {
             body: JSON.stringify({
                 'username': result.values.identifier,
                 'password': result.values.password,
-                'data': LoginType
+                'data': loginType
             })
         });
 
-        const ResponseData = await response.json();
+        const responseData = await response.json();
 
         if (!response.ok) {
             statusMessage.classList.add("status-message--error");
-            statusMessage.textContent = ResponseData.detail || t("loginFailed");
+            statusMessage.textContent = responseData.detail || t("loginFailed");
+            loginButton.disabled = false;
+            return;
+        }
+
+        const userData = responseData?.data;
+        if (
+            !userData ||
+            typeof userData.customer_id !== "string" ||
+            !Array.isArray(userData.accounts)
+        ) {
+            statusMessage.classList.add("status-message--error");
+            setMessage(statusMessage, "loginFailed");
             loginButton.disabled = false;
             return;
         }
         localStorage.setItem(STORAGE_KEYS.user, JSON.stringify({
-            customer_id: ResponseData.data.customer_id,
-            email: ResponseData.data.email,
-            role_id: ResponseData.data.role_id,
-            isLoggedIn: true
+            ...userData,
+            isLoggedIn: true,
         }));
 
         inputs.password.value = "";
