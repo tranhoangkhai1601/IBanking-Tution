@@ -7,7 +7,7 @@ from databases.schema.user import UserInLogin
 from databases.database import get_session
 from databases.models import auth_credentials
 
-authRouter = APIRouter()
+authRouter = APIRouter(prefix="/auth", tags=["Auth Core"])
 
 @authRouter.post("/login")
 async def login(userInfo: UserInLogin,
@@ -42,9 +42,7 @@ async def login(userInfo: UserInLogin,
         "message": "Login successful",
         "data": {
             "customer_id": str(user.customer_id),
-            "role_id": user.role_id,
-            "email": user.email,
-            "phone": user.phone
+            "role_id": user.role_id
         }
     }
     
