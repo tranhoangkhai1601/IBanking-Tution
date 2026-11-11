@@ -13,7 +13,7 @@ export const PAGE_PATHS = Object.freeze({
   homepage: "./index",
   login: "./login",
   forgotPassword: "./forgot-password",
-  otp: "./otp.html",
+  otp: "./otp",
   resetPassword: "./reset-password",
   transaction: "./transaction",
   profile: "./profile",
