@@ -11,7 +11,7 @@ email = [
     "tranhoangkhai271625@gmail.com",
     "julviadinh@gmail.com",
     "trankhai.16012005@gmail.com",
-    "523v0003@student.tdtu.edu.vn.com"]
+    "523v0003@student.tdtu.edu.vn"]
 
 phone = [
     "0987654321",
