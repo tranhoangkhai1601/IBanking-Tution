@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 from databases.database import async_session_local, async_engine, init_db, get_session
 from databases.scripts.seed import seed_customer_data
+from routers.v1.customer import customerRouter
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -18,6 +19,7 @@ async def lifespan(app: FastAPI):
     await async_engine.dispose()
 
 app = FastAPI(lifespan=lifespan)
+app.include_router(customerRouter)
 
 @app.get("/health", status_code=status.HTTP_200_OK)
 async def get_health():
