@@ -60,12 +60,14 @@ async def seed_customer_data(session: AsyncSession):
         # Account 1
         {"account_id": config.CUSTOMER_1_ACCOUNT_1,
         "customer_id": config.CUSTOMER_1,
+        "account_num": config.CUSTOMER_1_ACCOUNT_NUM1,
         "account_type": AccountType.debit,
         "balance": Decimal(10_000_000),
         "account_active": True},
 
         {"account_id": config.CUSTOMER_1_ACCOUNT_2,
         "customer_id": config.CUSTOMER_1,
+        "account_num": config.CUSTOMER_1_ACCOUNT_NUM2,
         "account_type": AccountType.debit,
         "balance": Decimal(12_000_000),
         "account_active": True},
@@ -73,12 +75,14 @@ async def seed_customer_data(session: AsyncSession):
         ## Account 2
         {"account_id": config.CUSTOMER_2_ACCOUNT_1,
         "customer_id": config.CUSTOMER_2,
+        "account_num": config.CUSTOMER_2_ACCOUNT_NUM1,
         "account_type": AccountType.debit,
         "balance": Decimal(10_000_000),
         "account_active": True},
 
         {"account_id": config.CUSTOMER_2_ACCOUNT_2,
         "customer_id": config.CUSTOMER_2,
+        "account_num": config.CUSTOMER_2_ACCOUNT_NUM2,
         "account_type": AccountType.debit,
         "balance": Decimal(17_000_000),
         "account_active": True},
@@ -86,6 +90,7 @@ async def seed_customer_data(session: AsyncSession):
         ## Account 3
         {"account_id": config.CUSTOMER_3_ACCOUNT_1,
         "customer_id": config.CUSTOMER_3,
+        "account_num": config.CUSTOMER_3_ACCOUNT_NUM1,
         "account_type": AccountType.debit,
         "balance": Decimal(15_000_000),
         "account_active": True},
@@ -93,6 +98,7 @@ async def seed_customer_data(session: AsyncSession):
         ## Account 4 - MOD
         {"account_id": config.CUSTOMER_4_ACCOUNT_1,
         "customer_id": config.MODERATOR,
+        "account_num": config.CUSTOMER_4_ACCOUNT_NUM1,
         "account_type": AccountType.mod,
         "balance": Decimal(0),
         "account_active": True},
@@ -100,6 +106,7 @@ async def seed_customer_data(session: AsyncSession):
         ## Account 5 - TDTU :))
         {"account_id": config.CUSTOMER_5_ACCOUNT_1,
         "customer_id": config.MERCHANT,
+        "account_num": config.CUSTOMER_5_ACCOUNT_NUM1,
         "account_type": AccountType.organization,
         "balance": Decimal(0),
         "account_active": True}

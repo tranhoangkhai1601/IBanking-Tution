@@ -58,6 +58,7 @@ class customer_details(Base):
 
     account_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, server_default=func.uuidv7())
     customer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("customers.customer_id"), index=True)
+    account_num: Mapped[str] = mapped_column(String, unique=True)
     account_type: Mapped[AccountType] = mapped_column(Integer, default=AccountType.credit)
     account_open_date: Mapped[datetime] = mapped_column(server_default=func.now())
 

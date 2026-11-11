@@ -21,6 +21,18 @@ class Config(BaseSettings):
 
     CUSTOMER_5_ACCOUNT_1: str
 
+    CUSTOMER_1_ACCOUNT_NUM1: str
+    CUSTOMER_1_ACCOUNT_NUM2: str
+    
+    CUSTOMER_2_ACCOUNT_NUM1: str
+    CUSTOMER_2_ACCOUNT_NUM2: str
+
+    CUSTOMER_3_ACCOUNT_NUM1: str
+
+    CUSTOMER_4_ACCOUNT_NUM1: str
+
+    CUSTOMER_5_ACCOUNT_NUM1: str
+
     model_config = SettingsConfigDict(extra="ignore")
 
 config = Config()
