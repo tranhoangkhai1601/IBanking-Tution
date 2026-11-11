@@ -1,7 +1,7 @@
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from config import config
-from models import Base
+from databases.models import Base
 
 postgres_db = config.DATABASE_URL
 

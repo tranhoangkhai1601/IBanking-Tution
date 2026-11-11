@@ -41,7 +41,7 @@ psql: ## make psql s=db_name
 
 test:
 	docker exec -it auth_service python -m pytest tests/test.py -v
-	docker exec -it customer_service pytest test.py -v
+	docker exec -it customer_service python -m pytest tests/test.py -v
 	docker exec -it payment_service pytest test.py -v
 	docker exec -it tuition_service pytest test.py -v
 
