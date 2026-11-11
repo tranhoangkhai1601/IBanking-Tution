@@ -14,11 +14,14 @@ class RoleType(IntEnum):
     inactive_customer=3001
     moderator = 3002
     bank_teller = 3003
+    merchant = 3004
 
-class Providers(IntEnum):
-    google = 3000
-    email = 3001
-    phone = 3002
+class OutBoxStatus(IntEnum):
+    NOTSEND = 10
+    SUCCESS = 11
+    FAILED = 12
+    PROCESSING = 13
+
 class Auth_Sessions(Base):
     __tablename__ = "Auth_Sessions"
 
@@ -49,6 +52,10 @@ class Auth_Credentials(Base):
 
     customer_id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
     role_id: Mapped[RoleType] = mapped_column(ForeignKey("Roles.role_id"))
+
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    phone: Mapped[str] = mapped_column(String(20), unique=True, index=True)
+
     password: Mapped[str | None]
     password_changed_at: Mapped[datetime | None] = mapped_column(server_default=func.now())
     create_at: Mapped[datetime] = mapped_column(server_default=func.now())
@@ -57,23 +64,6 @@ class Auth_Credentials(Base):
 
     __table_args__ = (
         Index('ix_auth_credential_extra', 'extra_data', postgresql_using='gin'),
-    )
-
-class Auth_Providers(Base):
-    __tablename__ = "Auth_Providers"
-
-    identity_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, server_default=func.uuidv7())
-    customer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("Auth_Credentials.customer_id"), index=True)
-
-    # TODO: identity_hash is encrypt of Email, Phone - provider to identify which signin method
-    provider: Mapped[Providers] = mapped_column(Integer)
-    identity_hash: Mapped[str] = mapped_column(String, index=True)
-    # TODO: Use HMAC for this case :)) Remember that if you read this note
-    
-    create_at: Mapped[datetime] = mapped_column(server_default=func.now())
-
-    __table_args__ = (
-        UniqueConstraint("provider", "identity_hash"),
     )
 
 class Roles(Base):
@@ -113,3 +103,15 @@ class Matrix_Permission(Base):
         Index("ix_feature_role", "role_id", "feature_id"),
         Index("ix_matrix_permission_extra", 'extra_data', postgresql_using='gin'),
     )
+
+class Outbox_Events(Base):
+    __tablename__ = "Outbox_Events"
+
+    event_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, server_default=func.uuidv7())
+    aggregate_type: Mapped[str] = mapped_column(String(50))
+    aggregate_id: Mapped[str] = mapped_column(String(50)) 
+    event_type: Mapped[str] = mapped_column(String(50)) 
+    payload: Mapped[dict] = mapped_column(JSONB) 
+    
+    status: Mapped[OutBoxStatus] = mapped_column(Integer, default=10, index=True)
+    create_at: Mapped[datetime] = mapped_column(server_default=func.now())

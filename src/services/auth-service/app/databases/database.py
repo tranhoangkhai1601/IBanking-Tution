@@ -9,6 +9,8 @@ async_engine = create_async_engine(postgres_db_url, echo=True, future=True,)
 AsyncSessionLocal = async_sessionmaker(
     bind=async_engine,
     expire_on_commit=False,
+    autocommit=False,
+    autoflush=False
 )
 
 async def init_db():

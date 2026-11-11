@@ -21,24 +21,21 @@ class LanguageType(IntEnum):
 class AccountType(IntEnum):
     debit = 10
     credit = 11
+    organization = 12
 
 class OutBoxStatus(IntEnum):
     NOTSEND = 10
     SUCCESS = 11
     FAILED = 12
+    PROCESSING = 13
 
 class Customers(Base):
     __tablename__ = "Customers"
 
     customer_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, server_default=func.uuidv7())
 
-    # TODO: encrypt for AES decrypt to get plaintext
-    phone_encrypt: Mapped[str] = mapped_column(String(255))
-    email_encrypt: Mapped[str] = mapped_column(String(255))
-
-    # TODO: hash by HMAC just for look up when login
-    phone_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
-    email_hash: Mapped[str] = mapped_column(String(64), unique=True,index=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True,index=True)
+    phone: Mapped[str] = mapped_column(String(20), unique=True, index=True)
 
     full_name: Mapped[str]
     status: Mapped[bool] = mapped_column(default=True)

@@ -19,6 +19,8 @@ class OutBoxStatus(IntEnum):
     NOTSEND = 10
     SUCCESS = 11
     FAILED = 12
+    PROCESSING = 13
+    
 class Base(DeclarativeBase):
     pass
 
@@ -27,7 +29,7 @@ class Transactions(Base):
 
     transaction_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, server_default=func.uuidv7())
     account_id: Mapped[uuid.UUID]# = mapped_column(index=True)
-    tuition_id: Mapped[uuid.UUID]# = mapped_column(index=True)
+    tuition_id: Mapped[uuid.UUID | None]# = mapped_column(index=True)
     amount: Mapped[Decimal] = mapped_column(Numeric(19, 4))
     description: Mapped[str] = mapped_column(String, nullable=True)
     status: Mapped[StatusType] = mapped_column(Integer)
