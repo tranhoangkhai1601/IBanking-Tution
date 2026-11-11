@@ -7,7 +7,10 @@ volumes:
 
 networks:
   ibanking_network:
-    name: ibanking_local
+    driver: bridge
+  public_net:
+    driver: bridge
+  data_net:
     driver: bridge
 
 services:
@@ -32,7 +35,7 @@ services:
       retries: 5
       start_period: 30s 
     networks: 
-      - ibanking_network
+      - data_net
     restart: unless-stopped
   
   nginx:
@@ -47,7 +50,22 @@ services:
     restart:
       unless-stopped
     networks:
+      - public_net
+
+  gateway:
+    build:
+      context: ./src/services/api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    volumes:
+      - ./src/services/api-gateway/app:/app
+    env_file:
+      - .env
+    networks:
+      - public_net
       - ibanking_network
+    restart:
+      unless-stopped
 
   redis:
     image: redis:8.4-alpine
@@ -63,7 +81,7 @@ services:
     expose:
       - "6379"
     networks:
-      - ibanking_network
+      - data_net
     restart:
       unless-stopped
 
@@ -84,6 +102,7 @@ services:
         condition: service_healthy
     networks: 
       - ibanking_network
+      - data_net
     restart: unless-stopped
 
   customer_service:
@@ -103,6 +122,7 @@ services:
         condition: service_healthy
     networks:
       - ibanking_network
+      - data_net
     restart:
       unless-stopped
 
@@ -123,6 +143,7 @@ services:
         condition: service_healthy
     networks:
       - ibanking_network
+      - data_net
     restart:
       unless-stopped
 
@@ -143,5 +164,6 @@ services:
         condition: service_healthy
     networks:
       - ibanking_network
+      - data_net
     restart:
       unless-stopped
