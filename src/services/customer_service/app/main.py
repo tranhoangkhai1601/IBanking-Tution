@@ -3,6 +3,7 @@ from fastapi import FastAPI, status
 from contextlib import asynccontextmanager
 
 from databases.database import async_session_local, async_engine, init_db, get_session
+from databases.scripts.seed import seed_customer_data
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -11,7 +12,7 @@ async def lifespan(app: FastAPI):
 
     async with async_session_local() as session:
         async with session.begin():
-            pass
+            await seed_customer_data(session)
 
     yield
     await async_engine.dispose()
