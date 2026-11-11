@@ -56,7 +56,8 @@ services:
     build:
       context: ./src/services/api-gateway
       dockerfile: Dockerfile
-    container_name: api-gateway
+    container_name: gateway
+    # TODO: In production ignore volumes :))
     volumes:
       - ./src/services/api-gateway/app:/app
     env_file:
