@@ -48,7 +48,7 @@ class AuthForwardingService:
                     status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                     detail="Customer Service is disconnected"
                 )
-
+    
             merge_data = {
                 **auth_data["data"],
                 **customer_data["data"]
