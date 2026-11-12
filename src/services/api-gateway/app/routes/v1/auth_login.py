@@ -1,64 +1,15 @@
 
-import httpx2
-from fastapi import APIRouter, HTTPException, status, Request
-from config import config
+from fastapi import APIRouter, HTTPException, status, Request, Depends
+from services.auth_forwarding import AuthForwardingService, get_auth_forwarding_service
 
 auth_router = APIRouter(prefix="/api/v1", tags=["Auth Forwarding"])
 
 @auth_router.post("/auth/login")
-async def forward_login_to_auth_service(request: Request):
+async def forward_login_to_auth_service(request: Request,
+                                        service: AuthForwardingService = Depends(get_auth_forwarding_service)):
 
     body = await request.json()
 
-    async with httpx2.AsyncClient() as client:
-        try:
-            auth_response = await client.post(
-                f"{config.AUTH_SERVICE_URL}/auth/login",
-                json=body,
-                timeout=5.0
-            )
+    response = await service.process_login(body)
 
-            auth_response.raise_for_status()
-            auth_data = auth_response.json()
-
-        except httpx2.HTTPStatusError as exc:
-            raise HTTPException (
-                status_code=exc.response.status_code,
-                detail=exc.response.json().get("detail", "Error")
-            )
-        except httpx2.RequestError:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE, 
-                detail="Auth Service is disconnected"
-            )
-        
-        customer_id = auth_data["data"]["customer_id"]
-
-        try:
-            customer_response = await client.get(f"{config.CUSTOMER_SERVICE_URL}/customers/{customer_id}",
-                                                 timeout=5.0)
-
-            customer_response.raise_for_status()
-            customer_data = customer_response.json()
-
-        except httpx2.HTTPStatusError as exc:
-            raise HTTPException (
-                status_code=exc.response.status_code,
-                detail=exc.response.json().get("detail", f"not found {customer_id}")
-            )
-        except httpx2.RequestError:
-            raise HTTPException (
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Customer Service is disconnected"
-            )
-
-        merge_data = {
-            **auth_data["data"],
-            **customer_data["data"]
-        }
-
-        return {
-            "status": "success",
-            "message": "Login successful",
-            "data": merge_data
-        }
+    return response
