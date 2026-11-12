@@ -2,6 +2,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Config(BaseSettings):
     DATABASE_URL: str
+    REDIS_HOST: str
+    REDIS_PASS: str
+    REDIS_PORT: int
     PROJECT_VERSION: str
     CUSTOMER_1: str
     CUSTOMER_2: str
