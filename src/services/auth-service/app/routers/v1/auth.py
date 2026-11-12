@@ -2,7 +2,6 @@
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, status
 from databases.schema.user import UserInLogin
-from databases.models import auth_credentials
 from services.auth_service import AuthService, get_auth_service
 
 authRouter = APIRouter(prefix="/auth", tags=["Auth Core"])
