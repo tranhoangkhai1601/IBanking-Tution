@@ -7,7 +7,7 @@ from databases.models import auth_credentials
 from databases.schema.user import UserInLogin, UserPayload
 from config import config
 from databases.database import get_session
-from providers import JwtProvider
+from providers.JwtProvider import JwtProvider
 
 class AuthService:
     def __init__(self, session: AsyncSession):
@@ -45,14 +45,14 @@ class AuthService:
 
         return user
 
-    def create_tokens(self, user) -> dict:
+    async def create_tokens(self, user) -> dict:
         payload = UserPayload(
             customer_id=str(user.customer_id),
             role_id=user.role_id
         )
 
-        access_token = self.access_token_provider.generate_token(payload)
-        refresh_token = self.refresh_token_provider.generate_token(payload)
+        access_token = await self.access_token_provider.generate_token(payload)
+        refresh_token = await self.refresh_token_provider.generate_token(payload)
 
         return {
             "access_token": access_token,

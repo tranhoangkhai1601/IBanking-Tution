@@ -2,7 +2,7 @@
 import jwt
 from datetime import datetime, timezone, timedelta
 from config import config
-from databases.schema import UserPayload
+from databases.schema.user import UserPayload
 
 class JwtProvider:
     def __init__(self, secret_signature: str, token_life: int):
