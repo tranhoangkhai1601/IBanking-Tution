@@ -6,6 +6,14 @@ class Configs(BaseSettings):
     REDIS_PASS: str
     REDIS_PORT: int
     PROJECT_VERSION: str
+
+    JWT_TOKEN: str
+    JWT_REFRESH_TOKEN: str
+    JWT_ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+    REFRESH_TOKEN_EXPIRE_MINUTES: int
+
+
     CUSTOMER_1: str
     CUSTOMER_2: str
     CUSTOMER_3: str

@@ -17,12 +17,17 @@ async def login(userInfo: UserInLogin,
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Username or password is not correct"
         )
+    
+    token = await auth_service.create_tokens(user)
 
     return {
         "status": "success",
         "message": "Login successful",
         "data": {
             "customer_id": str(user.customer_id),
-            "role_id": user.role_id    
+            "role_id": user.role_id,
+            "access_token": token["access_token"],
+            "refresh_token": token["refresh_token"],
+            "token_type": "Bearer"
         }
     }
