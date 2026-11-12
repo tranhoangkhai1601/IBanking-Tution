@@ -22,6 +22,7 @@ class AccountType(IntEnum):
     debit = 10
     credit = 11
     organization = 12
+    mod = 13
 
 class OutBoxStatus(IntEnum):
     NOTSEND = 10
@@ -29,8 +30,8 @@ class OutBoxStatus(IntEnum):
     FAILED = 12
     PROCESSING = 13
 
-class Customers(Base):
-    __tablename__ = "Customers"
+class customers(Base):
+    __tablename__ = "customers"
 
     customer_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, server_default=func.uuidv7())
 
@@ -52,11 +53,12 @@ class Customers(Base):
 
 
 
-class Customer_Details(Base):
-    __tablename__ = "Customer_Details"
+class customer_details(Base):
+    __tablename__ = "customer_details"
 
     account_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, server_default=func.uuidv7())
-    customer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("Customers.customer_id"), index=True)
+    customer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("customers.customer_id"), index=True)
+    account_num: Mapped[str] = mapped_column(String, unique=True)
     account_type: Mapped[AccountType] = mapped_column(Integer, default=AccountType.credit)
     account_open_date: Mapped[datetime] = mapped_column(server_default=func.now())
 
@@ -71,11 +73,11 @@ class Customer_Details(Base):
         Index('ix_customer_details_extra', 'extra_data', postgresql_using='gin'),
     )
 
-class Transaction_Lines(Base):
-    __tablename__ = "Transaction_Lines"
+class transaction_lines(Base):
+    __tablename__ = "transaction_lines"
 
     entry_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, server_default=func.uuidv7())
-    account_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("Customer_Details.account_id"))
+    account_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("customer_details.account_id"))
     transaction_id: Mapped[uuid.UUID] = mapped_column(index=True)
 
     amount: Mapped[Decimal] = mapped_column(Numeric(19, 4), default=Decimal('0.0000'))
@@ -94,8 +96,8 @@ class Transaction_Lines(Base):
         },
     )
 
-class Outbox_Events(Base):
-    __tablename__ = "Outbox_Events"
+class outbox_events(Base):
+    __tablename__ = "outbox_events"
 
     event_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, server_default=func.uuidv7())
     aggregate_type: Mapped[str] = mapped_column(String(50))

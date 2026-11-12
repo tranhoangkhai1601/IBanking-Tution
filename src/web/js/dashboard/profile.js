@@ -1,6 +1,8 @@
 import { setMessage, t } from '../../i18n/i18n.js';
 import { formatVND, initDashboard, renderAccountStatus } from './dashboard-shell.js';
-import { getAccountKey, getCustomerAccounts } from './customer-accounts.js';
+import {
+  getAccountDisplayId, getAccountKey, getCustomerAccounts, getUserKey
+} from './customer-accounts.js';
 
 const missingValue = '—';
 const accountsList = document.getElementById('profile-accounts');
@@ -26,12 +28,12 @@ function renderAccount(account) {
   const type = account.account_type === 'payment'
     ? t('dashboardPaymentAccount')
     : account.account_type;
-  const title = account.accountNumber || type || t('dashboardAccount');
+  const title = getAccountDisplayId(account) || type || t('dashboardAccount');
   card.querySelector('[data-account-title]').textContent = title;
 
   const typeLabel = card.querySelector('[data-account-type]');
   typeLabel.textContent = type ?? '';
-  typeLabel.hidden = !account.accountNumber || !type;
+  typeLabel.hidden = !getAccountDisplayId(account) || !type;
 
   renderAccountStatus(card.querySelector('[data-account-status]'), account.account_active);
 
@@ -58,7 +60,7 @@ function renderAccount(account) {
 }
 
 function renderPersonal(user) {
-  const name = user.name?.trim() ?? '';
+  const name = (user.full_name ?? user.name ?? '').trim();
   const initials = name.split(/\s+/).slice(-2).map(word => Array.from(word)[0]).join('');
   document.getElementById('profile-avatar').textContent = initials.toUpperCase() || missingValue;
   document.getElementById('profile-name').textContent = name || missingValue;
@@ -76,7 +78,7 @@ function renderAccounts(user) {
 }
 
 function renderProfile(_isLoggedIn, user) {
-  if (currentUser?.accountNumber !== user.accountNumber || currentUser?.email !== user.email) {
+  if (getUserKey(currentUser) !== getUserKey(user)) {
     editedDetails = undefined;
     removedAccountKeys.clear();
     editDialog.close();

@@ -31,8 +31,8 @@ const AUTH_MESSAGES = Object.freeze({
   }
 });
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
-const PHONE_PATTERN = /^(?:0|\+84)[35789][0-9]{8}$/;
+export const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
+export const PHONE_PATTERN = /^(?:0|\+84)[35789][0-9]{8}$/;
 
 export function validateIdentifier(value) {
   const identifier = value.trim();

@@ -1,8 +1,7 @@
 import "../components/auth-brand.js";
 import "../components/language-switch.js";
-
 import { APP_CONFIG, PAGE_PATHS, STORAGE_KEYS } from "../../config/config.js";
-import { validateLogin } from "./auth-validation.js";
+import { validateLogin, EMAIL_PATTERN, PHONE_PATTERN } from "./auth-validation.js";
 import { initI18n, t, setMessage } from "../../i18n/i18n.js";
 
 const form = document.getElementById("login-form");
@@ -59,7 +58,7 @@ form.addEventListener("input", () => {
     displayErrors(result.errors);
 });
 
-form.addEventListener("submit", (event) => {
+form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     if (loginButton.disabled) {
@@ -71,7 +70,7 @@ form.addEventListener("submit", (event) => {
 
     const result = readForm();
 
-    inputs.identifier.value = result.values.identifier;
+    const identifierValue = result.values.identifier;
     displayErrors(result.errors);
 
     if (Object.keys(result.errors).length > 0) {
@@ -82,19 +81,48 @@ form.addEventListener("submit", (event) => {
         firstInvalidInput.focus();
         return;
     }
-
-    // Khi nối backend, gửi thông tin đăng nhập đến API xác thực và chỉ chuyển trang sau khi máy chủ tạo phiên.
-    // Thay hồ sơ mẫu bên dưới bằng thông tin khách hàng từ phiên đã xác thực.
+    const loginType = EMAIL_PATTERN.test(identifierValue) ? 1 : 2;
     loginButton.disabled = true;
     try {
+        const response = await fetch('/api/v1/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                'username': result.values.identifier,
+                'password': result.values.password,
+                'data': loginType
+            })
+        });
+
+        const responseData = await response.json();
+
+        if (!response.ok) {
+            statusMessage.classList.add("status-message--error");
+            statusMessage.textContent = responseData.detail || t("loginFailed");
+            loginButton.disabled = false;
+            return;
+        }
+
+        const userData = responseData?.data;
+        if (
+            !userData ||
+            typeof userData.customer_id !== "string" ||
+            !Array.isArray(userData.accounts)
+        ) {
+            statusMessage.classList.add("status-message--error");
+            setMessage(statusMessage, "loginFailed");
+            loginButton.disabled = false;
+            return;
+        }
         localStorage.setItem(STORAGE_KEYS.user, JSON.stringify({
-            name: "Đinh Ngọc Hoa",
-            accountNumber: "1023456789",
-            phone: "0862123456",
-            email: "524K0031@gmail.com",
-            balance: 10000000,
-            isLoggedIn: true
+            ...userData,
+            isLoggedIn: true,
         }));
+
+        inputs.password.value = "";
+        window.location.replace(PAGE_PATHS.homepage);
     } catch {
         statusMessage.classList.add("status-message--error");
         setMessage(statusMessage, "loginSessionError");
@@ -102,8 +130,6 @@ form.addEventListener("submit", (event) => {
         return;
     }
 
-    inputs.password.value = "";
-    window.location.replace(PAGE_PATHS.homepage);
 });
 
 const passwordToggle = document.getElementById("password-toggle");
