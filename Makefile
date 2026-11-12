@@ -31,7 +31,7 @@ build:
 
 rebuild:
 	$(COMPOSE) down -v
-	$(COMPOSE) up -d --build
+	$(COMPOSE) up -d --build --remove-orphans
 
 ps: ## Show container status
 	$(COMPOSE) ps
