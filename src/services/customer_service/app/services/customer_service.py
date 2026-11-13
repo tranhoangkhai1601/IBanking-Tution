@@ -29,7 +29,7 @@ class CustomerService:
         accounts = result.scalars().all()
 
         if not accounts:
-            return None
+            return []
 
         accounts_data = []
 
