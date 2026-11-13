@@ -86,6 +86,25 @@ services:
     restart:
       unless-stopped
 
+  ibanking_rabbitmq:
+    image: rabbitmq:4.0.9-alpine
+    container_name: ibanking_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    expose:
+      - ${RABBIT_PORT}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - data_net
+    restart: unless-stopped
+
   auth_service:
     build: 
       context: ./src/services/auth-service
@@ -102,6 +121,8 @@ services:
       postgres:
         condition: service_healthy
       ibanking_redis:
+        condition: service_healthy
+      ibanking_rabbitmq:
         condition: service_healthy
     networks: 
       - ibanking_network
@@ -124,6 +145,8 @@ services:
       postgres:
         condition: service_healthy
       ibanking_redis:
+        condition: service_healthy
+      ibanking_rabbitmq:
         condition: service_healthy
     networks:
       - ibanking_network
@@ -148,6 +171,8 @@ services:
         condition: service_healthy
       ibanking_redis:
         condition: service_healthy
+      ibanking_rabbitmq:
+        condition: service_healthy
     networks:
       - ibanking_network
       - data_net
@@ -170,6 +195,8 @@ services:
       postgres:
         condition: service_healthy
       ibanking_redis:
+        condition: service_healthy
+      ibanking_rabbitmq:
         condition: service_healthy
     networks:
       - ibanking_network
