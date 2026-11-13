@@ -1,6 +1,7 @@
 
 from fastapi import FastAPI
-from routes.v1.auth_login import auth_router
+from routes.v1.auth_login_logout import auth_router
+from routes.v1.customers_profile import customerRouter
 from config import config
 
 IS_PROD = config.SERVER_ENV == "production"
@@ -12,4 +13,5 @@ app = FastAPI(
             openapi_url=None if IS_PROD else "/openapi.json")
 
 app.include_router(auth_router)
+app.include_router(customerRouter)
 
