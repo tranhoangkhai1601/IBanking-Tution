@@ -59,6 +59,27 @@ class AuthForwardingService:
                 "message": "Login successful",
                 "data": merge_data
             }
+        
+    async def process_refresh(self, refresh_token: str) -> dict:
+        async with httpx2.AsyncClient() as client:
+            try:
+                auth_response = await client.post(
+                    f"{config.AUTH_SERVICE_URL}/auth/refresh",
+                    cookies={"refresh_token": refresh_token},
+                    timeout=5.0
+                )
+                auth_response.raise_for_status()
+                return auth_response.json()
                 
+            except httpx2.HTTPStatusError as exc:
+                raise HTTPException(
+                    status_code=exc.response.status_code,
+                    detail=exc.response.json().get("detail", "Invalid refresh token")
+                )
+            except httpx2.RequestError:
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail="Auth Service is disconnected"
+                )       
 def get_auth_forwarding_service() -> AuthForwardingService:
     return AuthForwardingService()

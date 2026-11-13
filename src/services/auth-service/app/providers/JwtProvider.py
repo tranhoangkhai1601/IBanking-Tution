@@ -23,6 +23,7 @@ class JwtProvider:
             algorithm=self.algorithm
         )
 
+    # TODO: this is useless func :))
     async def verify_token(self, token: str) -> UserPayload | None:
         try:
             payload = jwt.decode(

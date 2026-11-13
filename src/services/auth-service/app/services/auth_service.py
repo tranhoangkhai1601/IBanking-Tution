@@ -59,5 +59,15 @@ class AuthService:
             "refresh_token": refresh_token
         }
 
+    async def create_access_token(self, payload: UserPayload) -> str:
+        return await self.access_token_provider.generate_token(payload)
+    async def create_refresh_token(self, payload: UserPayload) -> str:
+        return await self.refresh_token_provider.generate_token(payload)
+
+    async def decode_refresh_token(self, refresh_token: str):
+        if not refresh_token:
+            return None
+        return await self.refresh_token_provider.verify_token(refresh_token)
+
 def get_auth_service(session: AsyncSession = Depends(get_session)) -> AuthService:
     return AuthService(session)

@@ -56,9 +56,22 @@ export async function initDashboard({ titleKey, render, requiresAuth = false }) 
 
   pageContent.inert = true;
   try {
-    const response = await fetch('/api/v1/customers/me', {
+    let response = await fetch('/api/v1/customers/me', {
       credentials: 'same-origin'
     });
+
+    if (response.status === 401) {
+      const refreshResponse = await fetch('/api/v1/auth/refresh',{
+        method: 'POST',
+        credentials: 'same-origin'
+      });
+
+      if (refreshResponse.ok) {
+        response = await fetch('/api/v1/customers/me', {
+          credentials: 'same-origin'
+        });
+      }
+    }
 
     if (response.status === 401) {
       const user = getUser();
