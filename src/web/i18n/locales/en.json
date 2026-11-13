@@ -78,6 +78,8 @@
   "dashboardHome": "Home",
   "dashboardPayTuition": "Pay tuition",
   "dashboardProfile": "Profile",
+  "dashboardCustomerLoadError": "Unable to load your latest customer data. Please try again later.",
+  "dashboardLogoutError": "Unable to sign out. Please try again.",
   "dashboardSignIn": "Sign in",
   "dashboardLogout": "Logout",
   "dashboardNavigation": "Main navigation",

@@ -2,6 +2,7 @@
 from fastapi import APIRouter, HTTPException, status, Request, Depends, Response
 from services.auth_forwarding import AuthForwardingService, get_auth_forwarding_service
 from config import config
+from databases.schema.user import UserPayload
 
 auth_router = APIRouter(prefix="/api/v1", tags=["Auth Forwarding"])
 
@@ -41,3 +42,23 @@ async def forward_login_to_auth_service(request: Request,
     )
 
     return merge_data
+
+
+@auth_router.post("/auth/logout")
+async def logout(response: Response):
+    is_secure = config.SERVER_ENV == "production"
+    response.delete_cookie(
+        key="access_token",
+        httponly=True,
+        secure=is_secure,
+        samesite="lax",
+        path="/",
+    )
+    response.delete_cookie(
+        key="refresh_token",
+        httponly=True,
+        secure=is_secure,
+        samesite="lax",
+        path="/api/v1/auth/refresh",
+    )
+    return {"status": "success", "message": "Logout successful"}

@@ -2,7 +2,7 @@ import '../components/auth-brand.js';
 import '../components/language-switch.js';
 import '../components/menu-toggle.js';
 import { APP_CONFIG, PAGE_PATHS, STORAGE_KEYS } from '../../config/config.js';
-import { initI18n, t } from '../../i18n/i18n.js';
+import { initI18n, setMessage, t } from '../../i18n/i18n.js';
 import { isAccountStorageKey } from './customer-accounts.js';
 
 export function getUser() {
@@ -15,18 +15,18 @@ export function getUser() {
 }
 
 export async function initDashboard({ titleKey, render, requiresAuth = false }) {
-  if (requiresAuth && !getUser()?.isLoggedIn) {
-    window.location.href = PAGE_PATHS.homepage;
-    return false;
-  }
-
   const userDisplay = document.getElementById('user-display');
   const userName = userDisplay.querySelector('.user-name');
   const signIn = document.getElementById('btn-signin');
   const logout = document.getElementById('btn-logout');
   const authLinks = document.querySelectorAll('.auth-only');
+  const statusElement = document.getElementById('dashboard-i18n-status');
+  const pageContent = document.querySelector('.dashboard-layout');
+  let profileReady = false;
 
   function renderPage() {
+    if (!profileReady) return;
+
     const user = getUser();
     const isLoggedIn = Boolean(user?.isLoggedIn);
     if (!isLoggedIn && requiresAuth) {
@@ -44,10 +44,67 @@ export async function initDashboard({ titleKey, render, requiresAuth = false }) 
 
   const ready = await initI18n({
     titleKey,
-    statusElement: document.getElementById('dashboard-i18n-status'),
+    statusElement,
     onChange: renderPage
   });
   if (!ready) return false;
+
+  signIn.addEventListener('click', () => {
+    window.location.assign(PAGE_PATHS.login);
+  });
+  signIn.disabled = false;
+
+  pageContent.inert = true;
+  try {
+    const response = await fetch('/api/v1/customers/me', {
+      credentials: 'same-origin'
+    });
+
+    if (response.status === 401) {
+      const user = getUser();
+      if (user?.isLoggedIn) {
+        localStorage.setItem(STORAGE_KEYS.user, JSON.stringify({
+          ...user,
+          isLoggedIn: false
+        }));
+      }
+
+      profileReady = true;
+      pageContent.inert = false;
+      if (requiresAuth) {
+        window.location.href = PAGE_PATHS.homepage;
+        return false;
+      }
+    } else {
+      if (!response.ok) {
+        throw new Error(`Customer profile request failed: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+      const customer = responseData?.data;
+      if (
+        !customer ||
+        typeof customer.customer_id !== 'string' ||
+        !Array.isArray(customer.accounts)
+      ) {
+        throw new Error('Customer profile response has an invalid shape');
+      }
+
+      const user = {
+        ...getUser(),
+        ...customer,
+        isLoggedIn: true
+      };
+      localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(user));
+      profileReady = true;
+      pageContent.inert = false;
+    }
+  } catch {
+    setMessage(statusElement, 'dashboardCustomerLoadError');
+    return false;
+  }
+
+  if (!profileReady) return false;
 
   window.addEventListener('pageshow', (event) => {
     if (event.persisted) renderPage();
@@ -56,17 +113,32 @@ export async function initDashboard({ titleKey, render, requiresAuth = false }) 
     if (event.storageArea === localStorage && isAccountStorageKey(event.key)) renderPage();
   });
 
-  signIn.addEventListener('click', () => {
-    window.location.assign(PAGE_PATHS.login);
+  logout.addEventListener('click', async () => {
+    logout.disabled = true;
+    try {
+      const response = await fetch('/api/v1/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+      });
+      if (!response.ok) {
+        throw new Error(`Logout request failed: ${response.status}`);
+      }
+
+      const user = getUser() || {};
+      localStorage.setItem(STORAGE_KEYS.user, JSON.stringify({
+        ...user,
+        isLoggedIn: false
+      }));
+      setMessage(statusElement, '');
+      renderPage();
+    } catch {
+      setMessage(statusElement, 'dashboardLogoutError');
+    } finally {
+      logout.disabled = false;
+    }
   });
-  logout.addEventListener('click', () => {
-    // Khi nối backend, gọi API kết thúc phiên rồi cập nhật trạng thái giao diện.
-    const user = getUser() || {};
-    localStorage.setItem(STORAGE_KEYS.user, JSON.stringify({ ...user, isLoggedIn: false }));
-    renderPage();
-  });
-  signIn.disabled = false;
   logout.disabled = false;
+  renderPage();
   return true;
 }
 

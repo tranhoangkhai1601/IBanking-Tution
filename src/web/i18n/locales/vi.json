@@ -78,6 +78,8 @@
   "dashboardHome": "Trang chủ",
   "dashboardPayTuition": "Đóng học phí",
   "dashboardProfile": "Hồ sơ",
+  "dashboardCustomerLoadError": "Không thể tải dữ liệu khách hàng mới nhất. Vui lòng thử lại sau.",
+  "dashboardLogoutError": "Không thể đăng xuất. Vui lòng thử lại.",
   "dashboardSignIn": "Đăng nhập",
   "dashboardLogout": "Đăng xuất",
   "dashboardNavigation": "Điều hướng chính",
