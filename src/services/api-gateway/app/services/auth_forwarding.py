@@ -59,6 +59,6 @@ class AuthForwardingService:
                 "message": "Login successful",
                 "data": merge_data
             }
-
+                
 def get_auth_forwarding_service() -> AuthForwardingService:
     return AuthForwardingService()
