@@ -62,7 +62,7 @@ export async function initDashboard({ titleKey, render, requiresAuth = false }) 
 
     if (response.status === 401) {
       const refreshResponse = await fetch('/api/v1/auth/refresh',{
-        method: 'POST',
+        method: 'PUT',
         credentials: 'same-origin'
       });
 
