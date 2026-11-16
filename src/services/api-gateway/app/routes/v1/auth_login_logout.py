@@ -71,7 +71,7 @@ async def get_refresh_token(
 
     return {"status": "success", "message": "Token refreshed successfully"}
 
-@auth_router.post("/auth/logout")
+@auth_router.delete("/auth/logout")
 async def logout(response: Response):
     is_secure = config.SERVER_ENV == "production"
     response.delete_cookie(

@@ -130,7 +130,7 @@ export async function initDashboard({ titleKey, render, requiresAuth = false }) 
     logout.disabled = true;
     try {
       const response = await fetch('/api/v1/auth/logout', {
-        method: 'POST',
+        method: 'DELETE',
         credentials: 'same-origin'
       });
       if (!response.ok) {
@@ -138,10 +138,7 @@ export async function initDashboard({ titleKey, render, requiresAuth = false }) 
       }
 
       const user = getUser() || {};
-      localStorage.setItem(STORAGE_KEYS.user, JSON.stringify({
-        ...user,
-        isLoggedIn: false
-      }));
+      localStorage.removeItem(STORAGE_KEYS.user);
       setMessage(statusElement, '');
       renderPage();
     } catch {
