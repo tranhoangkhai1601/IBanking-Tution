@@ -76,10 +76,7 @@ export async function initDashboard({ titleKey, render, requiresAuth = false }) 
     if (response.status === 401) {
       const user = getUser();
       if (user?.isLoggedIn) {
-        localStorage.setItem(STORAGE_KEYS.user, JSON.stringify({
-          ...user,
-          isLoggedIn: false
-        }));
+        localStorage.removeItem(STORAGE_KEYS.user);
       }
 
       profileReady = true;
