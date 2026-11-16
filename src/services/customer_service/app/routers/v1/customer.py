@@ -8,7 +8,7 @@ customerRouter = APIRouter(prefix="/customers", tags=["Customers Core"])
 @customerRouter.get("/{customer_id}", response_model=CustomerResponse)
 async def get_customer(customer_id: str,
                        customer_service: CustomerService = Depends(get_customer_service)):
-
+    
     customer = await customer_service.get_customer(customer_id)
 
     if not customer:
