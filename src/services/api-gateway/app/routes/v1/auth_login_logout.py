@@ -43,7 +43,7 @@ async def forward_login_to_auth_service(request: Request,
 
     return merge_data
 
-@auth_router.post("/auth/refresh")
+@auth_router.put("/auth/refresh")
 async def get_refresh_token(
     response: Response,
     refresh_token: str | None = Cookie(default=None),

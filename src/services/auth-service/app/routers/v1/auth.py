@@ -32,7 +32,7 @@ async def login(userInfo: UserInLogin,
         }
     }
 
-@authRouter.post("/refresh")
+@authRouter.put("/refresh")
 async def refresh_token(
     refresh_token: str = Cookie(...),
     auth_service: AuthService = Depends(get_auth_service)

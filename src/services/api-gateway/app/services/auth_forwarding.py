@@ -63,7 +63,7 @@ class AuthForwardingService:
     async def process_refresh(self, refresh_token: str) -> dict:
         async with httpx2.AsyncClient() as client:
             try:
-                auth_response = await client.post(
+                auth_response = await client.put(
                     f"{config.AUTH_SERVICE_URL}/auth/refresh",
                     cookies={"refresh_token": refresh_token},
                     timeout=5.0
