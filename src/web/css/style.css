@@ -1,0 +1,331 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap");
+
+:root {
+  --navy-950: #071a2f;
+  --navy-900: #0b2545;
+  --navy-800: #10365e;
+  --blue-600: #1261a9;
+  --blue-500: #1976c9;
+  --cyan-400: #3bd4c5;
+  --surface: #ffffff;
+  --canvas: #f3f7fa;
+  --ink: #12283f;
+  --muted: #65778a;
+  --line: #d9e3eb;
+  --danger: #c63b4a;
+
+  --font-family-base: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-family-heading: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-primary: var(--blue-600);
+  --color-primary-hover: var(--navy-900);
+  --color-focus-ring: rgba(25, 118, 201, 0.2);
+  --color-surface: var(--surface);
+  --color-surface-muted: #fbfdfe;
+  --color-text: var(--ink);
+  --color-text-muted: var(--muted);
+  --color-border: var(--line);
+  --color-error: var(--danger);
+  --color-surface-error: #fffafb;
+  --brand-background:
+    linear-gradient(145deg, rgba(59, 212, 197, 0.08), transparent 42%),
+    linear-gradient(155deg, var(--navy-800), var(--navy-950) 75%);
+  --primary-button-background: linear-gradient(135deg, #0f5a9c, #0c477f);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --radius-lg: 24px;
+  --radius-md: 12px;
+  --radius-control: var(--radius-md);
+  --control-min-height: 52px;
+  --shadow: 0 28px 70px rgba(18, 40, 63, 0.12);
+}
+
+/* Kiểu nền dùng chung cho các trang. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: var(--canvas);
+  color: var(--color-text);
+  font-family: var(--font-family-base);
+  line-height: 1.5;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* Dấu hiệu thương hiệu dùng chung. */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  gap: 11px;
+}
+
+.brand__mark {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--cyan-400);
+}
+
+.brand__mark svg {
+  width: 100%;
+  height: 100%;
+}
+
+.brand__name {
+  min-width: 0;
+  color: var(--surface);
+  font-family: var(--font-family-heading);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.6px;
+  overflow-wrap: anywhere;
+}
+
+/* Nút hành động chính. */
+.primary-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--control-min-height);
+  padding: 13px 20px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--primary-button-background);
+  box-shadow: 0 8px 20px rgba(18, 97, 169, 0.19);
+  color: var(--surface);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.5;
+  cursor: pointer;
+  transition: box-shadow 160ms ease, transform 160ms ease;
+}
+
+.primary-button svg {
+  flex: 0 0 auto;
+}
+
+.primary-button:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 3px;
+}
+
+.primary-button:hover:not(:disabled) {
+  box-shadow: 0 12px 24px rgba(18, 97, 169, 0.25);
+  transform: translateY(-1px);
+}
+
+.primary-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.primary-button:disabled {
+  background: #718da7;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Nút phụ dùng chung. */
+.outline-button {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.outline-button:hover:where(:not(:disabled, [aria-pressed="true"])) {
+  background: var(--canvas);
+}
+
+.outline-button:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Ô nhập dữ liệu dùng chung. */
+.input-field {
+  min-width: 0;
+  min-height: var(--control-min-height);
+  padding: 13px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background-color: var(--color-surface-muted);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-text);
+  outline: none;
+}
+
+.input-field::placeholder {
+  color: var(--color-text-muted);
+}
+
+.input-field:focus {
+  border-color: var(--blue-500);
+  background-color: var(--color-surface);
+  box-shadow: 0 0 0 4px var(--color-focus-ring);
+}
+
+.input-field[aria-invalid="true"] {
+  border-color: var(--color-error);
+  background-color: var(--color-surface-error);
+}
+
+/* Hộp thoại dùng chung. */
+.app-dialog {
+  width: min(480px, calc(100% - 32px));
+  margin: auto;
+  padding: clamp(var(--space-4), 4vw, var(--space-6));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow);
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+.app-dialog::backdrop {
+  background: rgb(7 26 47 / 55%);
+}
+
+/* Thông báo lỗi và trạng thái dùng chung. */
+.field__error {
+  margin: 7px 0 0;
+  color: var(--danger);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.status-message {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.status-message:not(:empty) {
+  margin-bottom: var(--space-4);
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--canvas);
+}
+
+.status-message--error {
+  color: var(--danger);
+}
+
+.status-message--error:not(:empty) {
+  border-color: var(--danger);
+}
+
+/* Giao diện chung của language switch component. */
+language-switch {
+  display: inline-flex;
+  max-width: 100%;
+}
+
+language-switch .language-switch__group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-1);
+
+  width: 112px;
+  max-width: 100%;
+  padding: 3px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--canvas);
+
+  box-shadow: 0 4px 12px rgba(18, 40, 63, 0.08);
+}
+
+language-switch .language-switch__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 0;
+  min-height: 36px;
+  margin: 0;
+  padding: 6px 8px;
+
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-muted);
+
+  font-family: var(--font-family-heading);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.04em;
+
+  cursor: pointer;
+
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+/* Lựa chọn chưa được chọn. */
+language-switch .language-switch__button:hover:not([aria-pressed="true"]) {
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+}
+
+/* Lựa chọn đang được chọn. */
+language-switch .language-switch__button[aria-pressed="true"] {
+  background: var(--primary-button-background);
+  box-shadow: 0 2px 6px rgba(18, 97, 169, 0.25);
+  color: var(--color-surface);
+}
+
+language-switch .language-switch__button:focus-visible {
+  position: relative;
+  z-index: 1;
+
+  outline: 3px solid var(--blue-500);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  language-switch .language-switch__button {
+    transition: none;
+  }
+}
