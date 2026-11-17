@@ -9,7 +9,86 @@ let currentTuition = null;
 let availableTuitions = [];
 let paymentAccount = null;
 let isProcessing = false;
-let pendingPayment = null;
+const PENDING_PAYMENT_STORAGE_KEY = 'ibanking:pending-tuition-payment';
+const PAYMENT_ATTEMPT_STORAGE_KEY = 'ibanking:tuition-payment-attempt';
+
+function getPaymentAttempt() {
+  try {
+    const attempt = JSON.parse(
+      sessionStorage.getItem(PAYMENT_ATTEMPT_STORAGE_KEY) || 'null'
+    );
+    if (
+      typeof attempt?.idempotencyKey === 'string' &&
+      typeof attempt?.customerId === 'string' &&
+      typeof attempt?.tuitionId === 'string' &&
+      typeof attempt?.accountId === 'string' &&
+      typeof attempt?.description === 'string'
+    ) {
+      return attempt;
+    }
+  } catch {
+    sessionStorage.removeItem(PAYMENT_ATTEMPT_STORAGE_KEY);
+  }
+  return null;
+}
+
+function getPaymentIdempotencyKey(tuition, accountId, description) {
+  const customerId = getUser()?.customer_id;
+  if (typeof customerId !== 'string') {
+    throw new Error('Unable to identify the signed-in customer.');
+  }
+  const previousAttempt = getPaymentAttempt();
+  if (
+    previousAttempt?.customerId === customerId &&
+    previousAttempt.tuitionId === tuition.tuitionId &&
+    previousAttempt.accountId === accountId &&
+    previousAttempt.description === description
+  ) {
+    return previousAttempt.idempotencyKey;
+  }
+
+  const idempotencyKey = crypto.randomUUID();
+  sessionStorage.setItem(
+    PAYMENT_ATTEMPT_STORAGE_KEY,
+    JSON.stringify({
+      idempotencyKey,
+      customerId,
+      tuitionId: tuition.tuitionId,
+      accountId,
+      description
+    })
+  );
+  return idempotencyKey;
+}
+
+function clearPaymentAttempt() {
+  currentPaymentIdempotencyKey = null;
+  sessionStorage.removeItem(PAYMENT_ATTEMPT_STORAGE_KEY);
+}
+
+function loadPendingPayment() {
+  try {
+    const storedPayment = JSON.parse(
+      sessionStorage.getItem(PENDING_PAYMENT_STORAGE_KEY) || 'null'
+    );
+    if (
+      typeof storedPayment?.transactionId === 'string' &&
+      typeof storedPayment?.customerId === 'string' &&
+      typeof storedPayment?.tuition?.tuitionId === 'string' &&
+      typeof storedPayment?.tuition?.studentId === 'string' &&
+      typeof storedPayment?.tuition?.name === 'string' &&
+      typeof storedPayment?.tuition?.semester === 'string' &&
+      Number.isFinite(storedPayment?.tuition?.amount)
+    ) {
+      return storedPayment;
+    }
+  } catch {
+    sessionStorage.removeItem(PENDING_PAYMENT_STORAGE_KEY);
+  }
+  return null;
+}
+
+let pendingPayment = loadPendingPayment();
 let currentPaymentIdempotencyKey = null;
 const studentIdInput = document.getElementById('mssv-input');
 const searchButton = document.getElementById('btn-search');
@@ -18,6 +97,9 @@ const checkPaymentButton = document.getElementById('btn-check-payment');
 const termsCheckbox = document.getElementById('chk-terms');
 const confirmButton = document.getElementById('btn-confirm-tx');
 const descriptionInput = document.getElementById('payment-description');
+const otpVerification = document.getElementById('otp-verification');
+const otpInput = document.getElementById('payment-otp');
+const verifyOtpButton = document.getElementById('btn-verify-otp');
 
 function renderTransactionPageAuth(isLoggedIn, user) {
   const payerNameEl = document.getElementById('payer-name');
@@ -27,6 +109,14 @@ function renderTransactionPageAuth(isLoggedIn, user) {
   const paymentAccountNumber = document.getElementById('payment-account-number');
 
   const payer = isLoggedIn ? user : null;
+  if (pendingPayment && payer?.customer_id !== pendingPayment.customerId) {
+    pendingPayment = null;
+    sessionStorage.removeItem(PENDING_PAYMENT_STORAGE_KEY);
+  }
+  if (pendingPayment && !currentTuition) {
+    currentTuition = { ...pendingPayment.tuition, status: 'PENDING' };
+    studentIdInput.value = pendingPayment.tuition.studentId;
+  }
   const selectedAccount = payer ? getCustomerAccounts(payer).selectedAccount : null;
   if (getAccountKey(paymentAccount) !== getAccountKey(selectedAccount)) {
     termsCheckbox.checked = false;
@@ -50,6 +140,9 @@ function renderTransactionPageAuth(isLoggedIn, user) {
   termsCheckbox.disabled = formDisabled || !paymentAccount;
   checkPaymentButton.hidden = !payer || !pendingPayment;
   checkPaymentButton.disabled = isProcessing;
+  otpVerification.hidden = !payer || !pendingPayment?.requiresOtp;
+  otpInput.disabled = isProcessing;
+  verifyOtpButton.disabled = isProcessing;
 
   if (!payer) {
     studentIdInput.value = '';
@@ -84,9 +177,7 @@ function resetPaymentState() {
   renderTuitionDetails();
   setLookupMessage('');
   if (pendingPayment) {
-    setPaymentMessage('dashboardPaymentPending', false, {
-      transactionId: pendingPayment.transactionId
-    });
+    setPaymentMessage('dashboardPaymentPending');
   } else {
     setPaymentMessage('');
   }
@@ -123,9 +214,13 @@ async function checkPendingPaymentStatus() {
   try {
     const payment = await getPaymentStatus(pendingPayment.transactionId);
     if (payment.status === 'PENDING') {
-      setPaymentMessage('dashboardPaymentPending', false, {
-        transactionId: pendingPayment.transactionId
-      });
+      pendingPayment.requiresOtp = payment.requires_otp;
+      sessionStorage.setItem(
+        PENDING_PAYMENT_STORAGE_KEY,
+        JSON.stringify(pendingPayment)
+      );
+      otpVerification.hidden = !payment.requires_otp;
+      setPaymentMessage('dashboardPaymentPending');
       return;
     }
     await applyPaymentStatus(payment, pendingPayment.tuition);
@@ -368,13 +463,19 @@ async function getPaymentStatus(transactionId) {
   if (!['PENDING', 'SUCCESS', 'FAILED'].includes(payment.status)) {
     throw new Error('The payment service returned an unknown status.');
   }
+  if (typeof payment.requires_otp !== 'boolean') {
+    throw new Error('The payment service returned an invalid OTP state.');
+  }
   return payment;
 }
 
 async function applyPaymentStatus(payment, tuition) {
   pendingPayment = null;
-  currentPaymentIdempotencyKey = null;
+  sessionStorage.removeItem(PENDING_PAYMENT_STORAGE_KEY);
+  clearPaymentAttempt();
   checkPaymentButton.hidden = true;
+  otpVerification.hidden = true;
+  otpInput.value = '';
   if (payment.status === 'FAILED') {
     if (currentTuition?.tuitionId === tuition.tuitionId) {
       currentTuition = { ...tuition, status: 'UNPAID' };
@@ -406,7 +507,11 @@ async function applyPaymentStatus(payment, tuition) {
 
 async function processTuitionPayment(tuition, selectedAccount, description) {
   try {
-    currentPaymentIdempotencyKey ??= crypto.randomUUID();
+    currentPaymentIdempotencyKey = getPaymentIdempotencyKey(
+      tuition,
+      getAccountKey(selectedAccount),
+      description
+    );
     const createdPayment = await fetchApiJson('/api/v1/payments/tuition', {
       method: 'POST',
       headers: {
@@ -423,20 +528,88 @@ async function processTuitionPayment(tuition, selectedAccount, description) {
     if (typeof createdPayment.transaction_id !== 'string') {
       throw new Error('The payment service returned an invalid transaction.');
     }
+    if (createdPayment.status === 'FAILED') {
+      clearPaymentAttempt();
+      setPaymentMessage('dashboardPaymentFailed', true);
+      return;
+    }
     pendingPayment = {
       transactionId: createdPayment.transaction_id,
-      tuition
+      tuition,
+      requiresOtp: createdPayment.requires_otp === true,
+      customerId: payerCustomerId()
     };
+    sessionStorage.setItem(
+      PENDING_PAYMENT_STORAGE_KEY,
+      JSON.stringify(pendingPayment)
+    );
     checkPaymentButton.hidden = false;
+    otpVerification.hidden = !pendingPayment.requiresOtp;
 
     if (currentTuition?.tuitionId === tuition.tuitionId) {
       currentTuition = { ...tuition, status: 'PENDING' };
     }
-    setPaymentMessage('dashboardPaymentPending', false, {
-      transactionId: createdPayment.transaction_id
-    });
+    setPaymentMessage('dashboardPaymentPending');
     renderTuitionDetails();
     validateTransactionState();
+  } catch (error) {
+    if (error instanceof ApiRequestError && error.status === 502) {
+      clearPaymentAttempt();
+    }
+    setPaymentError(
+      error instanceof Error ? error.message : t('dashboardPaymentError')
+    );
+  } finally {
+    isProcessing = false;
+    const user = getUser();
+    renderTransactionPageAuth(Boolean(user?.isLoggedIn), user);
+  }
+}
+
+function payerCustomerId() {
+  const customerId = getUser()?.customer_id;
+  if (typeof customerId !== 'string') {
+    throw new Error('Unable to identify the signed-in customer.');
+  }
+  return customerId;
+}
+
+async function verifyPendingPaymentOtp() {
+  if (!pendingPayment || isProcessing) return;
+  const otpCode = otpInput.value.trim();
+  if (!/^[0-9]{6}$/.test(otpCode)) {
+    setPaymentMessage('dashboardOtpInvalid', true);
+    return;
+  }
+
+  isProcessing = true;
+  verifyOtpButton.disabled = true;
+  try {
+    const payment = await fetchApiJson(
+      `/api/v1/payments/${encodeURIComponent(pendingPayment.transactionId)}/verify-otp`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ otp_code: otpCode })
+      }
+    );
+    if (payment.transaction_id !== pendingPayment.transactionId) {
+      throw new Error('The payment service returned a different transaction.');
+    }
+    pendingPayment.requiresOtp = payment.requires_otp === true;
+    sessionStorage.setItem(
+      PENDING_PAYMENT_STORAGE_KEY,
+      JSON.stringify(pendingPayment)
+    );
+    otpVerification.hidden = pendingPayment.requiresOtp;
+    otpInput.value = '';
+    if (payment.status === 'FAILED') {
+      await applyPaymentStatus(payment, pendingPayment.tuition);
+    } else if (pendingPayment.requiresOtp) {
+      setPaymentMessage('dashboardOtpVerifiedWaiting');
+    } else {
+      setPaymentMessage('dashboardOtpVerified');
+    }
   } catch (error) {
     setPaymentError(
       error instanceof Error ? error.message : t('dashboardPaymentError')
@@ -457,6 +630,7 @@ const ready = await initDashboard({
 if (ready) {
   searchButton.addEventListener('click', searchTuition);
   checkPaymentButton.addEventListener('click', checkPendingPaymentStatus);
+  verifyOtpButton.addEventListener('click', verifyPendingPaymentOtp);
   tuitionSelect.addEventListener('change', () => {
     setSelectedTuition(Number(tuitionSelect.value));
     termsCheckbox.checked = false;

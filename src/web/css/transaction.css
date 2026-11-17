@@ -83,6 +83,14 @@
   resize: vertical;
 }
 
+.otp-verification {
+  margin-top: var(--space-4);
+}
+
+.otp-verification[hidden] {
+  display: none;
+}
+
 #tuition-amount,
 #summary-tuition-amount {
   color: var(--color-primary);

@@ -237,6 +237,31 @@
                 role="status"
                 aria-atomic="true"
               ></p>
+              <div id="otp-verification" class="otp-verification" hidden>
+                <label for="payment-otp" data-i18n="dashboardOtpLabel"
+                  >Enter the OTP sent to your email</label
+                >
+                <div class="search-box-row">
+                  <input
+                    type="text"
+                    id="payment-otp"
+                    class="input-field"
+                    inputmode="numeric"
+                    autocomplete="one-time-code"
+                    maxlength="6"
+                    pattern="[0-9]{6}"
+                    aria-describedby="payment-message"
+                  />
+                  <button
+                    type="button"
+                    id="btn-verify-otp"
+                    class="primary-button"
+                    data-i18n="dashboardVerifyOtp"
+                  >
+                    Verify OTP
+                  </button>
+                </div>
+              </div>
               <button
                 type="button"
                 id="btn-check-payment"
