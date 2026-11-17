@@ -6,8 +6,10 @@ from decimal import InvalidOperation
 from uuid import UUID
 
 import aio_pika
+import httpx2
 from sqlalchemy import select
 
+from config import config
 from databases.database import async_session_local, redis_client
 from databases.models import statusType, tuition
 
@@ -20,6 +22,9 @@ async def _apply_payment_succeeded(event: dict) -> None:
     payload = event["payload"]
     tuition_id = UUID(payload["tuition_id"])
     amount = Decimal(payload["amount"])
+    transaction_id = UUID(payload["transaction_id"])
+    customer_email = payload["customer_email"]
+    paid_at = payload["paid_at"]
 
     async with async_session_local() as session:
         async with session.begin():
@@ -43,6 +48,19 @@ async def _apply_payment_succeeded(event: dict) -> None:
             student_id = tuition_record.student_id
 
     await redis_client.delete(f"tuition:student:{student_id.upper()}")
+    async with httpx2.AsyncClient(timeout=10.0) as client:
+        response = await client.post(
+            f"{config.NOTIFICATION_SERVICE_URL.rstrip('/')}"
+            "/v1/notifications/payment-success",
+            json={
+                "recipient": customer_email,
+                "transaction_id": str(transaction_id),
+                "tuition_id": str(tuition_id),
+                "amount": str(amount),
+                "paid_at": paid_at,
+            },
+        )
+        response.raise_for_status()
 
 
 async def _consume_payment_message(message: aio_pika.IncomingMessage) -> None:

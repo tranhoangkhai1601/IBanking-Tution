@@ -273,7 +273,7 @@ async def _apply_payment_command(event: dict) -> None:
                                 description="Tuition payment",
                                 extra_data={
                                     "tuition_id": tuition_id,
-                                    "merchant_account_id": merchant_account_id,
+                                    "merchant_account_id": str(merchant_account_id),
                                     "student_name": student_name,
                                     "payment_event_id": event.get("event_id"),
                                 },
