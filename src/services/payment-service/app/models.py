@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 from enum import IntEnum
 from decimal import Decimal
-from sqlalchemy import func, Index, ForeignKey, String, Integer, Float, Numeric
+from sqlalchemy import func, Index, ForeignKey, String, Integer, Float, Numeric, DateTime
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -34,8 +34,8 @@ class Transactions(Base):
     description: Mapped[str] = mapped_column(String, nullable=True)
     status: Mapped[StatusType] = mapped_column(Integer)
     idempotency_key: Mapped[str] = mapped_column(unique=True)
-    create_at: Mapped[datetime] = mapped_column(primary_key=True, server_default=func.now())
-    update_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+    create_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), primary_key=True, server_default=func.now())
+    update_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     extra_data: Mapped[dict] = mapped_column(JSONB, server_default="{}")
 
     __table_args__ = (
@@ -43,6 +43,9 @@ class Transactions(Base):
         Index("ix_transactions_account", "account_id"),
         Index("ix_transactions_status", "status"),
         Index("ix_transactions_extra", "extra_data", postgresql_using="gin"),
+        {
+            "postgresql_partition_by": "RANGE (create_at)"
+        },
     )
 
 class Outbox_Events(Base):
@@ -55,4 +58,4 @@ class Outbox_Events(Base):
     payload: Mapped[dict] = mapped_column(JSONB) 
     
     status: Mapped[OutBoxStatus] = mapped_column(Integer, default=10, index=True)
-    create_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    create_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
