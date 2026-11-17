@@ -6,6 +6,7 @@ class Config(BaseSettings):
     REDIS_HOST: str
     REDIS_PASS: str
     REDIS_PORT: int
+    MERCHANT: str
 
     model_config = SettingsConfigDict(extra="ignore")
 config = Config()

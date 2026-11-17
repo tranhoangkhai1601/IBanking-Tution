@@ -2,7 +2,8 @@
 from fastapi import FastAPI, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from contextlib import asynccontextmanager
-from database import async_engine, async_session_local, init_db
+from databases.database import async_engine, async_session_local, init_db
+from databases.scripts.seed import seed_tuition_data
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -11,7 +12,7 @@ async def lifespan(app: FastAPI):
 
     async with async_session_local() as session:
         async with session.begin():
-            pass
+            await seed_tuition_data(session)
 
     yield
 
