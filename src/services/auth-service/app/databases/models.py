@@ -31,8 +31,8 @@ class auth_sessions(Base):
     ip_address: Mapped[str | None]
     device_info: Mapped[str | None]
     is_active: Mapped[bool] = mapped_column(default=False)
-    expires_at: Mapped[datetime]
-    create_at: Mapped[datetime] = mapped_column(primary_key=True, server_default=func.now())
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    create_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), primary_key=True, server_default=func.now())
     extra_data: Mapped[dict] = mapped_column(JSONB, server_default='{}')
 
     __table_args__ = (
@@ -57,9 +57,9 @@ class auth_credentials(Base):
     phone: Mapped[str] = mapped_column(String(20), unique=True, index=True)
 
     password: Mapped[str | None]
-    password_changed_at: Mapped[datetime | None] = mapped_column(server_default=func.now())
-    create_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    update_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+    password_changed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    create_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    update_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     extra_data: Mapped[dict] = mapped_column(JSONB, server_default='{}')
 
     __table_args__ = (
@@ -94,8 +94,8 @@ class features(Base):
 class matrix_permission(Base):
     __tablename__ = "matrix_permission"
 
-    feature_id: Mapped[int] = mapped_column(ForeignKey("features.feature_id"), primary_key=True)
     role_id: Mapped[RoleType] = mapped_column(ForeignKey("roles.role_id"), primary_key=True)
+    feature_id: Mapped[int] = mapped_column(ForeignKey("features.feature_id"), primary_key=True)
     permission: Mapped[int] = mapped_column(BIGINT, default=0)
     extra_data: Mapped[dict] =  mapped_column(JSONB, server_default="{}")
 
@@ -114,4 +114,4 @@ class Outbox_Events(Base):
     payload: Mapped[dict] = mapped_column(JSONB) 
     
     status: Mapped[OutBoxStatus] = mapped_column(Integer, default=10, index=True)
-    create_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    create_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
