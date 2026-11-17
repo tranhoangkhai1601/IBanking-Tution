@@ -62,7 +62,7 @@ export async function initDashboard({ titleKey, render, requiresAuth = false }) 
 
     if (response.status === 401) {
       const refreshResponse = await fetch('/api/v1/auth/refresh',{
-        method: 'POST',
+        method: 'PUT',
         credentials: 'same-origin'
       });
 
@@ -76,10 +76,7 @@ export async function initDashboard({ titleKey, render, requiresAuth = false }) 
     if (response.status === 401) {
       const user = getUser();
       if (user?.isLoggedIn) {
-        localStorage.setItem(STORAGE_KEYS.user, JSON.stringify({
-          ...user,
-          isLoggedIn: false
-        }));
+        localStorage.removeItem(STORAGE_KEYS.user);
       }
 
       profileReady = true;
@@ -130,7 +127,7 @@ export async function initDashboard({ titleKey, render, requiresAuth = false }) 
     logout.disabled = true;
     try {
       const response = await fetch('/api/v1/auth/logout', {
-        method: 'POST',
+        method: 'DELETE',
         credentials: 'same-origin'
       });
       if (!response.ok) {
@@ -138,10 +135,7 @@ export async function initDashboard({ titleKey, render, requiresAuth = false }) 
       }
 
       const user = getUser() || {};
-      localStorage.setItem(STORAGE_KEYS.user, JSON.stringify({
-        ...user,
-        isLoggedIn: false
-      }));
+      localStorage.removeItem(STORAGE_KEYS.user);
       setMessage(statusElement, '');
       renderPage();
     } catch {

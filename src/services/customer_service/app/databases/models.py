@@ -3,7 +3,7 @@ from enum import IntEnum
 from datetime import datetime
 from decimal import Decimal
 import uuid
-from sqlalchemy import func, Index, String, Integer, Float, ForeignKey, UniqueConstraint, Numeric
+from sqlalchemy import func, Index, String, Integer, Float, ForeignKey, UniqueConstraint, Numeric, DateTime
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -41,9 +41,9 @@ class customers(Base):
     full_name: Mapped[str]
     status: Mapped[bool] = mapped_column(default=True)
     language: Mapped[LanguageType] = mapped_column(Integer)
-    create_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    update_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
-    delete_at: Mapped[datetime | None]
+    create_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    update_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    delete_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     description: Mapped[str | None]
     extra_data: Mapped[dict] = mapped_column(JSONB, server_default='{}')
 
@@ -60,7 +60,7 @@ class customer_details(Base):
     customer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("customers.customer_id"), index=True)
     account_num: Mapped[str] = mapped_column(String, unique=True)
     account_type: Mapped[AccountType] = mapped_column(Integer, default=AccountType.credit)
-    account_open_date: Mapped[datetime] = mapped_column(server_default=func.now())
+    account_open_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     balance: Mapped[Decimal] = mapped_column(Numeric(19, 4))
     # TODO: IF have register feat in the future, change default account_active to False
@@ -84,7 +84,7 @@ class transaction_lines(Base):
     entry_type: Mapped[EntryTypeEnum] = mapped_column(Integer)
     description: Mapped[str]
 
-    create_at: Mapped[datetime] = mapped_column(primary_key=True, server_default=func.now())
+    create_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), primary_key=True, server_default=func.now())
     extra_data: Mapped[dict] = mapped_column(JSONB, server_default='{}')
     
     __table_args__ = (
@@ -106,4 +106,4 @@ class outbox_events(Base):
     payload: Mapped[dict] = mapped_column(JSONB) 
     
     status: Mapped[OutBoxStatus] = mapped_column(Integer, default=10, index=True)
-    create_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    create_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

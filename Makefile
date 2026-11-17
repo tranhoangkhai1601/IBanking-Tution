@@ -43,7 +43,7 @@ test:
 	docker exec -it auth_service python -m pytest tests/test.py -v -p no:cacheprovider
 	docker exec -it customer_service python -m pytest tests/test.py -v -p no:cacheprovider
 	docker exec -it payment_service python -m pytest test.py -v -p no:cacheprovider
-	docker exec -it tuition_service python -m pytest test.py -v -p no:cacheprovider
+	docker exec -it tuition_service python -m pytest tests/test.py -v -p no:cacheprovider
 
 logs:
 	docker logs auth_service

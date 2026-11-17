@@ -4,6 +4,14 @@ import { APP_CONFIG, PAGE_PATHS, STORAGE_KEYS } from "../../config/config.js";
 import { validateLogin, EMAIL_PATTERN, PHONE_PATTERN } from "./auth-validation.js";
 import { initI18n, t, setMessage } from "../../i18n/i18n.js";
 
+const protectedRouter = () => {
+    const user = localStorage.getItem(STORAGE_KEYS.user);
+    if (user) {
+        window.location.replace(PAGE_PATHS.homepage);
+    }
+}
+protectedRouter();
+
 const form = document.getElementById("login-form");
 const loginButton = document.getElementById("login-submit");
 const statusMessage = document.getElementById("login-status");

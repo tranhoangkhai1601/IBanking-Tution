@@ -3,7 +3,7 @@ from datetime import datetime
 import uuid
 from enum import IntEnum
 from decimal import Decimal
-from sqlalchemy import Index, ForeignKey, String, Integer, Boolean, func, Numeric, PrimaryKeyConstraint, ForeignKeyConstraint
+from sqlalchemy import Index, ForeignKey, String, Integer, Boolean, func, Numeric, PrimaryKeyConstraint, ForeignKeyConstraint, DateTime
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -26,8 +26,8 @@ class OutBoxStatus(IntEnum):
     FAILED = 12
     PROCESSING = 13
 
-class Students(Base):
-    __tablename__ = "Students"
+class students(Base):
+    __tablename__ = "students"
 
     merchant_code: Mapped[MerchantType] = mapped_column(default=MerchantType.TDTU)
     student_id: Mapped[str] = mapped_column(String(50))
@@ -37,8 +37,8 @@ class Students(Base):
         PrimaryKeyConstraint("merchant_code", "student_id"),
     )
 
-class Tuition(Base):
-    __tablename__ = "Tuition"
+class tuition(Base):
+    __tablename__ = "tuition"
 
     tuition_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, server_default=func.uuidv7())
     student_id: Mapped[str] = mapped_column(String(50) ,index=True)
@@ -51,12 +51,12 @@ class Tuition(Base):
     semester: Mapped[int] = mapped_column(Integer) # TODO: 1 2 3
     academic_year: Mapped[int] = mapped_column(Integer)
     status: Mapped[statusType] = mapped_column(Integer)
-    expires_at: Mapped[datetime]
-    create_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    update_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    create_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    update_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     __table_args__ = (
-        ForeignKeyConstraint(["merchant_code", "student_id"], ["Students.merchant_code", "Students.student_id"]),
+        ForeignKeyConstraint(["merchant_code", "student_id"], ["students.merchant_code", "students.student_id"]),
     )
 
 
@@ -71,4 +71,4 @@ class Outbox_Events(Base):
     payload: Mapped[dict] = mapped_column(JSONB) 
     
     status: Mapped[OutBoxStatus] = mapped_column(Integer, default=10, index=True)
-    create_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    create_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

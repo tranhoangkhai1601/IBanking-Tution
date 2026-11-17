@@ -1,10 +1,11 @@
 
 from fastapi import APIRouter, status, HTTPException, Depends
 from services.customer_service import CustomerService, get_customer_service
+from databases.schema.customer import CustomerResponse
 
 customerRouter = APIRouter(prefix="/customers", tags=["Customers Core"])
 
-@customerRouter.get("/{customer_id}")
+@customerRouter.get("/{customer_id}", response_model=CustomerResponse)
 async def get_customer(customer_id: str,
                        customer_service: CustomerService = Depends(get_customer_service)):
     
@@ -22,12 +23,7 @@ async def get_customer(customer_id: str,
         "status": "success",
         "message": "Get customer info successful",
         "data": {
-            "customer_id": str(customer.customer_id),
-            "email": customer.email,
-            "phone": customer.phone,
-            "full_name": customer.full_name,
-            "status": customer.status,
-            "language": customer.language,
+            **customer.__dict__,
             "accounts": account_data
         }
     }
