@@ -1,4 +1,5 @@
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from config import config
 from databases.models import Base
@@ -18,6 +19,12 @@ async_session_local = async_sessionmaker(
 async def init_db():
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        await conn.execute(
+            text(
+                "CREATE TABLE IF NOT EXISTS transaction_lines_default "
+                "PARTITION OF transaction_lines DEFAULT"
+            )
+        )
 
 async def get_session() -> AsyncSession:
     async with async_session_local() as session:
