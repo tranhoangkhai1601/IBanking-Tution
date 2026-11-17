@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 from random import randint
 import uuid_utils as uuid
 from decimal import Decimal
+from sqlalchemy import update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from databases.models import statusType, MerchantType, students, tuition
@@ -13,6 +14,12 @@ middle = ["Hoàng", "Ngọc", "Hùng", "Gia", "Hoài", "Thảo"]
 last = ["Khải", "Phi", "Hoa", "Thịnh", "Phúc", "Nhi"]
 
 async def seed_tuition_data(session: AsyncSession):
+    await session.execute(
+        update(tuition)
+        .where(tuition.merchant_account_id == config.MERCHANT)
+        .values(merchant_account_id=config.MERCHANT_ACCOUNT_ID)
+    )
+
     students_data = []
     for i in range (20):
         students_data.append({
@@ -38,7 +45,7 @@ async def seed_tuition_data(session: AsyncSession):
             "tuition_id": uuid.uuid7(),
             "student_id": students_data[i]["student_id"],
             "merchant_code": MerchantType.TDTU,
-            "merchant_account_id": config.MERCHANT,
+            "merchant_account_id": config.MERCHANT_ACCOUNT_ID,
             "amount": Decimal(11_000_000),
             "semester": 1,
             "academic_year": 2026,
