@@ -25,7 +25,7 @@ class Base(DeclarativeBase):
     pass
 
 class Transactions(Base):
-    __tablename__ = "Transactions"
+    __tablename__ = "transactions"
 
     transaction_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, server_default=func.uuidv7())
     account_id: Mapped[uuid.UUID]# = mapped_column(index=True)
@@ -34,7 +34,7 @@ class Transactions(Base):
     description: Mapped[str] = mapped_column(String, nullable=True)
     status: Mapped[StatusType] = mapped_column(Integer)
     idempotency_key: Mapped[str] = mapped_column(unique=True)
-    create_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), primary_key=True, server_default=func.now())
+    create_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     update_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     extra_data: Mapped[dict] = mapped_column(JSONB, server_default="{}")
 
@@ -43,9 +43,6 @@ class Transactions(Base):
         Index("ix_transactions_account", "account_id"),
         Index("ix_transactions_status", "status"),
         Index("ix_transactions_extra", "extra_data", postgresql_using="gin"),
-        {
-            "postgresql_partition_by": "RANGE (create_at)"
-        },
     )
 
 class Outbox_Events(Base):
@@ -57,5 +54,5 @@ class Outbox_Events(Base):
     event_type: Mapped[str] = mapped_column(String(50)) 
     payload: Mapped[dict] = mapped_column(JSONB) 
     
-    status: Mapped[OutBoxStatus] = mapped_column(Integer, default=10, index=True)
+    status: Mapped[OutBoxStatus] = mapped_column(Integer, default=OutBoxStatus.NOTSEND, index=True)
     create_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
