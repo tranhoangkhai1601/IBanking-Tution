@@ -1,3 +1,4 @@
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from urllib.parse import quote
 
@@ -7,6 +8,7 @@ class Config(BaseSettings):
     REDIS_PASS: str
     REDIS_PORT: int
     TUITION_SERVICE_URL: str
+    NOTIFICATION_SERVICE_URL: str = "http://notification_service:8080"
     RABBITMQ_DEFAULT_USER: str
     RABBITMQ_DEFAULT_PASS: str
     RABBITMQ_HOST: str

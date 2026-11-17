@@ -40,8 +40,8 @@ class Config(BaseSettings):
 
     RABBITMQ_DEFAULT_USER: str
     RABBITMQ_DEFAULT_PASS: str
-    RABBITMQ_HOST: str = "ibanking_rabbitmq"
-    RABBITMQ_PORT: int = 5672
+    RABBITMQ_HOST: str
+    RABBITMQ_PORT: int
 
     model_config = SettingsConfigDict(extra="ignore")
 

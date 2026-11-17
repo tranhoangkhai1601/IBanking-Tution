@@ -14,6 +14,7 @@ class Config(BaseSettings):
     RABBITMQ_DEFAULT_PASS: str
     RABBITMQ_HOST: str
     RABBITMQ_PORT: int
+    NOTIFICATION_SERVICE_URL: str = "http://notification_service:8080"
 
     model_config = SettingsConfigDict(extra="ignore")
 

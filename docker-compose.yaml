@@ -105,7 +105,7 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     expose:
-      - ${RABBIT_PORT}
+      - ${RABBITMQ_PORT}
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 10s
@@ -186,6 +186,8 @@ services:
         condition: service_healthy
       ibanking_rabbitmq:
         condition: service_healthy
+      notification_service:
+        condition: service_healthy
     networks:
       - ibanking_network
       - data_net
@@ -212,8 +214,39 @@ services:
         condition: service_healthy
       ibanking_rabbitmq:
         condition: service_healthy
+      notification_service:
+        condition: service_healthy
     networks:
       - ibanking_network
       - data_net
     restart:
       unless-stopped
+
+  notification_service:
+    build:
+      context: ./src/services/notification-service
+      dockerfile: Dockerfile
+    container_name: notification_service
+    volumes:
+      - ./src/services/notification-service/app:/app
+    env_file:
+      - .env
+    environment:
+      - TZ=UTC
+      - PYTHONDONTWRITEBYTECODE=1
+    expose:
+      - "8080"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=2)",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ibanking_network
+    restart: unless-stopped
