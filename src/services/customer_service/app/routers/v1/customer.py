@@ -23,7 +23,7 @@ async def get_customer(customer_id: str,
         "status": "success",
         "message": "Get customer info successful",
         "data": {
-            **customer.__dict__,
+            **customer,
             "accounts": account_data
         }
     }
