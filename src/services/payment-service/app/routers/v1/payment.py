@@ -4,6 +4,7 @@ import uuid
 from fastapi import APIRouter, Depends, Header, status
 from databases.models import StatusType, Transactions
 from databases.schema.payment_response import (
+    OTPVerificationRequest,
     TuitionPaymentRequest,
     TuitionPaymentResponse,
 )
@@ -19,6 +20,8 @@ def _payment_response(transaction: Transactions) -> TuitionPaymentResponse:
         tuition_id=transaction.tuition_id,
         amount=transaction.amount,
         status=StatusType(transaction.status).name,
+        requires_otp=(transaction.extra_data or {}).get("payment_stage")
+        in {"OTP_PENDING", "OTP_VERIFIED"},
     )
 
 
@@ -30,6 +33,7 @@ def _payment_response(transaction: Transactions) -> TuitionPaymentResponse:
 async def create_tuition_payment(
     request: TuitionPaymentRequest,
     customer_id: uuid.UUID = Header(alias="X-Authenticated-Customer-ID"),
+    customer_email: str = Header(alias="X-Authenticated-Customer-Email"),
     idempotency_key: str = Header(
         alias="Idempotency-Key",
         min_length=1,
@@ -50,6 +54,7 @@ async def create_tuition_payment(
         idempotency_key=idempotency_key,
     )
     if existing is not None:
+        await service.send_payment_otp(existing.transaction_id)
         return _payment_response(existing)
 
     tuition_details = await service.get_tuition_payment_details(
@@ -59,12 +64,33 @@ async def create_tuition_payment(
     transaction = await service.process_payment(
         customer_id=customer_id,
         account_id=request.account_id,
+        customer_email=str(customer_email),
+        student_id=request.student_id,
         tuition_id=tuition_details.tuition_id,
         amount=tuition_details.amount,
         idempotency_key=idempotency_key,
         merchant_account_id=tuition_details.merchant_account_id,
         student_name=tuition_details.student_name,
         description=description,
+    )
+    await service.send_payment_otp(transaction.transaction_id)
+    return _payment_response(transaction)
+
+
+@payment_router.post(
+    "/{transaction_id}/verify-otp",
+    response_model=TuitionPaymentResponse,
+)
+async def verify_tuition_payment_otp(
+    transaction_id: uuid.UUID,
+    request: OTPVerificationRequest,
+    customer_id: uuid.UUID = Header(alias="X-Authenticated-Customer-ID"),
+    service: PaymentService = Depends(get_payment_service),
+):
+    transaction = await service.verify_payment_otp(
+        transaction_id,
+        request.otp_code,
+        customer_id=customer_id,
     )
     return _payment_response(transaction)
 

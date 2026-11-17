@@ -19,6 +19,11 @@ class TuitionPaymentResponse(BaseModel):
     tuition_id: UUID | None
     amount: Decimal
     status: str
+    requires_otp: bool = False
+
+
+class OTPVerificationRequest(BaseModel):
+    otp_code: str = Field(pattern=r"^[0-9]{6}$")
 
 
 class TuitionPaymentDetails(BaseModel):
