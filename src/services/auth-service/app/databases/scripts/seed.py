@@ -5,6 +5,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from databases.models import RoleType, roles, features, matrix_permission, auth_credentials
 from config import config
+from PermissionEnum import PermissionEnum, Feature
 
 
 # customer_id_1 = uuid.uuid7(config.CUSTOMER_1)
@@ -72,5 +73,36 @@ async def seed_auth_db(session: AsyncSession):
     stmt = stmt.on_conflict_do_nothing(index_elements=['customer_id'])
 
     await session.execute(stmt)
+    await session.flush()
+
+    feature = [
+        {"feature_id": Feature.USER, "feature_name": "UserFeature"},
+        {"feature_id": Feature.TUITION, "feature_name": "TuitionFeature"}
+    ]
+
+    stmt = insert(features).values(feature)
+
+    conn = stmt.on_conflict_do_nothing(index_elements=['feature_name'])
+    await session.execute(conn)
+    await session.flush()
+
+    matrix = [
+        {"role_id": RoleType.customer, "feature_id": Feature.USER, "permission": int(PermissionEnum.VIEW | PermissionEnum.EDIT)},
+        {"role_id": RoleType.inactive_customer, "feature_id": Feature.USER,"permission": int(PermissionEnum.VIEW)},
+        {"role_id": RoleType.moderator, "feature_id": Feature.USER,"permission": int(PermissionEnum.VIEW | PermissionEnum.ADD | PermissionEnum.EDIT | PermissionEnum.BANNED)},
+        {"role_id": RoleType.bank_teller, "feature_id": Feature.USER,"permission": int(PermissionEnum.VIEW)},
+        {"role_id": RoleType.merchant, "feature_id": Feature.USER,"permission": int(PermissionEnum.VIEW | PermissionEnum.EDIT)},
+
+        {"role_id": RoleType.customer, "feature_id": Feature.TUITION, "permission": int(PermissionEnum.VIEW | PermissionEnum.APPROVE)},
+        {"role_id": RoleType.inactive_customer, "feature_id": Feature.TUITION,"permission": int(PermissionEnum.NONE)},
+        {"role_id": RoleType.moderator, "feature_id": Feature.TUITION,"permission": int(PermissionEnum.VIEW | PermissionEnum.ADD | PermissionEnum.EDIT | PermissionEnum.REFUND | PermissionEnum.BANNED)},
+        {"role_id": RoleType.bank_teller, "feature_id": Feature.TUITION,"permission": int(PermissionEnum.VIEW)},
+        {"role_id": RoleType.merchant, "feature_id": Feature.TUITION,"permission": int(PermissionEnum.VIEW)},
+    ]
+
+    stmt = insert(matrix_permission).values(matrix)
+
+    conn = stmt.on_conflict_do_nothing(index_elements=['role_id', 'feature_id'])
+    await session.execute(conn)
     await session.flush()
 
