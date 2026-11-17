@@ -135,6 +135,12 @@
                       role="alert"
                     ></p>
                   </div>
+                  <div class="info-group" id="tuition-selection-group" hidden>
+                    <label for="tuition-select" data-i18n="dashboardSelectTuition">
+                      Tuition semester:
+                    </label>
+                    <select id="tuition-select" class="input-field"></select>
+                  </div>
                   <div class="tuition-details">
                     <div class="info-group">
                       <label data-i18n="dashboardStudentName"
@@ -231,6 +237,15 @@
                 role="status"
                 aria-atomic="true"
               ></p>
+              <button
+                type="button"
+                id="btn-check-payment"
+                class="primary-button"
+                data-i18n="dashboardCheckPaymentStatus"
+                hidden
+              >
+                Check payment status
+              </button>
             </section>
           </div>
         </main>

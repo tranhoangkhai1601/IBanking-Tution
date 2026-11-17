@@ -1,5 +1,5 @@
 
-from fastapi import APIRouter, status, HTTPException, Depends
+from fastapi import APIRouter, status, HTTPException, Depends, Response
 from services.customer_service import CustomerService, get_customer_service
 from databases.schema.customer import CustomerResponse
 
@@ -23,7 +23,21 @@ async def get_customer(customer_id: str,
         "status": "success",
         "message": "Get customer info successful",
         "data": {
-            **customer.__dict__,
+            **customer,
             "accounts": account_data
         }
+    }
+
+
+@customerRouter.get("/{customer_id}/transactions")
+async def get_customer_transaction_history(
+    customer_id: str,
+    response: Response,
+    customer_service: CustomerService = Depends(get_customer_service),
+):
+    response.headers["Cache-Control"] = "no-store"
+    history = await customer_service.get_transaction_history(customer_id)
+    return {
+        "status": "success",
+        "data": history,
     }

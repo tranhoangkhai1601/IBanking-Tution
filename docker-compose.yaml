@@ -62,6 +62,8 @@ services:
     container_name: gateway
     environment:
       - TZ=UTC
+    ports:
+      - "8080:8080"
     # TODO: In production ignore volumes :))
     volumes:
       - ./src/services/api-gateway/app:/app

@@ -22,6 +22,10 @@ class Configs(BaseSettings):
     MERCHANT: str
     PASSWORD: str = "123456"
 
+    REDIS_HOST: str
+    REDIS_PASS: str
+    REDIS_PORT: str
+
     model_config = SettingsConfigDict(extra="ignore")
 
 config = Configs()

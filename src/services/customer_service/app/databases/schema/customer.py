@@ -6,6 +6,7 @@ from typing import List
 from databases.models import AccountType, LanguageType
 
 class AccountOut(BaseModel):
+    account_id: uuid.UUID
     account_num: str
     account_type: str
     balance: Decimal
