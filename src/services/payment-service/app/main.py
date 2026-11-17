@@ -1,7 +1,7 @@
 
 from fastapi import FastAPI, status
 from contextlib import asynccontextmanager
-from database import async_session_local, async_engine, init_db, get_session
+from databases.database import async_session_local, async_engine, init_db, get_session, redis_client
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -13,6 +13,7 @@ async def lifespan(app: FastAPI):
             pass
 
     yield
+    await redis_client.aclose()
     await async_engine.dispose()
 
 
