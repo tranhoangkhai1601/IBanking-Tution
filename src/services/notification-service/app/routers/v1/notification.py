@@ -40,7 +40,7 @@ def create_otp_notification(request: OTPRequest) -> EmailResponse:
     except OSError as exc:
         raise HTTPException(
             status_code=502,
-            detail="Không gửi được email OTP qua SMTP",
+            detail="Can not sent OTP",
         ) from exc
 
-    return EmailResponse(message="Đã gửi email OTP")
+    return EmailResponse(message="Already sent OTP")
