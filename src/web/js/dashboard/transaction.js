@@ -1,24 +1,20 @@
-import { STORAGE_KEYS } from '../../config/config.js';
 import { formatVND, getUser, initDashboard } from './dashboard-shell.js';
 import {
-  getAccountDisplayId, getAccountKey, getCustomerAccounts, getUserKey,
-  readStoredTransactionHistory
+  getAccountDisplayId, getAccountKey, getCustomerAccounts,
 } from './customer-accounts.js';
+import { STORAGE_KEYS } from '../../config/config.js';
 import { setMessage, t } from '../../i18n/i18n.js';
 
-const mockTuitionDatabase = {
-  "523V0003": { name: "Trần Hoàng Khải", amount: 3500000, semester: 'HK1/2026-2027', status: 'UNPAID' },
-  "524K0008": { name: "Vũ Hùng Phi", amount: 4200000, semester: 'HK1/2026-2027', status: 'UNPAID' },
-  "524K0031": { name: "Đinh Ngọc Hoa", amount: 5000000, semester: 'HK1/2026-2027', status: 'UNPAID' },
-  "524K0032": { name: "Trường Giang", amount: 15000000, semester: 'HK1/2026-2027', status: 'UNPAID' },
-  "524K0034": { name: "Sinh viên mẫu", amount: 3500000, semester: 'HK1/2026-2027', status: 'PAID' }
-};
-
 let currentTuition = null;
+let availableTuitions = [];
 let paymentAccount = null;
 let isProcessing = false;
+let pendingPayment = null;
+let currentPaymentIdempotencyKey = null;
 const studentIdInput = document.getElementById('mssv-input');
 const searchButton = document.getElementById('btn-search');
+const tuitionSelect = document.getElementById('tuition-select');
+const checkPaymentButton = document.getElementById('btn-check-payment');
 const termsCheckbox = document.getElementById('chk-terms');
 const confirmButton = document.getElementById('btn-confirm-tx');
 const descriptionInput = document.getElementById('payment-description');
@@ -49,8 +45,11 @@ function renderTransactionPageAuth(isLoggedIn, user) {
   document.getElementById('btn-logout').disabled = isProcessing;
   studentIdInput.disabled = formDisabled;
   searchButton.disabled = formDisabled;
+  tuitionSelect.disabled = formDisabled;
   descriptionInput.disabled = formDisabled;
   termsCheckbox.disabled = formDisabled || !paymentAccount;
+  checkPaymentButton.hidden = !payer || !pendingPayment;
+  checkPaymentButton.disabled = isProcessing;
 
   if (!payer) {
     studentIdInput.value = '';
@@ -76,11 +75,21 @@ function setPaymentMessage(key, isError = false, values) {
 
 function resetPaymentState() {
   currentTuition = null;
+  availableTuitions = [];
+  currentPaymentIdempotencyKey = null;
+  tuitionSelect.replaceChildren();
+  document.getElementById('tuition-selection-group').hidden = true;
   termsCheckbox.checked = false;
 
   renderTuitionDetails();
   setLookupMessage('');
-  setPaymentMessage('');
+  if (pendingPayment) {
+    setPaymentMessage('dashboardPaymentPending', false, {
+      transactionId: pendingPayment.transactionId
+    });
+  } else {
+    setPaymentMessage('');
+  }
   validateTransactionState();
 }
 
@@ -88,7 +97,11 @@ function renderTuitionDetails() {
   const amountDue = currentTuition?.status === 'UNPAID' ? currentTuition.amount : 0;
   const formattedFee = formatVND(amountDue);
   const status = currentTuition
-    ? t(currentTuition.status === 'PAID' ? 'dashboardPaid' : 'dashboardUnpaid')
+    ? t({
+      PAID: 'dashboardPaid',
+      PENDING: 'dashboardHistoryPending',
+      UNPAID: 'dashboardUnpaid'
+    }[currentTuition.status] ?? 'dashboardUnpaid')
     : '-';
   const details = {
     'student-name': currentTuition?.name ?? '-',
@@ -103,17 +116,87 @@ function renderTuitionDetails() {
   }
 }
 
-function hasSuccessfulPayment(tuition, history, userKey) {
-  return history.some(item => item?.payerKey === userKey &&
-    item.studentId === tuition.studentId && item.semester === tuition.semester &&
-    item.status === 'Success');
+async function checkPendingPaymentStatus() {
+  if (!pendingPayment || isProcessing) return;
+  isProcessing = true;
+  checkPaymentButton.disabled = true;
+  try {
+    const payment = await getPaymentStatus(pendingPayment.transactionId);
+    if (payment.status === 'PENDING') {
+      setPaymentMessage('dashboardPaymentPending', false, {
+        transactionId: pendingPayment.transactionId
+      });
+      return;
+    }
+    await applyPaymentStatus(payment, pendingPayment.tuition);
+  } catch (error) {
+    setPaymentError(
+      error instanceof Error ? error.message : t('dashboardPaymentError')
+    );
+  } finally {
+    isProcessing = false;
+    const user = getUser();
+    renderTransactionPageAuth(Boolean(user?.isLoggedIn), user);
+  }
 }
 
 function getStudentId() {
   return studentIdInput.value.trim().toUpperCase();
 }
 
-function searchTuition() {
+class ApiRequestError extends Error {
+  constructor(status, detail) {
+    super(detail || `Request failed (${status})`);
+    this.status = status;
+  }
+}
+
+async function fetchApiJson(url, options = {}) {
+  const requestOptions = { ...options, credentials: 'same-origin' };
+  let response = await fetch(url, requestOptions);
+
+  if (response.status === 401) {
+    const refreshResponse = await fetch('/api/v1/auth/refresh', {
+      method: 'PUT',
+      credentials: 'same-origin'
+    });
+    if (refreshResponse.ok) {
+      response = await fetch(url, requestOptions);
+    }
+  }
+
+  let responseBody;
+  try {
+    responseBody = await response.json();
+  } catch {
+    responseBody = null;
+  }
+  if (!response.ok) {
+    throw new ApiRequestError(
+      response.status,
+      typeof responseBody?.detail === 'string' ? responseBody.detail : ''
+    );
+  }
+  if (!responseBody || typeof responseBody !== 'object') {
+    throw new Error('The server returned an invalid response.');
+  }
+  return responseBody;
+}
+
+function setPaymentError(message) {
+  const element = document.getElementById('payment-message');
+  delete element.dataset.i18n;
+  element.classList.add('status-message--error');
+  element.textContent = message || t('dashboardPaymentError');
+}
+
+function setSelectedTuition(index) {
+  currentTuition = availableTuitions[index] ?? null;
+  renderTuitionDetails();
+  validateTransactionState();
+}
+
+async function searchTuition() {
   if (isProcessing) return;
   const mssv = getStudentId();
 
@@ -124,27 +207,89 @@ function searchTuition() {
     return;
   }
 
-  // Khi nối backend, tra cứu học phí theo mã sinh viên và dùng số tiền, học kỳ, trạng thái từ API.
-  const data = mockTuitionDatabase[mssv];
-  if (!data) {
-    setLookupMessage('dashboardTuitionNotFound');
-    return;
-  }
+  isProcessing = true;
+  renderTransactionPageAuth(true, getUser());
+  setMessage(searchButton, 'dashboardLookingUpTuition');
+  try {
+    const data = await fetchApiJson(
+      `/api/v1/tuition/${encodeURIComponent(mssv)}`
+    );
+    if (
+      typeof data.student_id !== 'string' ||
+      typeof data.name !== 'string' ||
+      data.student_id.toUpperCase() !== mssv ||
+      !Array.isArray(data.details)
+    ) {
+      throw new Error('The tuition service returned invalid student data.');
+    }
 
-  currentTuition = { ...data, studentId: mssv };
-  if (hasSuccessfulPayment(
-    currentTuition,
-    readStoredTransactionHistory() ?? [],
-    getUserKey(getUser())
-  )) {
-    currentTuition.status = 'PAID';
+    availableTuitions = data.details.map(item => {
+      const amount = Number(item?.amount);
+      const semesterIsValid =
+        (typeof item?.semester === 'string' && item.semester.trim().length > 0) ||
+        (typeof item?.semester === 'number' && Number.isFinite(item.semester));
+      if (
+        typeof item?.tuition_id !== 'string' ||
+        !semesterIsValid ||
+        item.status !== 'UNPAID' ||
+        !Number.isFinite(amount) ||
+        amount <= 0
+      ) {
+        throw new Error('The tuition service returned invalid tuition data.');
+      }
+      return {
+        tuitionId: item.tuition_id,
+        studentId: data.student_id,
+        name: data.name,
+        semester: String(item.semester),
+        amount,
+        status: pendingPayment?.tuition.tuitionId === item.tuition_id
+          ? 'PENDING'
+          : item.status
+      };
+    });
+
+    tuitionSelect.replaceChildren();
+    availableTuitions.forEach((item, index) => {
+      const option = document.createElement('option');
+      option.value = String(index);
+      option.textContent = `${item.semester} — ${formatVND(item.amount)}`;
+      tuitionSelect.append(option);
+    });
+    document.getElementById('tuition-selection-group').hidden =
+      availableTuitions.length < 2;
+
+    if (availableTuitions.length > 0) {
+      setSelectedTuition(0);
+    } else {
+      currentTuition = {
+        studentId: data.student_id,
+        name: data.name,
+        semester: '-',
+        amount: 0,
+        status: 'PAID'
+      };
+      renderTuitionDetails();
+      validateTransactionState();
+      setPaymentMessage('dashboardNoOutstandingTuition');
+    }
+  } catch (error) {
+    if (error instanceof ApiRequestError && error.status === 404) {
+      setLookupMessage('dashboardTuitionNotFound');
+    } else {
+      setLookupMessage('dashboardTuitionLookupError');
+    }
+  } finally {
+    isProcessing = false;
+    setMessage(searchButton, 'dashboardLookUp');
+    const user = getUser();
+    renderTransactionPageAuth(Boolean(user?.isLoggedIn), user);
   }
-  renderTuitionDetails();
-  validateTransactionState();
 }
 
 function validateTransactionState() {
-  const hasTuition = currentTuition?.status === 'UNPAID' && currentTuition.amount > 0;
+  const hasTuition = currentTuition?.status === 'UNPAID' &&
+    currentTuition.amount > 0 && Boolean(currentTuition.tuitionId);
   const isEnoughBalance = paymentAccount && paymentAccount.balance >= (currentTuition?.amount ?? 0);
 
   let warning = '';
@@ -187,91 +332,120 @@ function submitTransaction() {
     return;
   }
 
-  const description = descriptionInput.value.trim();
   setPaymentMessage('');
   isProcessing = true;
   renderTransactionPageAuth(true, payer);
 
-  // Khi nối backend, thay bộ hẹn giờ bằng API thanh toán, gửi account_id và thông tin khoản học phí đã tra cứu.
-  // Máy chủ kiểm tra quyền dùng tài khoản, số dư và giao dịch trùng; xác minh OTP nếu luồng thanh toán yêu cầu.
-  setTimeout(async () => {
-    try {
-      const finish = () => completePayment(getUserKey(payer), accountKey, tuition, description);
-      if (navigator.locks) {
-        await navigator.locks.request(STORAGE_KEYS.transactionHistory, finish);
-      } else {
-        finish();
-      }
-    } catch {
-      setPaymentMessage('dashboardPaymentError', true);
-    } finally {
-      isProcessing = false;
-      const user = getUser();
-      renderTransactionPageAuth(Boolean(user?.isLoggedIn), user);
-    }
-  }, 800);
+  processTuitionPayment(tuition, selectedAccount, descriptionInput.value.trim());
 }
 
-function completePayment(payerKey, paymentAccountKey, tuition, description) {
-  const user = getUser();
-  if (!user?.isLoggedIn || getUserKey(user) !== payerKey) {
-    resetPaymentState();
-    setPaymentMessage('dashboardSessionChanged', true);
-    return;
+async function refreshCustomerProfile() {
+  const response = await fetchApiJson('/api/v1/customers/me');
+  const customer = response?.data;
+  if (
+    !customer ||
+    typeof customer.customer_id !== 'string' ||
+    !Array.isArray(customer.accounts)
+  ) {
+    throw new Error('The customer service returned an invalid profile.');
   }
-
-  const storedHistory = readStoredTransactionHistory();
-  if (storedHistory === null) {
-    setPaymentMessage('dashboardPaymentError', true);
-    return;
-  }
-
-  const history = storedHistory ?? [];
-  const { selectedAccount } = getCustomerAccounts(user, history);
-  if (getAccountKey(selectedAccount) !== paymentAccountKey) {
-    termsCheckbox.checked = false;
-    setPaymentMessage('dashboardPaymentAccountChanged', true);
-    return;
-  }
-
-  if (hasSuccessfulPayment(tuition, history, getUserKey(user))) {
-    currentTuition = { ...tuition, status: 'PAID' };
-    setPaymentMessage('dashboardAlreadyPaid');
-    return;
-  }
-
-  if (selectedAccount.balance < tuition.amount) return;
-
-  const today = new Date();
-  const dateStr = String(today.getDate()).padStart(2, '0') + '/' +
-    String(today.getMonth() + 1).padStart(2, '0') + '/' +
-    today.getFullYear();
-  const newTx = {
-    date: dateStr,
-    studentName: tuition.name,
-    description,
-    studentId: tuition.studentId,
-    semester: tuition.semester,
-    amount: -tuition.amount,
-    status: 'Success',
-    payerKey,
-    paymentAccountKey,
-    paymentAccount: {
-      accountNumber: getAccountDisplayId(selectedAccount)
-    }
+  const updatedUser = {
+    ...getUser(),
+    ...customer,
+    isLoggedIn: true
   };
+  localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(updatedUser));
+  renderTransactionPageAuth(true, updatedUser);
+}
 
-  // Bản demo dùng cùng một bản ghi cho lịch sử và khoản trừ. Khi nối API, cập nhật theo giao dịch và số dư máy chủ trả về.
-  localStorage.setItem(STORAGE_KEYS.transactionHistory, JSON.stringify([newTx, ...history]));
-  setPaymentMessage('dashboardPaymentSuccess', false, {
-    student: tuition.name,
-    amount: formatVND(tuition.amount),
-    balance: formatVND(selectedAccount.balance - tuition.amount)
-  });
+async function getPaymentStatus(transactionId) {
+  const payment = await fetchApiJson(
+    `/api/v1/payments/${encodeURIComponent(transactionId)}`
+  );
+  if (payment.transaction_id !== transactionId) {
+    throw new Error('The payment service returned a different transaction.');
+  }
+  if (!['PENDING', 'SUCCESS', 'FAILED'].includes(payment.status)) {
+    throw new Error('The payment service returned an unknown status.');
+  }
+  return payment;
+}
 
-  currentTuition = { ...tuition, status: 'PAID' };
+async function applyPaymentStatus(payment, tuition) {
+  pendingPayment = null;
+  currentPaymentIdempotencyKey = null;
+  checkPaymentButton.hidden = true;
+  if (payment.status === 'FAILED') {
+    if (currentTuition?.tuitionId === tuition.tuitionId) {
+      currentTuition = { ...tuition, status: 'UNPAID' };
+    }
+    setPaymentMessage('dashboardPaymentFailed', true);
+    return;
+  }
+
+  if (currentTuition?.tuitionId === tuition.tuitionId) {
+    currentTuition = { ...tuition, status: 'PAID' };
+  }
   termsCheckbox.checked = false;
   descriptionInput.value = '';
+  try {
+    await refreshCustomerProfile();
+    setPaymentMessage('dashboardPaymentSuccess', false, {
+      student: tuition.name,
+      amount: formatVND(tuition.amount)
+    });
+  } catch {
+    setPaymentMessage('dashboardPaymentSuccessRefreshError', false, {
+      student: tuition.name,
+      amount: formatVND(tuition.amount)
+    });
+  }
+  renderTuitionDetails();
+  validateTransactionState();
+}
+
+async function processTuitionPayment(tuition, selectedAccount, description) {
+  try {
+    currentPaymentIdempotencyKey ??= crypto.randomUUID();
+    const createdPayment = await fetchApiJson('/api/v1/payments/tuition', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Idempotency-Key': currentPaymentIdempotencyKey
+      },
+      body: JSON.stringify({
+        account_id: getAccountKey(selectedAccount),
+        student_id: tuition.studentId,
+        tuition_id: tuition.tuitionId,
+        description
+      })
+    });
+    if (typeof createdPayment.transaction_id !== 'string') {
+      throw new Error('The payment service returned an invalid transaction.');
+    }
+    pendingPayment = {
+      transactionId: createdPayment.transaction_id,
+      tuition
+    };
+    checkPaymentButton.hidden = false;
+
+    if (currentTuition?.tuitionId === tuition.tuitionId) {
+      currentTuition = { ...tuition, status: 'PENDING' };
+    }
+    setPaymentMessage('dashboardPaymentPending', false, {
+      transactionId: createdPayment.transaction_id
+    });
+    renderTuitionDetails();
+    validateTransactionState();
+  } catch (error) {
+    setPaymentError(
+      error instanceof Error ? error.message : t('dashboardPaymentError')
+    );
+  } finally {
+    isProcessing = false;
+    const user = getUser();
+    renderTransactionPageAuth(Boolean(user?.isLoggedIn), user);
+  }
 }
 
 const ready = await initDashboard({
@@ -282,6 +456,11 @@ const ready = await initDashboard({
 
 if (ready) {
   searchButton.addEventListener('click', searchTuition);
+  checkPaymentButton.addEventListener('click', checkPendingPaymentStatus);
+  tuitionSelect.addEventListener('change', () => {
+    setSelectedTuition(Number(tuitionSelect.value));
+    termsCheckbox.checked = false;
+  });
   termsCheckbox.addEventListener('change', validateTransactionState);
   confirmButton.addEventListener('click', submitTransaction);
 
@@ -290,6 +469,9 @@ if (ready) {
     const cleaned = studentIdInput.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
     if (cleaned !== studentIdInput.value) studentIdInput.value = cleaned;
     resetPaymentState();
+  });
+  descriptionInput.addEventListener('input', () => {
+    if (!pendingPayment) currentPaymentIdempotencyKey = null;
   });
 
   studentIdInput.addEventListener('keydown', event => {

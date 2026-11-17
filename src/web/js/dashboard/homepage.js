@@ -1,4 +1,4 @@
-import { formatVND, initDashboard, renderAccountStatus } from './dashboard-shell.js';
+import { formatVND, getUser, initDashboard, renderAccountStatus } from './dashboard-shell.js';
 import { setMessage, t } from '../../i18n/i18n.js';
 import {
   canPayWithAccount, getAccountDisplayId, getAccountKey, getCustomerAccounts, getUserKey,
@@ -17,6 +17,17 @@ const historyDetailDialog = document.getElementById('history-detail-dialog');
 const visibleRowLimit = 3;
 const limitAccountRows = createRowLimiter(accountList);
 const limitHistoryRows = createRowLimiter(historyContainerEl);
+let historyCustomerId = null;
+let customerHistory = null;
+let historyRequestCustomerId = null;
+let historyRequestVersion = 0;
+
+function resetCustomerHistory() {
+  historyCustomerId = null;
+  customerHistory = null;
+  historyRequestCustomerId = null;
+  historyRequestVersion += 1;
+}
 
 function createRowLimiter(container) {
   let first;
@@ -99,15 +110,13 @@ function renderHomeAccounts(user, { accounts, isDemo, selectedAccount }) {
   setMessage(status, items.length ? '' : emptyMessage);
 }
 
-function showHistoryDetails(item, { student, amount, accountNumber, statusKey, statusClass, ownsPayment }) {
-  const canShowStudentDetails = !item.payerKey || ownsPayment;
+function showHistoryDetails(item, { student, amount, accountNumber, statusKey, statusClass }) {
   const fields = {
     date: item.date,
     student,
-    'student-id': canShowStudentDetails ? item.studentId : null,
-    semester: canShowStudentDetails ? item.semester : null,
     amount,
-    account: accountNumber
+    account: accountNumber,
+    'merchant-account': item.merchantAccountNumber
   };
   for (const [name, value] of Object.entries(fields)) {
     document.getElementById(`history-detail-${name}`).textContent = value || '—';
@@ -119,7 +128,7 @@ function showHistoryDetails(item, { student, amount, accountNumber, statusKey, s
   if (!statusKey) status.textContent = item.status || '—';
 
   const detail = document.getElementById('history-detail-description');
-  const description = ownsPayment && typeof item.description === 'string' ? item.description.trim() : '';
+  const description = typeof item.description === 'string' ? item.description.trim() : '';
   setMessage(detail, description ? '' : 'dashboardHistoryNoDescription');
   if (description) detail.textContent = description;
   historyDetailDialog.showModal();
@@ -127,7 +136,9 @@ function showHistoryDetails(item, { student, amount, accountNumber, statusKey, s
 
 function renderHistoryRow(body, item, accountsByKey, userAccountNumber) {
   const row = body.insertRow();
-  const student = item.studentName ?? (item.content === 'Tuition payment' ? '' : item.content);
+  const student = item.studentName ??
+    (item.content === 'Tuition payment' ? item.description : item.content) ??
+    item.description;
   row.insertCell().textContent = item.date || '—';
   row.insertCell().textContent = student || '—';
 
@@ -141,9 +152,8 @@ function renderHistoryRow(body, item, accountsByKey, userAccountNumber) {
   }
 
   const ownsPayment = Boolean(item.payerKey && item.payerKey === userAccountNumber);
-  const paymentAccount = ownsPayment
-    ? item.paymentAccount ?? accountsByKey.get(item.paymentAccountKey)
-    : null;
+  const paymentAccount = item.paymentAccount ??
+    (ownsPayment ? accountsByKey.get(item.paymentAccountKey) : null);
   const accountCell = row.insertCell();
   accountCell.className = 'history-payment-account';
   accountCell.textContent = getAccountDisplayId(paymentAccount) || '—';
@@ -165,8 +175,7 @@ function renderHistoryRow(body, item, accountsByKey, userAccountNumber) {
     amount: amountCell.textContent,
     accountNumber: getAccountDisplayId(paymentAccount),
     statusKey,
-    statusClass,
-    ownsPayment
+    statusClass
   }));
   row.insertCell().append(button);
 }
@@ -192,11 +201,18 @@ function renderTransactionHistory(history, user, accounts) {
 
   if (!history?.length) {
     const message = document.createElement('p');
+    const isLoading = history === undefined;
     const isError = history === null;
     message.className = 'status-message';
     message.classList.toggle('status-message--error', isError);
     message.setAttribute('role', isError ? 'alert' : 'status');
-    message.textContent = t(isError ? 'dashboardHistoryError' : 'dashboardHistoryEmpty');
+    message.textContent = t(
+      isLoading
+        ? 'dashboardHistoryLoading'
+        : isError
+          ? 'dashboardHistoryError'
+          : 'dashboardHistoryEmpty'
+    );
     historyContainerEl.replaceChildren(message);
     return;
   }
@@ -208,7 +224,7 @@ function renderTransactionHistory(history, user, accounts) {
           <th scope="col">${t('dashboardHistoryDate')}</th>
           <th scope="col">${t('dashboardHistoryStudent')}</th>
           <th scope="col">${t('dashboardHistoryAmount')}</th>
-          <th scope="col">${t('dashboardPaymentAccount')}</th>
+          <th scope="col">${t('dashboardPayerAccount')}</th>
           <th scope="col">${t('dashboardHistoryStatus')}</th>
           <th scope="col">${t('dashboardHistoryDetail')}</th>
         </tr>
@@ -228,19 +244,111 @@ function renderTransactionHistory(history, user, accounts) {
 
 function renderHomePageAuth(isLoggedIn, user) {
   if (!isLoggedIn) {
+    resetCustomerHistory();
     renderHomeAccounts(null, { accounts: [], isDemo: false });
     renderTransactionHistory(null, null, []);
     return;
   }
 
-  // Khi nối backend, tải lịch sử theo khách hàng đã xác thực; dùng giao dịch và tài khoản thanh toán từ API.
   const storedHistory = readStoredTransactionHistory();
   const { accounts, isDemo, selectedAccount } = getCustomerAccounts(user, storedHistory ?? []);
   renderHomeAccounts(user, { accounts, isDemo, selectedAccount });
 
-  const history = storedHistory === undefined
-    ? (isDemo ? demoHistory : [])
-    : storedHistory;
-  renderTransactionHistory(history, user, accounts);
+  if (isDemo) {
+    resetCustomerHistory();
+    renderTransactionHistory(demoHistory, user, accounts);
+    return;
+  }
+
+  if (historyCustomerId !== user.customer_id) {
+    resetCustomerHistory();
+    historyCustomerId = user.customer_id;
+  }
+  if (Array.isArray(customerHistory)) {
+    renderTransactionHistory(customerHistory, user, accounts);
+    return;
+  }
+
+  renderTransactionHistory(undefined, user, accounts);
+  if (historyRequestCustomerId === user.customer_id) return;
+  const requestedCustomerId = user.customer_id;
+  historyRequestCustomerId = requestedCustomerId;
+  const requestVersion = ++historyRequestVersion;
+
+  void (async () => {
+    try {
+      let response = await fetch('/api/v1/customers/me/transactions', {
+        credentials: 'same-origin',
+        cache: 'no-store'
+      });
+      if (response.status === 401) {
+        const refreshResponse = await fetch('/api/v1/auth/refresh', {
+          method: 'PUT',
+          credentials: 'same-origin'
+        });
+        if (refreshResponse.ok) {
+          response = await fetch('/api/v1/customers/me/transactions', {
+            credentials: 'same-origin',
+            cache: 'no-store'
+          });
+        }
+      }
+      if (!response.ok) {
+        throw new Error(`Transaction history request failed: ${response.status}`);
+      }
+      const body = await response.json();
+      if (!Array.isArray(body?.data)) {
+        throw new Error('Transaction history response has an invalid shape.');
+      }
+      const fetchedHistory = body.data.map(item => {
+        const amount = Number(item.amount);
+        if (
+          typeof item.transaction_id !== 'string' ||
+          typeof item.date !== 'string' ||
+          !Number.isFinite(amount) ||
+          typeof item.status !== 'string'
+        ) {
+          throw new Error('Transaction history contains an invalid entry.');
+        }
+        return { ...item, amount };
+      });
+      if (
+        historyCustomerId === requestedCustomerId &&
+        historyRequestVersion === requestVersion
+      ) {
+        customerHistory = fetchedHistory;
+      }
+    } catch {
+      if (
+        historyCustomerId === requestedCustomerId &&
+        historyRequestVersion === requestVersion
+      ) {
+        customerHistory = null;
+      }
+    } finally {
+      if (
+        historyRequestCustomerId === requestedCustomerId &&
+        historyRequestVersion === requestVersion
+      ) {
+        historyRequestCustomerId = null;
+      }
+      if (
+        historyCustomerId !== requestedCustomerId ||
+        historyRequestVersion !== requestVersion
+      ) return;
+      const currentUser = getUser();
+      if (currentUser?.customer_id !== requestedCustomerId) return;
+      const latestAccounts = getCustomerAccounts(currentUser).accounts;
+      renderTransactionHistory(customerHistory, currentUser, latestAccounts);
+    }
+  })();
 }
+
+window.addEventListener('pageshow', event => {
+  if (!event.persisted) return;
+  resetCustomerHistory();
+  const user = getUser();
+  renderHomePageAuth(Boolean(user?.isLoggedIn), user);
+});
+
 await initDashboard({ titleKey: 'dashboardHome', render: renderHomePageAuth });
