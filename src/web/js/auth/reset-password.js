@@ -1,0 +1,214 @@
+import "../components/auth-brand.js";
+import "../components/language-switch.js";
+
+import { APP_CONFIG } from "../../config/config.js";
+import { validateResetPassword } from "./auth-validation.js";
+import { initI18n, t, setMessage } from "../../i18n/i18n.js";
+import { clearRecoveryFlow, requireRecoveryStep } from "./recovery-storage.js";
+
+const recovery = requireRecoveryStep("reset");
+
+const form = document.getElementById("reset-password-form");
+const submitButton = document.getElementById("reset-password-submit");
+const statusMessage = document.getElementById("reset-password-status");
+const pageError = document.getElementById("reset-page-error");
+const formView = document.getElementById("reset-form-view");
+const successView = document.getElementById("reset-success");
+const successTitle = document.getElementById("reset-success-title");
+const authPanel = form.closest(".auth-panel");
+
+const inputs = {
+    password: document.getElementById("new-password"),
+    confirmPassword: document.getElementById("confirm-password")
+};
+
+const errorElements = {
+    password: document.getElementById("new-password-error"),
+    confirmPassword: document.getElementById("confirm-password-error")
+};
+
+inputs.password.minLength = APP_CONFIG.minPasswordLength;
+
+let hasSubmitted = false;
+let isComplete = false;
+
+window.addEventListener("pageshow", (event) => {
+    if (event.persisted && !isComplete) requireRecoveryStep("reset");
+});
+
+function readForm() {
+    return validateResetPassword({
+        password: inputs.password.value,
+        confirmPassword: inputs.confirmPassword.value
+    });
+}
+
+function displayErrors(errors) {
+    for (const name of Object.keys(inputs)) {
+        const message = errors[name] || "";
+
+        inputs[name].setAttribute(
+            "aria-invalid",
+            String(Boolean(message))
+        );
+
+        errorElements[name].textContent = message;
+        errorElements[name].hidden = !message;
+    }
+}
+
+const passwordToggles = Array.from(
+    form.querySelectorAll("[data-password-toggle]"),
+    (button) => ({
+        button,
+        input: document.getElementById(
+            button.dataset.passwordToggle
+        ),
+        slash: button.querySelector("[data-password-slash]")
+    })
+);
+
+function updatePasswordToggleLabels() {
+    passwordToggles.forEach(({ button, input }) => {
+        button.setAttribute(
+            "aria-label",
+            t(
+                input.type === "password"
+                    ? "showPassword"
+                    : "hidePassword"
+            )
+        );
+    });
+}
+
+passwordToggles.forEach(({ button, input, slash }) => {
+    button.addEventListener("click", () => {
+        const shouldShow = input.type === "password";
+
+        input.type = shouldShow ? "text" : "password";
+        slash.toggleAttribute("hidden", !shouldShow);
+
+        updatePasswordToggleLabels();
+    });
+});
+
+function clearResetError() {
+    setMessage(statusMessage, "");
+    statusMessage.hidden = true;
+}
+
+// Điểm hiển thị lỗi từ API đặt lại mật khẩu.
+export function showResetError(key = "resetServerError") {
+    if (isComplete) {
+        return;
+    }
+
+    setMessage(statusMessage, key);
+    statusMessage.hidden = false;
+}
+
+// Điểm hiển thị thành công sau khi API xác nhận đã đổi mật khẩu.
+export function showResetSuccess() {
+    if (isComplete || submitButton.disabled || !requireRecoveryStep("reset")) {
+        return;
+    }
+
+    isComplete = true;
+    clearRecoveryFlow();
+    hasSubmitted = false;
+
+    clearResetError();
+    displayErrors({});
+
+    // Xóa mật khẩu khỏi các input khi hoàn tất.
+    form.reset();
+
+    passwordToggles.forEach(({ input, slash }) => {
+        input.type = "password";
+        slash.setAttribute("hidden", "");
+    });
+
+    updatePasswordToggleLabels();
+
+    formView.hidden = true;
+    successView.hidden = false;
+
+    authPanel.setAttribute(
+        "aria-labelledby",
+        "reset-success-title"
+    );
+
+    document.title =
+        `${t("resetSuccessTitle")} | ${APP_CONFIG.appName}`;
+
+    successTitle.focus();
+}
+
+form.addEventListener("input", () => {
+    if (submitButton.disabled || isComplete) {
+        return;
+    }
+
+    clearResetError();
+
+    if (hasSubmitted) {
+        displayErrors(readForm().errors);
+    }
+});
+
+form.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    if (submitButton.disabled || isComplete) {
+        return;
+    }
+
+    hasSubmitted = true;
+    clearResetError();
+
+    const result = readForm();
+    displayErrors(result.errors);
+
+    const firstInvalidName = Object.keys(inputs).find(
+        (name) => result.errors[name]
+    );
+
+    if (firstInvalidName) {
+        inputs[firstInvalidName].focus();
+        return;
+    }
+
+    // Khi nối backend, gửi mật khẩu mới cùng thông tin xác minh bước OTP đến API đặt lại mật khẩu.
+    // Gọi showResetSuccess() sau khi thành công, hoặc showResetError() với khóa bản dịch phù hợp khi có lỗi.
+    showResetSuccess();
+});
+
+const languageReady = recovery && await initI18n({
+    titleKey: "resetPageTitle",
+    statusElement: pageError,
+
+    onChange() {
+        updatePasswordToggleLabels();
+
+        if (isComplete) {
+            document.title =
+                `${t("resetSuccessTitle")} | ${APP_CONFIG.appName}`;
+
+            return;
+        }
+
+        if (hasSubmitted) {
+            displayErrors(readForm().errors);
+        }
+    }
+});
+
+if (languageReady) {
+    submitButton.disabled = false;
+
+    passwordToggles.forEach(({ button }) => {
+        button.disabled = false;
+    });
+} else {
+    pageError.hidden = false;
+}

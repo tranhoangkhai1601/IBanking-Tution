@@ -1,5 +1,8 @@
 **/.dockerignore
 **/.env
+venv/
+.venv/
+**/.venv/
 **/.git
 **/.gitignore
 **/.project
@@ -20,6 +23,9 @@
 **/secrets.dev.yaml
 **/values.dev.yaml
 **/out/
+**/Makefile
+**/__pycache__
+*.pyc
 LICENSE
 README.md
 local/data/

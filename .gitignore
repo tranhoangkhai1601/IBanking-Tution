@@ -1,3 +1,4 @@
+**/.DS_Store
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -50,6 +51,7 @@ coverage.xml
 *.lcov
 .hypothesis/
 .pytest_cache/
+*.pytest_cache/
 cover/
 
 # Translations
@@ -151,8 +153,10 @@ activemq-data/
 
 # Environments
 .env
+*.env
 .envrc
 .venv
+*.venv
 env/
 venv/
 ENV/
@@ -289,6 +293,7 @@ web_modules/
 # dotenv environment variable files
 .env
 .env.*
+!.env.*.example
 !.env.example
 
 # parcel-bundler cache (https://parceljs.org/)
